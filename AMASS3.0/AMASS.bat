@@ -42,4 +42,3 @@ del ".\error_preprocess_whonet.txt"
 del ".\Report_with_patient_identifiers\Report_with_patient_identifiers_annexA_withstatus.xlsx"
 del ".\Report_with_patient_identifiers\Report_with_patient_identifiers_annexB_withstatus.xlsx"
 echo Finish running AMASS: %date% %time%
-Pause
