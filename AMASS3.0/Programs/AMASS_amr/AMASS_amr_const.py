@@ -34,6 +34,7 @@ CONST_ALIVE_VALUE = "alive"
 CONST_PERPOP = 100000
 CONST_PATH_RESULT = "./ResultData/"
 CONST_PATH_VAR = "./Variables/"
+CONST_PATH_REPORTWITH_PID = "./Report_with_patient_identifiers/"
 CONST_PATH_ROOT = "./"
 CONST_ANNEXA_NON_ORG = "non-organism-annex-A"
 
@@ -46,6 +47,7 @@ CONST_VARNAME_GENDER = "gender"
 CONST_VARNAME_BIRTHDAY = "birthday"
 CONST_VARNAME_AGEY = "age_year"
 CONST_VARNAME_AGEGROUP = "age_group"
+CONST_VARNAME_SPECNUM = "specimen_number"
 
 CONST_VARNAME_SPECDATERAW = "specimen_collection_date"
 CONST_VARNAME_COHO = "infection_origin"
@@ -89,6 +91,7 @@ CONST_NEWVARNAME_ASTMRSA = CONST_NEWVARNAME_PREFIX_AST + "mrsa"
 CONST_NEWVARNAME_ASTPEN = CONST_NEWVARNAME_PREFIX_AST + "pengroup"
 CONST_NEWVARNAME_AST3GCCBPN = CONST_NEWVARNAME_PREFIX_AST + "3gcsCarbs"
 CONST_NEWVARNAME_AMR = "AMR"
+CONST_NEWVARNAME_AMR_TESTED = "AMR_TESTED"
 CONST_NEWVARNAME_AMRCAT = "AMRcat"
 CONST_NEWVARNAME_MICROREC_ID ="amass_micro_rec_id"
 CONST_NEWVARNAME_MATCHLEV ="hospmicro_match_level"
@@ -123,6 +126,25 @@ dict_ast = {
     "I":"1",
     "S":"0"
 }
+def getlist_amr_atb(dict_orgatb):
+    try:
+        list_atb = []
+        for sorgkey in dict_orgatb:
+            ocurorg = dict_orgatb[sorgkey]
+            if ocurorg[1] == 1 :
+                list_Curatb_source = ocurorg[4]
+                list_curatb = []
+                for atb in list_Curatb_source:
+                    if atb[0:len(CONST_NEWVARNAME_PREFIX_RIS)] == CONST_NEWVARNAME_PREFIX_RIS:
+                        list_curatb = list_curatb + [CONST_NEWVARNAME_PREFIX_AST +  atb[len(CONST_NEWVARNAME_PREFIX_RIS):]]
+                    else:
+                        list_curatb = list_curatb + [atb]
+                list_atb = list_atb + list_curatb
+        #Dedup
+        list_atb = list(dict.fromkeys(list_atb))
+        return list_atb
+    except Exception:
+        return []
 def dict_orgcatwithatb(bisabom):
     return {
     "organism_staphylococcus_aureus":[1,1,"Staphylococcus aureus",

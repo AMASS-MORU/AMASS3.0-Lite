@@ -21,6 +21,9 @@ import calendar as cld
 import psutil,gc
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
+import AMASS_amr_analysis_annex_b as ANNEX_B
+import AMASS_amr_report as AMR_REPORT
+import AMASS_supplementary_report as SUP_REPORT
 
 bisdebug = True
 
@@ -78,18 +81,32 @@ def fn_allmonthname():
     month = 1
     return [cld.month_name[(month % 12 + i) or month] for i in range(12)]
 def clean_date(df,oldfield,cleanfield,dformat):
+    CDATEFORMAT_DMY =["%d/%m/%Y","%d/%m/%y","%-d/%-m/%Y","%-d/%/-m/%y"]
+    CDATEFORMAT_MDY =["%m/%d/%Y","%m/%d/%y","%-m/%-d/%Y","%-m/%/-d/%y"]
+    CDATEFORMAT_OTH =["%d/%b/%Y","%d/%b/%y","%-d/%b/%Y","%-d/%/b/%y","%d/%B/%Y","%d/%B/%y","%-d/%B/%Y","%-d/%/B/%y"]
     cleanfieldtemp = cleanfield + "_tmpamassf"
     if oldfield != cleanfield:
         df[cleanfield] = df[oldfield]
     df[cleanfield] = df[cleanfield].fillna("1900-01-01")
     df[cleanfield] = df[cleanfield].str.split(" ", n = 1, expand = True)[0]
+    df[cleanfield] = df[cleanfield].str.replace('-', '/', regex=False)
+    bisDMY= True
+    try:
+        #check if second value in date split is day -> m-d-y
+        if df[cleanfield].str.split("/", n = 2, expand = True)[1].astype(int).max() > 12:
+           bisDMY= False
+    except:
+        bisDMY= True
     df[cleanfieldtemp] = df[cleanfield]
-    df[cleanfield] = pd.to_datetime(df[cleanfield],format="%Y-%m-%d", errors="coerce")
+    df[cleanfield] = pd.to_datetime(df[cleanfield],format="%Y/%m/%d", errors="coerce")
+    if bisDMY==True:
+        dformat = CDATEFORMAT_DMY + CDATEFORMAT_MDY + CDATEFORMAT_OTH
+    else:
+        dformat = CDATEFORMAT_MDY + CDATEFORMAT_DMY + CDATEFORMAT_OTH
     for sf in dformat:
         if df[cleanfield].isnull().values.any() == False:
             break
-        if sf != "%Y-%m-%d":
-            df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[cleanfieldtemp], format=sf, errors="coerce"))
+        df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[cleanfieldtemp], format=sf, errors="coerce"))
     if df[cleanfield].isnull().values.any() == True:
         df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[oldfield], errors="coerce"))
     df.loc[df[cleanfield]<datetime(2000, 1, 1),cleanfield] = np.nan
@@ -113,7 +130,7 @@ def fn_clean_date_andcalday_year_month(df,oldfield,cleanfield,caldayfield,calyea
         return df  
     except:
         return df         
-def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoamass,logger) :
+def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoamass,dict_inforg_datavaltoamass,dict_gender_datavaltoamass,dict_died_datavaltoamass,logger) :
     df_merged = pd.DataFrame()
     bMergedsuccess = False
     sErrorat = ""
@@ -136,7 +153,7 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             # Translate gender, age year, age cat data
             sErrorat = "(do add columns)"
             # Translate gender, age year, age cat data
-            df_merged[AC.CONST_NEWVARNAME_GENDERCAT] = df_merged[AC.CONST_VARNAME_GENDER].map(dict_datavaltoamass)
+            df_merged[AC.CONST_NEWVARNAME_GENDERCAT] = df_merged[AC.CONST_VARNAME_GENDER].astype("string").map(dict_gender_datavaltoamass)
             df_merged[AC.CONST_NEWVARNAME_AGEYEAR] =  (df_merged[AC.CONST_NEWVARNAME_DAYTOADMDATE] - df_merged[AC.CONST_NEWVARNAME_DAYTOBIRTHDATE])/365.25
             df_merged[AC.CONST_NEWVARNAME_AGEYEAR].fillna(df_merged[AC.CONST_VARNAME_AGEY])
             df_merged[AC.CONST_NEWVARNAME_AGEYEAR] = df_merged[AC.CONST_NEWVARNAME_AGEYEAR].apply(np.floor)
@@ -149,7 +166,7 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
                                              right=False)
             # CO/HO (If want to support case micro data have admission date move it outside of bishosp_ava condition)
             if AC.CONST_VARNAME_COHO in df_merged.columns:
-                df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] = df_merged[AC.CONST_VARNAME_COHO].map(dict_datavaltoamass)
+                df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] = df_merged[AC.CONST_VARNAME_COHO].astype("string").map(dict_inforg_datavaltoamass)
                 df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] = np.select([(df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] == AC.CONST_DICT_COHO_CO),(df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] == AC.CONST_DICT_COHO_HO)],
                                                                             [0,1],
                                                                             default=np.nan)
@@ -163,7 +180,7 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
                df_merged[AC.CONST_NEWVARNAME_COHO_FINAL] =  df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS]
             else:
                df_merged[AC.CONST_NEWVARNAME_COHO_FINAL] =  df_merged[AC.CONST_NEWVARNAME_COHO_FROMCAL]  
-            df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_VARNAME_DISCHARGESTATUS].map(dict_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
+            df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_VARNAME_DISCHARGESTATUS].astype("string").map(dict_died_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
             sErrorat = "(do change columns to category type)"
             df_merged[AC.CONST_NEWVARNAME_AGECAT] = df_merged[AC.CONST_NEWVARNAME_AGECAT].astype("category")
             df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_NEWVARNAME_DISOUTCOME].astype("category")
@@ -204,10 +221,10 @@ def debug_savecsv(df,fname,bdebug,iquotemode,logger)  :
         #return True
 # Filter orgcat before dedup (For merge data)
 def fn_deduplicatebyorgcat_hospmico(df,colname,orgcat) :
-    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
 # Filter orgcat before dedup
 def fn_deduplicatebyorgcat(df,colname,orgcat) :
-    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR],[True,True,False],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED],[True,True,False,False],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
 # deduplicate data by sort the data by multiple column (First order then second then..) and then select either first or last of each group of the first order and/or second and/or..
 def fn_deduplicatedata(df,list_sort,list_order,na_posmode,list_dupcolchk,keepmode) :
     return df.sort_values(by = list_sort, ascending = list_order, na_position = na_posmode).drop_duplicates(subset=list_dupcolchk, keep=keepmode)
@@ -228,12 +245,13 @@ def mainloop() :
     try:
         # If folder doesn't exist, then create it.
         if not os.path.isdir(AC.CONST_PATH_RESULT) : os.makedirs(AC.CONST_PATH_RESULT)
-        path_variable = "./Variables/"
+        path_repwithPID = AC.CONST_PATH_REPORTWITH_PID
+        path_variable = AC.CONST_PATH_VAR
         path_input = "./"
         ## Import data 
         sub_printprocmem("Start main loop",logger)
         df_micro = pd.DataFrame()
-        df_micro_original = pd.DataFrame()
+        #df_micro_original = pd.DataFrame()
         df_hosp = pd.DataFrame()
         df_hosp_formerge = pd.DataFrame()
         df_config = AL.readxlsxorcsv(path_input +"Configuration/", "Configuration")
@@ -305,6 +323,16 @@ def mainloop() :
         lst_dict_dataval = df_dict.iloc[0:,1:2]
         dict_datavaltoamass = pd.Series(df_dict[AC.CONST_DICTCOL_AMASS].values,index=df_dict[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
         dict_amasstodataval = pd.Series(df_dict[AC.CONST_DICTCOL_DATAVAL].values,index=df_dict[AC.CONST_DICTCOL_AMASS].str.strip()).to_dict()
+        #dict for value replacement in data column
+
+        temp_df = df_dict[df_dict[AC.CONST_DICTCOL_AMASS].isin(["specimen_blood","specimen_cerebrospinal_fluid","specimen_genital_swab","specimen_respiratory_tract","specimen_stool","specimen_urine","specimen_others"])]
+        dict_spectype_datavaltoamass = pd.Series(temp_df[AC.CONST_DICTCOL_AMASS].values,index=temp_df[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip()).to_dict()
+        temp_df = df_dict[df_dict[AC.CONST_DICTCOL_AMASS].isin(["male","female"])]
+        dict_gender_datavaltoamass = pd.Series(temp_df[AC.CONST_DICTCOL_AMASS].values,index=temp_df[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip()).to_dict()
+        temp_df = df_dict[df_dict[AC.CONST_DICTCOL_AMASS].isin(["community_origin","unknown_origin","hospital_origin"])]
+        dict_inforg_datavaltoamass = pd.Series(temp_df[AC.CONST_DICTCOL_AMASS].values,index=temp_df[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip()).to_dict()
+        temp_df = df_dict[df_dict[AC.CONST_DICTCOL_AMASS] == "died"]
+        dict_died_datavaltoamass = pd.Series(temp_df[AC.CONST_DICTCOL_AMASS].values,index=temp_df[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip()).to_dict()
         #------------------------------------------------------------------------------------------------------------------------------------------------------
         # dictionary from AMASS_amr_const
         dict_ris = AC.dict_ris(df_dict)
@@ -315,7 +343,7 @@ def mainloop() :
         list_antibiotic = AC.list_antibiotic
         AL.printlog("Complete load data and dictionary: " + str(datetime.now()),False,logger)    
     except Exception as e: # work on python 3.x
-        AL.printlog("load data and dictionary: " +  str(e),True,logger)
+        AL.printlog("Fail load data and dictionary: " +  str(e),True,logger)
     #########################################################################################################################################
     # Start transform hosp and micro data
     try:
@@ -324,7 +352,6 @@ def mainloop() :
         df_micro.rename(columns=dict_datavaltoamass, inplace=True)   
         if bishosp_ava:
             df_hosp.rename(columns=dict_datavaltoamass, inplace=True)
-        
         #Remove unused column to save memory
         list_micorcol = [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_SPECDATERAW,AC.CONST_VARNAME_COHO,AC.CONST_VARNAME_ORG,AC.CONST_VARNAME_SPECTYPE]
         list_micorcol = list_micorcol + list_antibiotic
@@ -336,7 +363,7 @@ def mainloop() :
         # This is new code in python to remove unused column from raw data. -> May help in term of performance
         # Can't do with micro because it have flexible column name for antibiotics
                    
-        df_micro[AC.CONST_NEWVARNAME_BLOOD] = df_micro["specimen_type"].map(dict_datavaltoamass)
+        df_micro[AC.CONST_NEWVARNAME_BLOOD] = df_micro[AC.CONST_VARNAME_SPECTYPE].astype("string").map(dict_spectype_datavaltoamass)
         df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] == "specimen_blood", "blood"] = "blood"
         df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] != "blood", "blood"] = "non-blood"
         df_micro[AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_VARNAME_ORG].str.strip().map(dict_datavaltoamass).fillna(df_micro[AC.CONST_VARNAME_ORG])
@@ -351,9 +378,10 @@ def mainloop() :
                 df_hosp[AC.CONST_VARNAME_GENDER] = df_hosp[AC.CONST_VARNAME_GENDER].astype("category")
                 df_hosp[AC.CONST_VARNAME_AGEGROUP] = df_hosp[AC.CONST_VARNAME_AGEGROUP].astype("category")
             except Exception as e: # work on python 3.x
-                AL.printlog("Fail convert field type to category type (hosp): " +  str(e),True,logger)  
+                AL.printlog("Warning, fail convert field type to category type (hosp): " +  str(e),False,logger)  
             df_hosp_formerge = df_hosp.copy(deep=True)
-            df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP] = df_hosp[AC.CONST_VARNAME_DISCHARGESTATUS].map(dict_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
+
+            df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP] = df_hosp[AC.CONST_VARNAME_DISCHARGESTATUS].astype("string").map(dict_died_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_ADMISSIONDATE, AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_DAYTOADMDATE, AC.CONST_NEWVARNAME_ADMYEAR, AC.CONST_NEWVARNAME_ADMMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE)
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_DISCHARGEDATE, AC.CONST_NEWVARNAME_CLEANDISDATE, AC.CONST_NEWVARNAME_DAYTODISDATE, AC.CONST_NEWVARNAME_DISYEAR, AC.CONST_NEWVARNAME_DISMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE)
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_BIRTHDAY, AC.CONST_NEWVARNAME_CLEANBIRTHDATE, AC.CONST_NEWVARNAME_DAYTOBIRTHDATE, "","", AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE)
@@ -364,23 +392,18 @@ def mainloop() :
             df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY] = df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] + 1
             df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO] = df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY] - 2
             df_hosp.loc[df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO] <0, AC.CONST_NEWVARNAME_PATIENTDAY_HO] = 0
-        # -----------------------------------------------------------------------------------------------------------------------------------------
-        # This line df_micro = MicroData2 in old R code
-        debug_savecsv(df_micro,path_variable + "MicroData2_python.csv",bisdebug,1,logger)
+            debug_savecsv(df_hosp,path_repwithPID + "prepared_hospital_data.csv",bisdebug,1,logger)
         # Start Org Cat vs AST of interest -------------------------------------------------------------------------------------------------------
         # Suggest to be in a configuration files hide from user is better in term of coding
         df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_NEWVARNAME_ORG3]
         df_micro.loc[df_micro[AC.CONST_NEWVARNAME_ORG3].str.strip() == "","Temp" + AC.CONST_NEWVARNAME_ORG3] = AC.CONST_ORG_NOGROWTH
         df_micro[AC.CONST_NEWVARNAME_ORGCAT] = df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3].map({k : vs[0] for k, vs in dict_orgcatwithatb.items()}).fillna(0)
-        df_micro.drop("Temp" + AC.CONST_NEWVARNAME_ORG3, axis=1, inplace=True)
-        # This line df_micro = MicroData2_2 in old R code
-        debug_savecsv(df_micro,path_variable + "MicroData2_2_python.csv",bisdebug,1,logger)
-                
-        
+        df_micro.drop("Temp" + AC.CONST_NEWVARNAME_ORG3, axis=1, inplace=True)              
         # Gen RIS columns
         for satb in list_antibiotic:
             if satb in df_micro.columns:
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = df_micro[satb].map(dict_ris).fillna("")
+                df_micro[satb] = df_micro[satb].astype("category")
             else:
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = "" 
             df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].astype("category")
@@ -422,36 +445,36 @@ def mainloop() :
         temp_cond = [(df_micro[AC.CONST_NEWVARNAME_AST3GC] == "0") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN] != "1") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN].isna() == True)),
                      (df_micro[AC.CONST_NEWVARNAME_AST3GC] == "1") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN] != "1") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN].isna() == True))]
         df_micro[AC.CONST_NEWVARNAME_AST3GCCBPN] = np.select(temp_cond,list_ast_asvalue,default="0")
-        
-        df_micro[AC.CONST_NEWVARNAME_AMR] = df_micro[[
-            AC.CONST_NEWVARNAME_ASTCBPN, AC.CONST_NEWVARNAME_AST3GC, 'ASTMethicillin', 'ASTVancomycin', 'ASTFluoroquin', 'ASTTetra', 
-            'ASTaminogly', 'ASTColistin', 'ASTCefepime', 'ASTAmpicillin', 'ASTSulfamethoxazole_and_trimethoprim',
-            'ASTOxacillin', 'ASTPenicillin_G']].apply(pd.to_numeric,errors='coerce').sum(axis=1, skipna=True)   
-        list_amrcat = ["non-AMR","AMR","NA"]
-        temp_cond = [(df_micro[AC.CONST_NEWVARNAME_AMR]==0),
-                     (df_micro[AC.CONST_NEWVARNAME_AMR]>0) & (df_micro[AC.CONST_NEWVARNAME_AMR]<3),
-                     (df_micro[AC.CONST_NEWVARNAME_AMR]>=3)]
-        df_micro[AC.CONST_NEWVARNAME_AMRCAT] = np.select(temp_cond,list_amrcat,default="NA")
+        list_amr_atb = AC.getlist_amr_atb(dict_orgcatwithatb)
+        if len(list_amr_atb) <=0:
+            AL.printlog("Waring: list of antibiotic of interest for amr (get from dict_orgcatwithatb defined in AMASS_amr_const.py) is empty, application may pickup wrong record during deduplication by organism",False,logger)  
+            df_micro[AC.CONST_NEWVARNAME_AMR] = 0
+            df_micro[AC.CONST_NEWVARNAME_AMR_TESTED] = 0
+        else:
+            df_micro[AC.CONST_NEWVARNAME_AMR] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').sum(axis=1, skipna=True)   
+            df_micro[AC.CONST_NEWVARNAME_AMR_TESTED] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').count(axis=1,numeric_only=True)   
         #Micro remove and alter column data type to save memory usage --------------------------------------------------------------------------------------
         #Change text/object field type to category type to save memory usage
         df_micro[AC.CONST_NEWVARNAME_BLOOD] =df_micro[AC.CONST_NEWVARNAME_BLOOD].astype("category")
         df_micro[AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_NEWVARNAME_ORG3].astype("category")
         df_micro[AC.CONST_NEWVARNAME_ORGCAT] = df_micro[AC.CONST_NEWVARNAME_ORGCAT].astype("category")
-        df_micro[AC.CONST_NEWVARNAME_AMRCAT] = df_micro[AC.CONST_NEWVARNAME_AMRCAT].astype("category")
+        #df_micro[AC.CONST_NEWVARNAME_AMRCAT] = df_micro[AC.CONST_NEWVARNAME_AMRCAT].astype("category")
         try:
             df_micro[AC.CONST_VARNAME_SPECTYPE] = df_micro[AC.CONST_VARNAME_SPECTYPE].astype("category")
             df_micro[AC.CONST_VARNAME_ORG] = df_micro[AC.CONST_VARNAME_ORG].astype("category")
             df_micro[AC.CONST_VARNAME_COHO] = df_micro[AC.CONST_VARNAME_COHO].astype("category")
         except Exception as e: # work on python 3.x
-            AL.printlog("Fail convert field type to category type: " +  str(e),True,logger)  
+            AL.printlog("Warning, fail convert field type to category type: " +  str(e),False,logger)  
         #Drop original antibiotic col to save memory usage
-        df_micro = AL.fn_removecol(df_micro,list_antibiotic)
-        #---------------------------------------------------------------------------------------------------------------------------------------------------
-        debug_savecsv(df_micro,path_variable + "MicroData3_python.csv",bisdebug,1,logger)  
+        #df_micro = AL.fn_removecol(df_micro,list_antibiotic) #using in ANNEX B don't remove
+ 
         ## Only blood specimen !!!!!!!!!!
         df_micro_blood = df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD]=="blood"]
         ## Only interesting org cat !!!!!!!!!!
         df_micro_bsi = df_micro_blood.loc[df_micro[AC.CONST_NEWVARNAME_ORGCAT]!=AC.CONST_ORG_NOTINTEREST_ORGCAT]
+        debug_savecsv(df_micro,path_repwithPID + "prepared_microbiology.csv",bisdebug,1,logger)
+        debug_savecsv(df_micro_blood,path_repwithPID + "prepared_microbiology_blood.csv",bisdebug,1,logger)
+        debug_savecsv(df_micro_bsi,path_repwithPID + "prepared_microbiology_BSI.csv",bisdebug,1,logger)
         # May need improve performance in future !!!!!!!!
         AL.printlog("Complete prepare data: " + str(datetime.now()),False,logger)        
     except Exception as e: # work on python 3.x
@@ -459,14 +482,16 @@ def mainloop() :
     sub_printprocmem("before start merge",logger)
     # Start Merge with hosp data -------------------------------------------------------------------------------------------------------------------------
     try:            
-        df_hospmicro = fn_mergededup_hospmicro(df_micro, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,logger)
+        df_hospmicro = fn_mergededup_hospmicro(df_micro, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,dict_inforg_datavaltoamass,dict_gender_datavaltoamass,dict_died_datavaltoamass,logger)
         sub_printprocmem("finish merge micro and hosp data",logger)
-        df_hospmicro_blood = fn_mergededup_hospmicro(df_micro_blood, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,logger)
+        df_hospmicro_blood = fn_mergededup_hospmicro(df_micro_blood, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,dict_inforg_datavaltoamass,dict_gender_datavaltoamass,dict_died_datavaltoamass,logger)
         sub_printprocmem("finish merge micro (blood) and hosp data",logger)
-        df_hospmicro_bsi = fn_mergededup_hospmicro(df_micro_bsi, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,logger)
+        df_hospmicro_bsi = fn_mergededup_hospmicro(df_micro_bsi, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,dict_inforg_datavaltoamass,dict_gender_datavaltoamass,dict_died_datavaltoamass,logger)
         sub_printprocmem("finish merge micro (bsi) and hosp data",logger)
         del df_hosp_formerge
-        debug_savecsv(df_hospmicro_bsi,path_variable + "df_hospmicro_bsi.csv",bisdebug,1,logger)
+        debug_savecsv(df_hospmicro,path_repwithPID + "merged_hospital_microbiology.csv",bisdebug,1,logger)
+        debug_savecsv(df_hospmicro_blood,path_repwithPID + "merged_hospital_microbiology_blood.csv",bisdebug,1,logger)
+        debug_savecsv(df_hospmicro_bsi,path_repwithPID + "merged_hospital_microbiology_BSI.csv",bisdebug,1,logger)
         gc.collect() 
         AL.printlog("Complete merge hosp and micro data: " + str(datetime.now()),False,logger)
     except Exception as e: # work on python 3.x
@@ -477,8 +502,8 @@ def mainloop() :
     # General summary variable for calculation/report
     try:
         if bishosp_ava:
-            dict_progvar["patientdays"] =df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY].sum()
-            dict_progvar["patientdays_ho"] =df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO].sum()
+            dict_progvar["patientdays"] =int(df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY].sum())
+            dict_progvar["patientdays_ho"] =int(df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO].sum())
             dict_progvar["hosp_date_min"] = df_hosp[AC.CONST_NEWVARNAME_CLEANADMDATE].min().strftime("%d %b %Y")
             dict_progvar["hosp_date_max"] = df_hosp[AC.CONST_NEWVARNAME_CLEANADMDATE].max().strftime("%d %b %Y")
         else:
@@ -574,7 +599,6 @@ def mainloop() :
                             nUpperCI  = (AC.CONST_PERPOP/100)*fn_wilson_upperCI(x=nPatient, n=dict_progvar["n_blood_patients"], conflevel=0.95, decimalplace=10)
                         onew_row = {"Organism":sorgname_incidence,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI  }   
                         df_isoRep_blood_incidence_atb = df_isoRep_blood_incidence_atb.append(onew_row,ignore_index = True)
-        debug_savecsv(df_micro_bsi,path_variable + "df_micro_bsi.csv",bisdebug,1,logger)
         AL.printlog("Complete analysis (By Sample base (Section 1,2,4,5,6)): " + str(datetime.now()),False,logger)
     except Exception as e: # work on python 3.x
         AL.printlog("Fail analysis (By Sample base (Section 1,2,4,5,6)): " +  str(e),True,logger)     
@@ -604,7 +628,7 @@ def mainloop() :
             if ocurorg[1] == 1 :
                 scurorgcat = ocurorg[0]
                 temp_df_byorgcat = fn_deduplicatebyorgcat_hospmico(df_hospmicro_bsi,AC.CONST_NEWVARNAME_ORGCAT, int(scurorgcat))
-                debug_savecsv(temp_df,path_variable + "section3_dedup_"  + sorgname + ".csv",bisdebug,1,logger)
+                debug_savecsv(temp_df_byorgcat,path_repwithPID + "section3_dedup_"  + ocurorg[2] + ".csv",bisdebug,1,logger)
                 iCO = 0
                 iHO = 0
                 for iCOHO in range(2):
@@ -729,8 +753,6 @@ def mainloop() :
                                                                                 "Hospital_origin":iHO,
                                                                                 "Unknown_origin":iAll- iCO- iHO
                                                                                 },ignore_index = True)
-        debug_savecsv(df_COHO_isoRep_blood,path_variable + "df_COHO_isoRep_blood.csv",bisdebug,1,logger)
-        debug_savecsv(df_COHO_isoRep_blood_mortality,path_variable + "df_COHO_isoRep_blood_mortalityd.csv",bisdebug,1,logger)
         AL.printlog("Complete analysis (By Infection Origin (Section 3, 5, 6)): " + str(datetime.now()),False,logger)
     except Exception as e: # work on python 3.x
         AL.printlog("Fail analysis (By Infection Origin (Section 3, 5, 6)): " +  str(e),True,logger)  
@@ -743,12 +765,12 @@ def mainloop() :
                                 "organism_corynebacterium_diphtheriae":[3,1,"C. diphtheriae",1,[]],
                                 "organism_neisseria_gonorrhoeae":[4,1,"N. gonorrhoeae",1,[]],
                                 "organism_neisseria_meningitidis":[5,1,"N. meningitidis",1,[]],
-                                "organism_non-typhoidal_salmonella_spp":[6,1,"Non-typhoidal\nSalmonella spp",1,[]],
+                                "organism_non-typhoidal_salmonella_spp":[6,1,"Non-typhoidal Salmonella spp",1,[]],
                                 "organism_salmonella_paratyphi":[7,1,"S. Paratyphi",1,[]],
                                 "organism_salmonella_typhi":[8,1,"S. Typhi",1,[]],
                                 "organism_shigella_spp":[9,1,"Shigella spp.",1,[]],
                                 "organism_streptococcus_suis":[10,1,"S. suis",1,[]],
-                                "organism_vibrio":[11,1,"Vibrio spp.",1,[]],
+                                "organism_vibrio_spp":[11,1,"Vibrio spp.",1,[]],
                                 AC.CONST_ORG_NOGROWTH:[AC.CONST_ORG_NOGROWTH_ORGCAT_ANNEX_A,0,"",1,[]]
                                 }
         dict_annex_a_spectype = {"specimen_blood":"Blood",
@@ -764,13 +786,12 @@ def mainloop() :
         df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS].str.contains("organism_brucella"),AC.CONST_DICTCOL_AMASS] = "organism_brucella_spp"
         df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS].str.contains("organism_shigella"),AC.CONST_DICTCOL_AMASS] = "organism_shigella_spp"
         df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS].str.contains("organism_vibrio"),AC.CONST_DICTCOL_AMASS] = "organism_vibrio_spp"
-        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "organism_salmonella_typhi",AC.CONST_DICTCOL_AMASS] = "t_organism_salmonella_typhi"
-        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "organism_salmonella_paratyphi",AC.CONST_DICTCOL_AMASS] = "t_organism_salmonella_paratyphi"
+        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "organism_salmonella_typhi",AC.CONST_DICTCOL_AMASS] = "t_typhi"
+        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "organism_salmonella_paratyphi",AC.CONST_DICTCOL_AMASS] = "t_paratyphi"
         df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS].str.contains("organism_salmonella"),AC.CONST_DICTCOL_AMASS] = "organism_non-typhoidal_salmonella_spp"
-        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "t_organism_salmonella_typhi",AC.CONST_DICTCOL_AMASS] = "organism_salmonella_typhi"
-        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "t_organism_salmonella_paratyphi",AC.CONST_DICTCOL_AMASS] = "organism_salmonella_paratyphi"
+        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "t_typhi",AC.CONST_DICTCOL_AMASS] = "organism_salmonella_typhi"
+        df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "t_paratyphi",AC.CONST_DICTCOL_AMASS] = "organism_salmonella_paratyphi"
         dict_datavaltoamass_annex_a = pd.Series(df_dict_annex_a[AC.CONST_DICTCOL_AMASS].values,index=df_dict_annex_a[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
-        
         df_micro_annex_a = df_micro.copy(deep=True)
         df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_micro_annex_a[AC.CONST_VARNAME_SPECTYPE].str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
         df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA] = df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA].str.strip().map(dict_annex_a_spectype).fillna("Others")
@@ -797,7 +818,7 @@ def mainloop() :
         df_annexA1_pivot = temp_df.pivot_table(index=AC.CONST_NEWVARNAME_ORGNAME_ANNEXA, columns=AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA, aggfunc={AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA:len}, fill_value=0)
         df_annexA1_pivot.columns = df_annexA1_pivot.columns.droplevel(0)
         # add missing column and row to pivot table
-        df_annexA1 = pd.DataFrame(columns=["Organism","Total number\nof patients"])
+        df_annexA1 = pd.DataFrame(columns=["Organism","Total number\nof patients*"])
         for oorg in dict_annex_a_listorg.values():
             if oorg[1] == 1 :
                 sorg = oorg[2]
@@ -952,8 +973,8 @@ def mainloop() :
         if bishosp_ava:
             temp_df = df_hospmicro_blood[[AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE]].dropna().drop_duplicates()
             temp_df = temp_df.groupby([AC.CONST_NEWVARNAME_HN])[AC.CONST_NEWVARNAME_CLEANADMDATE].count().reset_index(name="count")
-            temp_list = [['merged_data','Minimum_date', dict_progvar["hosp_date_min"]], 
-                         ['merged_data','Maximum_date', dict_progvar["hosp_date_max"]],  
+            temp_list = [['merged_data','Minimum_date', dict_progvar["micro_date_min"]], 
+                         ['merged_data','Maximum_date', dict_progvar["micro_date_max"]],  
                          ['merged_data','Number_of_blood_specimens_collected', dict_progvar["n_blood"]], 
                          ['merged_data','Number_of_patients_sampled_for_blood_culture', dict_progvar["n_blood_patients"]],
                          ['merged_data','Number_of_patients_with_blood_culture_within_first_2_days_of_admission', dict_progvar["n_CO_blood_patients"]], 
@@ -976,7 +997,8 @@ def mainloop() :
         # SECTION 6 - Summary
         if bishosp_ava:
             n_hosp_unique = len(df_hosp[AC.CONST_NEWVARNAME_HN_HOSP].unique())
-            n_hosp_died_unique = len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP]==AC.CONST_DIED_VALUE][AC.CONST_NEWVARNAME_HN_HOSP].unique())
+            #n_hosp_died_unique = len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP]==AC.CONST_DIED_VALUE][AC.CONST_NEWVARNAME_HN_HOSP].unique())
+            n_hosp_died_unique = len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP]==AC.CONST_DIED_VALUE])
             n_died_per = round((n_hosp_died_unique/n_hosp_unique)*100, 0)
             n_died_per_text = str(n_died_per) +"% (" + str(n_hosp_died_unique) + "/" + str(n_hosp_unique) + ")"
             temp_list = [['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
@@ -1060,6 +1082,9 @@ def mainloop() :
     except Exception as e: # work on python 3.x
         AL.printlog("Fail analysis (By Infection Origin (Section 3, 5, 6)): " +  str(e),True,logger)        
     AL.printlog("End AMR analysis: " + str(datetime.now()),False,logger)
+    ANNEX_B.generate_annex_b(df_dict_micro, df_micro,logger)
+    AMR_REPORT.generate_amr_report(df_dict_micro, logger)
+    SUP_REPORT.generate_supplementary_report(df_dict_micro,logger)
 # ------------------------------------------------------------------------------------------------------------------------------------------------------      
 #Main loop
 mainloop()

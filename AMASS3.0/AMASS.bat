@@ -24,13 +24,6 @@ echo Start Preprocessing: %date% %time%
 .\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_preprocess\AMASS_preprocess_whonet_version_2.py
 echo Start AMR analysis
 .\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS3.0_amr_analysis.py
-echo Start Data indicator: %date% %time%
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_data\AMASS_analysis_data_version_2.py
-echo Start generating "AMR surveillance report"
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS3.0_amr_report.py
-del ".\ResultData\*.png"
-echo Start generating "Supplementary data indicators report"
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_data\AMASS_report_data_version_2.py
 echo Start generating "Data verificator logfile report"
 .\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_version_2.py
 .\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_err_version_2.py
