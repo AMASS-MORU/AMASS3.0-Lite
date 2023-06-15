@@ -24,7 +24,7 @@ import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 from AMASS_commonlib_supplementary_report import * #for importing data indicators functions
 
-def generate_supplementary_report(df_dict_micro,logger):
+def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
     AL.printlog("Start Supplementary data indicators report: " + str(datetime.datetime.now()),False,logger)
     path = "./"
     summary_res_i = path + "ResultData/Supplementary_data_indicators_results.csv"
@@ -87,7 +87,11 @@ def generate_supplementary_report(df_dict_micro,logger):
                 except:
                     dict_micro = pd.read_csv(path + "dictionary_for_microbiology_data.csv",encoding="windows-1252").iloc[:,:2].fillna("")
             dict_micro.columns = ["amass_name","user_name"]"""
-            dict_micro = df_dict_micro.iloc[:,:2].fillna("")
+            #dict_micro = df_dict_micro.iloc[:,:2].fillna("")
+            if bisusingmappeddata == True:
+                dict_micro = df_dict_micro.iloc[:,:2].fillna("")
+            else:                   
+                dict_micro = AL.readxlsxorcsv(path, "dictionary_for_microbiology_data").iloc[:,:2].fillna("")
             dict_micro.columns = ["amass_name","user_name"]
             #The following change because annex b file generated are from microfile after match with dictionary thusm column name changed
             """hn      = retrieve_uservalue(dict_micro, "hospital_number")
@@ -100,6 +104,12 @@ def generate_supplementary_report(df_dict_micro,logger):
             spctype = AC.CONST_VARNAME_SPECTYPE
             spcnum  = AC.CONST_VARNAME_SPECNUM
             organism= AC.CONST_VARNAME_ORG
+            if bisusingmappeddata != True:
+                hn      = retrieve_uservalue(dict_micro, "hospital_number")
+                spcdate = retrieve_uservalue(dict_micro, "specimen_collection_date")
+                spctype = retrieve_uservalue(dict_micro, "specimen_type")
+                spcnum  = retrieve_uservalue(dict_micro, "specimen_number")
+                organism= retrieve_uservalue(dict_micro, "organism")
             lst_no_growth   = retrieve_userlist(dict_micro,"organism_no_growth")
             font_style = ParagraphStyle('normal',fontName='Helvetica',fontSize=7,alignment=TA_CENTER)
     
@@ -507,6 +517,7 @@ def generate_supplementary_report(df_dict_micro,logger):
         cover_1_4 = bold_blue_op + str(spc_date_start) + " to " + str(spc_date_end) + bold_blue_ed
         cover_1 = [cover_1_1,cover_1_2,add_blankline+cover_1_3, cover_1_4]
         cover_2_1 = "This is a detailed report for records with data indicators. This report, together with the full list in Excel format, is for users to check and validate records with notifiable bacteria, notifiable antibiotic-pathogen combinations, infrequent phenotypes or potential errors in the AST results at the local level. The identifiers listed include hospital number and specimen collection date. Users should not share or transfer this Supplementary data indictors report (in PDF and Excel formats) to any party outside of the hospital without data security management and confidential agreement."
+        today = datetime.datetime.now().strftime("%d %b %Y %H:%M:%S")
         cover_2_2 = "<b>Generated on:</b>  " + bold_blue_op + today + bold_blue_ed
         cover_2 = [cover_2_1,cover_2_2]
         ##reportlab

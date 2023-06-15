@@ -135,10 +135,10 @@ def create_new_drugcol(df, col_drug, col_drug_new):
 #col_org: column name of organism
 #return value: dataframe with columns for "rule_organism", "except_organism", and "tax_level"
 def prepare_datai_org(df, col_org, lst_fam, lst_ge, lst_sci): # + include
-    df["organism_1"] = df[col_org].replace(regex=["organism_","family_"],value="").replace(regex=["_"],value=" ")
-    df[['rule_organism','except_organism']] = df['organism_1'].str.split(";",1,expand=True) #spliting org col to rule_organism and except_organism
+    df["organism_1"] = df[col_org].replace(regex=["organism_","family_"],value="").replace(regex=["_"],value=" ") 
+    df[['rule_organism','except_organism']] = df['organism_1'].str.split(";",n=1,expand=True) #spliting org col to rule_organism and except_organism
     df['except_organism'] = df['except_organism'].str.replace(', ',',').str.replace(' except ','').str.replace('except ','').str.replace('except','').fillna('') #cleaning org spcies
-    df[['rule_organism','include_organism']] = df['organism_1'].str.split(";",1,expand=True) #spliting org col to rule_organism and except_organism
+    df[['rule_organism','include_organism']] = df['organism_1'].str.split(";",n=1,expand=True) #spliting org col to rule_organism and except_organism
     df['include_organism'] = df['include_organism'].str.replace(', ',',').str.replace(' including ','').str.replace('including ','').str.replace('including','').fillna('') #cleaning org spcies
     df["tax_level"] = ""
     for idx in df.index:
@@ -191,7 +191,7 @@ def prepare_datai_org(df, col_org, lst_fam, lst_ge, lst_sci): # + include
 #lst_drugname: lst_dr
 #return value: dataframe with columns for "except_antibiotic", and "amass_drug_rename" 
 def prepare_datai_drug(df_datai, df_drug, col_drug, lst_drugclass, lst_drugname):
-    df_datai[['antibiotic','except_antibiotic']] = df_datai[col_drug].str.split(";",1,expand=True) #spliting org col to rule_organism and except_organism
+    df_datai[['antibiotic','except_antibiotic']] = df_datai[col_drug].str.split(";",n=1,expand=True) #spliting org col to rule_organism and except_organism
     df_datai['except_antibiotic'] = df_datai['except_antibiotic'].str.replace(', ',',').str.replace(' except ','').str.replace('except ','').str.replace('except','').fillna('') #cleaning org spcies
     df_datai["amass_drug_rename"] = ""
     for idx in df_datai.index:
@@ -268,6 +268,7 @@ def export_annexB(df, df_blo_posneg, nogrowth_status, df_blo_ast, rule1, rule2, 
         for idx in df.index:
             #Assigning "xx% (xx/xxx)" to all priority
             if idx == "blood_contamination":
+                
                 if nogrowth_status:
                     df.at[idx,"perc_"+col] = cal_perc_annex_v1(df.loc[idx,col],len(df_blo_posneg))
                     df.at[idx,"summary_"+col] = str(df.at[idx,"perc_"+col]) + "(" + str(int(df.loc[idx,col])) + "/" + str(len(df_blo_posneg)) + ")"
@@ -280,9 +281,9 @@ def export_annexB(df, df_blo_posneg, nogrowth_status, df_blo_ast, rule1, rule2, 
                     df.at[idx,"perc_"+col] = "NA"
                     df.at[idx,"summary_"+col] = "NA"
             else:
+                
                 df.at[idx,"perc_"+col] = cal_perc_annex_v1(df.loc[idx,col],len(df_blo_ast))
                 df.at[idx,"summary_"+col] = str(df.at[idx,"perc_"+col]) + " (" + str(int(df.loc[idx,col])) + "/" + str(len(df_blo_ast)) + ")"
-
             #Assigning "NA" to which priority that is not assigned to each indicator 1, 2, and 3 (in list_of_indicators.xlsx)
             if idx == "blood_contamination":
                 lst_appeared_priority = list(set(rule1["priority"]))
@@ -291,10 +292,19 @@ def export_annexB(df, df_blo_posneg, nogrowth_status, df_blo_ast, rule1, rule2, 
             elif idx == "potential_errors":
                 lst_appeared_priority = list(set(rule3a["priority"].tolist()+rule3b["priority"].tolist()))
             lst_notappeared_priority = assign_na_topriority(lst_appeared_priority)
+            try:
+                if len(lst_notappeared_priority) > 0:
+                    for snsp in lst_notappeared_priority:
+                        df.at[idx,snsp] = "NA"
+            except Exception as e:
+                print("Warning : " + str(e))
+                pass
+            """
             if len(lst_notappeared_priority) > 0:
                 df.at[idx,lst_notappeared_priority] = "NA"
             else:
                 pass
+            """
     #Adding 2 columns for Total_blood_positive_AST(N), and Total_blood_positive_and_negative(N)
     df["Total_blood_positive_AST(N)"] = len(df_blo_ast)
     df["Total_blood_positive_and_negative(N)"] = len(df_blo_posneg)
@@ -1068,11 +1078,11 @@ def create_summary_table_supp_poerr(df_qc, df_mi, int_denominator, col_mi_drug, 
 #return value: dataframe of each set of indicator with %blood samples
 def create_summary_table_supp_pocon(df_qc, df_mi, int_denominator, col_mi_warning="warning_indicator_1", col_qc_org="rule_organism", col_qc_exorg="except_organism", col_mi_org="mapped_sci", col_mi_fam="mapped_fam"):
     df_mi_1 = df_mi.copy().loc[df_mi[col_mi_warning]!=""]
-    df_mi_1[["genus","species"]] = df_mi_1[col_mi_org].str.split(" ",1,expand=True).fillna("")
+    df_mi_1[["genus","species"]] = df_mi_1[col_mi_org].str.split(" ",n=1,expand=True).fillna("")
     lst_ge = list(set(df_mi_1["genus"])) + list(set(df_mi_1[col_mi_fam])) #list of unique genus + family
 
     df_qc_1 = df_qc.copy()
-    df_qc_1[["genus","species"]] = df_qc_1.loc[:,col_qc_org].str.split(" ",1,expand=True)
+    df_qc_1[["genus","species"]] = df_qc_1.loc[:,col_qc_org].str.split(" ",n=1,expand=True)
     df_qc_1["number_blood"]=0
     df_qc_1["blood_samples"]=""
     for idx in df_qc_1.index:
@@ -1087,13 +1097,13 @@ def create_summary_table_supp_pocon_v2(boolean_nogrowth,df_qc, df_mi, int_denomi
     lst_ge = []
     df_mi_1 = df_mi.copy()
     if  len(df_mi) > 0: #there is at least 1 record
-        df_mi_1[["genus","species"]] = df_mi_1[col_mi_org].str.split(" ",1,expand=True)
+        df_mi_1[["genus","species"]] = df_mi_1[col_mi_org].str.split(" ",n=1,expand=True)
         lst_ge = list(set(df_mi_1["genus"])) + list(set(df_mi_1[col_mi_fam])) #list of unique genus + family
     else:
         lst_ge = []
     df_qc_1 = df_qc.copy()
     df_qc_1[col_qc_org] = df_qc_1[col_qc_org].replace(regex=[" spp"], value=" spp.")
-    df_qc_1[["genus","species"]] = df_qc_1.loc[:,col_qc_org].str.split(" ",1,expand=True)
+    df_qc_1[["genus","species"]] = df_qc_1.loc[:,col_qc_org].str.split(" ",n=1,expand=True)
     df_qc_1["number_blood"]=0
     df_qc_1["blood_samples"]=""
     for idx in df_qc_1.index:

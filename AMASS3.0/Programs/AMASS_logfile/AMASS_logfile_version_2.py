@@ -8,6 +8,7 @@
 import logging #for creating logfile
 import pandas as pd #for creating and manipulating dataframe
 from datetime import date #for generating today date
+import datetime 
 from reportlab.lib.pagesizes import A4 #for setting PDF size
 from reportlab.pdfgen import canvas #for creating PDF page
 from reportlab.platypus.paragraph import Paragraph #for creating text in paragraph
@@ -335,6 +336,7 @@ def cover(over_raw, today=today.strftime("%d %b %Y")):
     cover_1_4 = bold_blue_op + str(spc_date_start_cov) + " to " + str(spc_date_end_cov) + bold_blue_ed
     cover_1 = [cover_1_1,cover_1_2,add_blankline+cover_1_3, cover_1_4]
     cover_2_1 = "This report is for users to review variable names and data values used by microbiology_data file and hospital_admission_data file saved within the same folder as the application file (AMASS.bat). This report can be used to assist users while completing the data dictionaries for both data files."
+    today = datetime.datetime.now().strftime("%d %b %Y %H:%M:%S")
     cover_2_2 = "<b>Generated on:</b>  " + bold_blue_op + today + bold_blue_ed
     cover_2 = [cover_2_1,cover_2_2]
     ##reportlab

@@ -20,13 +20,13 @@ mkdir ResultData
 mkdir Variables
 
 echo Start Preprocessing: %date% %time%
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_preprocess\AMASS_preprocess_version_2.py
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_preprocess\AMASS_preprocess_whonet_version_2.py
+.\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_preprocess\AMASS_preprocess_version_2.py
+.\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_preprocess\AMASS_preprocess_whonet_version_2.py
 echo Start AMR analysis
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS3.0_amr_analysis.py
+.\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS3.0_amr_analysis.py
 echo Start generating "Data verificator logfile report"
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_version_2.py
-.\Programs\Python-Portable\Portable_Python-3.7.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_err_version_2.py
+.\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_version_2.py
+.\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_logfile\AMASS_logfile_err_version_2.py
 del ".\error_analysis*.txt"
 del ".\error_report*.txt"
 del ".\error_logfile_amass.txt"

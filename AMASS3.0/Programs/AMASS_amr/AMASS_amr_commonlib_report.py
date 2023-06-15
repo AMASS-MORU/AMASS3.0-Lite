@@ -5,6 +5,7 @@
 # to analyze their own data and generate AMR surveillance reports, Supplementary data indicators reports, and Data verification logfile reports systematically.
 
 # Created on 20th April 2022
+import math as m
 import pandas as pd #for creating and manipulating dataframe
 import matplotlib.pyplot as plt #for creating graph (pyplot)
 import matplotlib #for importing graph elements
@@ -21,7 +22,7 @@ from reportlab.graphics.shapes import Drawing #for creating shapes
 from reportlab.lib.units import inch #for importing inch for plotting
 from reportlab.lib import colors #for importing color palette
 from reportlab.platypus.flowables import Flowable #for plotting graph and tables
-
+import AMASS_amr_const as AC
 
 # Core pages
 pagenumber_intro = ["1","2"]
@@ -88,6 +89,278 @@ pagenumber_ava_other = ["43","44","45","46","47"] #complement; 6 pages
 #         name = org_1[0][0]+"_"+org_1[1]
 #     lst_org_short.append(name.lower())  #['s_aureus', ...]
 
+# Added in verions 3.0------------------------------------------------------------
+#CONST
+##### Cal figure height for section6
+def cal_sec6_fig_height(irow):
+    if irow <= 2:
+        return 1
+    elif irow <= 3:
+        return 1.4 
+    elif irow <= 5:
+        return 2 
+    else:
+        return 3.5
+##### Cal figure height for section4,5
+def cal_sec4_fig_height(irow):
+    if irow <= 6:
+        return 3.0
+    elif irow <= 9:
+        return 6.0 #default height
+    else:
+        return 7.0 
+##### Cal figure height for section2 and section3
+def cal_sec2and3_fig_height(iatbrow):
+    if iatbrow <= m.ceil(AC.CONST_MAX_ATBCOUNTFITHALFPAGE/2):
+        return 2.5
+    elif iatbrow <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
+        return 3.5 #default height
+    else:
+        return 5.5 
+def count_atbperorg(raw_df,org_full,origin="", org_col="Organism", drug_col="Antibiotic",  ns_col="Non-susceptible(N)", total_col="Total(N)"):
+    if origin == "": #section2
+        sel_df = raw_df.loc[raw_df[org_col]==org_full].set_index(drug_col).fillna(0)
+    else: #section3
+        sel_df = raw_df.loc[(raw_df[org_col]==org_full) & (raw_df['Infection_origin']==origin)].set_index(drug_col).fillna(0)
+    return len(sel_df)
+def get_atbnote(list_curnote):
+    try:
+        sallnote = ""
+        for scurnote in list_curnote:
+            scurnote = scurnote.strip()
+            sallnote = sallnote + AC.dict_atbnote.get(scurnote, "")
+        return sallnote
+    except Exception as e:
+        print(e)
+        return ""
+        pass
+def get_atbnoteperorg(raw_df,org_full,origin="",origin_col="Infection_origin", org_col="Organism", drug_col="Antibiotic",  ns_col="Non-susceptible(N)", total_col="Total(N)"): 
+    if origin == "": #section2
+        list_atbnote = raw_df.loc[raw_df[org_col]==org_full][drug_col].values.tolist()
+    else: #section3
+        list_atbnote = raw_df.loc[(raw_df[org_col]==org_full) & (raw_df[origin_col]==origin)][drug_col].values.tolist()
+    return list_atbnote
+def get_atbnoteper_priority_pathogen(raw_df,origin="",origin_col="Infection_origin",pathogen_col="Priority_pathogen"):
+    satbnote = ""
+    list_atbnote = []
+    df =raw_df.copy(deep=True)
+    if origin != "": #section4
+        df = df.loc[(df[origin_col]==origin)]
+    for ind in df.index:
+        for spt in AC.dict_atbnote_sec4_5.keys():
+            sdfpt = df[pathogen_col][ind].lower()
+            sptl = spt.lower()
+            if sptl in sdfpt:
+                if not (sptl in list_atbnote):
+                    list_atbnote = list_atbnote + [sptl]
+                    satbnote = satbnote + " " + AC.dict_atbnote_sec4_5[spt]
+    return satbnote
+def get_atbnoteper_priority_pathogen_sec6(raw_df,origin="",origin_col="Infection_origin",pathogen_col="Antibiotic"):
+    list_atbnote = []
+    df =raw_df.copy(deep=True)
+    if origin != "": #section4
+        df = df.loc[(df[origin_col]==origin)]
+    for ind in df.index:
+        for spt in AC.dict_atbnote_sec6.keys():
+            sdfpt = df[pathogen_col][ind].lower()
+            sptl = spt.lower()
+            if sptl in sdfpt:
+                if not (sptl in list_atbnote):
+                    list_atbnote = list_atbnote + [spt]
+    return list_atbnote
+def get_atbnote_sec6(list_atbnote):
+    snote = ""
+    for scurnote in list_atbnote:
+        if scurnote not in snote:
+            snote = snote + AC.dict_atbnote_sec6[scurnote]
+    return snote   
+"""
+def get_atbnoteper_priority_pathogen_sec6(raw_df,origin="",origin_col="Infection_origin",pathogen_col="Antibiotic"):
+    satbnote = ""
+    list_atbnote = []
+    df =raw_df.copy(deep=True)
+    if origin != "": #section4
+        df = df.loc[(df[origin_col]==origin)]
+    for ind in df.index:
+        for spt in AC.dict_atbnote_sec6.keys():
+            sdfpt = df[pathogen_col][ind].lower()
+            sptl = spt.lower()
+            if sptl in sdfpt:
+                if not (sptl in list_atbnote):
+                    list_atbnote = list_atbnote + [sptl]
+                    satbnote = satbnote + " " + AC.dict_atbnote_sec6[spt]
+    return satbnote
+"""
+def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, perc_col, upper_col, lower_col,ifig_H, origin=""):
+    #Creating graph for PDF
+    #raw_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
+    #org_short : short name of organisms for using to retrieve rows by names ex.s_aureus
+    #org_col : column name of organisms
+    #drug_col : column name of antibiotics
+    #perc_col : column name of %Non-susceptible
+    #upper_col : column name of upperCI
+    #lower_col : column name of lowerCT
+    raw_df[drug_col] = raw_df[drug_col].str.rjust(AC.CONST_MAXNUMCHAR_ATBNAME," ")
+    if origin == "": #section2
+        sel_df = raw_df.loc[raw_df['Organism']==org_full].set_index(drug_col).fillna(0)
+    else: #section3
+        sel_df = raw_df.loc[(raw_df['Organism']==org_full) & (raw_df['Infection_origin']==origin)].set_index(drug_col).fillna(0)
+    
+    plt.figure(figsize=(7,ifig_H))
+    sns.barplot(data=sel_df.loc[:,perc_col].to_frame().T, palette=palette,orient='h',capsize=.2)
+    for drug in sel_df.index:
+        ci_lo=sel_df.loc[drug,lower_col]
+        ci_hi=sel_df.loc[drug,upper_col]
+        if ci_lo == 0 and ci_hi == 0:
+            plt.plot([ci_lo,ci_hi],[drug,drug],'|-',color='black',markersize=12,linewidth=0,markeredgewidth=0)
+        else:
+            plt.plot([ci_lo,ci_hi],[drug,drug],'|-',color='black',markersize=12,linewidth=3,markeredgewidth=3)
+    plt.xlim(0, 100)
+    plt.xlabel('*Proportion of NS isolates(%)',fontsize=14)
+    plt.ylabel('', fontsize=11)
+    sns.despine(left=True)
+    plt.xticks(fontname='sans-serif',style='normal',fontsize=19)
+    plt.yticks(fontname='sans-serif',style='normal',fontsize=19)
+    plt.tick_params(top=False, bottom=True, left=False, right=False,labelleft=True, labelbottom=True)
+    plt.tight_layout()
+    if origin == "":
+        plt.savefig('./ResultData/Report2_AMR_' + org_short + '.png', format='png',dpi=180,transparent=True)
+    else:
+        plt.savefig('./ResultData/Report3_AMR_' + org_short + '_' + origin + '.png', format='png',dpi=180,transparent=True)
+def prepare_section2_table_for_reportlab_V3(df_org, df_pat, lst_org, checkpoint_sec2,dict_orgcatwithatb):
+    ##Preparing section2_table for ploting in pdf
+    #df: raw section2_table
+    #checkpoint_hosp: checkpoint of section2_result
+    #return value: lst of dataframe "section2_table"
+    d_org_core = {}
+    for sorgkey in dict_orgcatwithatb:
+        ocurorg = dict_orgcatwithatb[sorgkey]
+        d_org_core[sorgkey] = ocurorg[2]
+    df_org = df_org.set_index("Organism").rename(d_org_core)
+    df_pat = df_pat.set_index("Organism").rename(d_org_core)
+    if checkpoint_sec2:
+        #Creating table for page 6
+        df_merge = pd.merge(df_org.astype(str), df_pat.astype(str), on="Organism", how="outer").fillna("0").loc[lst_org]
+        df_merge_sum = pd.merge(df_org, df_pat, on="Organism", how="outer").fillna(0)
+        if "organism_no_growth" in df_merge_sum.index:
+            df_merge_sum = df_merge_sum.drop(index=["organism_no_growth"])
+        else:
+            pass
+        #Reformetting Organism name
+        d_org_fmt = {}
+        style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=10,alignment=TA_LEFT)
+        for i in range(len(lst_org)):
+            d_org_fmt[lst_org[i]] = Paragraph(prepare_org_core(lst_org[i], text_line=1, text_style="full", text_work="table", text_bold="Y"),style_summary)
+        df_merge = df_merge.rename(index=d_org_fmt)
+        #Adding Total
+        df_merge.loc["Total:","Number_of_blood_specimens_culture_positive_for_the_organism"] = round(df_merge_sum["Number_of_blood_specimens_culture_positive_for_the_organism"].sum())
+        df_merge.loc["Total:","Number_of_blood_specimens_culture_positive_deduplicated"]     = round(df_merge_sum["Number_of_blood_specimens_culture_positive_deduplicated"].sum())
+        df_merge = df_merge.reset_index().rename(columns={"Number_of_blood_specimens_culture_positive_for_the_organism":"Number of records\nof blood specimens\nculture positive\nfor the organism", 
+                                                            "Number_of_blood_specimens_culture_positive_deduplicated":"**Number of patients with\nblood culture positive\nfor the organism\n(de−duplicated)"})
+        #Preparing to list
+        lst_col = [list(df_merge.columns)]
+        lst_df = df_merge.values.tolist()
+        lst_df = lst_col + lst_df
+    else:
+        #Reformetting Organism name
+        d_org_fmt = {}
+        style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=11,alignment=TA_LEFT)
+        for i in range(len(lst_org)):
+            d_org_fmt[lst_org[i]] = Paragraph(prepare_org_core(lst_org[i], text_line=1, text_style="full", text_work="table"),style_summary)
+        df_merge = pd.DataFrame(index=lst_org + ["Total:"], 
+                                columns=["Number of records\nof blood specimens\nculture positive\nfor the organism", 
+                                        "**Number of patients with\nblood culture positive\nfor the organism\n(de−duplicated)"])
+        lst_df = df_merge.rename(index=d_org_fmt).fillna("NA").values.tolist()
+    return lst_df
+def prepare_section3_table_for_reportlab_V3(df_pat, lst_org, lst_org_format):
+    style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=11,alignment=TA_LEFT)
+    for i in range(len(lst_org)):
+        df_pat.loc[df_pat['Organism']==lst_org[i], 'Organism'] =  Paragraph("<b>" + lst_org_format[i] + "</b>",style_summary)
+    df_pat.loc[df_pat['Organism']=='Total', 'Organism'] = Paragraph("<b>" + 'Total:' + "</b>",style_summary)
+    return df_pat
+def prepare_section6_mortality_table_for_reportlab_V3(df_mor, lst_org, lst_org_format):
+    ##Preparing section6_mortality_table for reportlab; page 33
+    df_mor_com = create_table_perc_mortal_eachorigin_V3(df_mor,'Organism','Infection_origin','Number_of_deaths','Total_number_of_patients','Community-origin','Mortality in patients with\nCommunity−origin BSI')
+    df_mor_hos = create_table_perc_mortal_eachorigin_V3(df_mor,'Organism','Infection_origin','Number_of_deaths','Total_number_of_patients','Hospital-origin', 'Mortality in patients with\nHospital−origin BSI')
+    df_mor_all = df_mor_com.merge(df_mor_hos, how="inner", left_on='Organism', right_on='Organism',suffixes=("", "_hos"))
+    style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=11,alignment=TA_LEFT)
+    for i in range(len(lst_org)):
+        df_mor_all.loc[df_mor_all['Organism']==lst_org[i], 'Organism'] =  Paragraph("<b>" + lst_org_format[i] + "</b>",style_summary)
+    df_mor_all.loc[df_mor_all['Organism']=='Total:', 'Organism'] = Paragraph("<b>" + 'Total:' + "</b>",style_summary)
+    df_mor_dis = pd.DataFrame(list(df_mor_all.columns),index=df_mor_all.columns).T
+    #sec3_pat_val = sec3_col.append(sec3_pat).drop(columns=["Organism"]).values.tolist()
+    return df_mor_dis.append(df_mor_all).values.tolist()
+def create_table_perc_mortal_eachorigin_V3(df,org_col,ori_col,mortal_col,total_col,origin,col_displayval): 
+    df = df.loc[df[ori_col]==origin,:].astype({mortal_col:'int32',total_col:'int32'})
+    df_amr = df[[org_col,mortal_col,total_col]]
+    df_amr.loc["Total",org_col] = "Total:"
+    msum = df_amr[mortal_col].sum()
+    tsum = df_amr[total_col].sum()
+    df_amr.loc["Total",mortal_col] = msum
+    df_amr.loc["Total",total_col] = tsum
+    df_amr['perc_mortal'] = round((df_amr[mortal_col]/df_amr[total_col]*100),0).fillna(0)
+    #df_amr_1 = correct_digit(df=df_amr, df_col=["perc_mortal",mortal_col,total_col])
+    df_amr[col_displayval] = (df_amr['perc_mortal'].astype(int).astype(str) + '% (' + df_amr[mortal_col].astype(int).astype(str) + '/' + df_amr[total_col].astype(int).astype(str) + ')').replace('0% (0/0)','NA')
+    #return df_amr[[org_col,col_displayval]]
+    return df_amr[[org_col,col_displayval]]
+def create_graph_surveillance_V3(df_raw, lst_org, prefix, text_work_drug="N", freq_col="frequency_per_tested", upper_col="frequency_per_tested_uci", lower_col="frequency_per_tested_lci",ifig_H=12):
+    #Creating graph for PDF
+    #raw_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
+    #upper_col : column name of upperCI
+    #lower_col : column name of lowerCT
+    if text_work_drug == "Y":
+        df_raw = df_raw.set_index('Priority_pathogen')
+        palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','saddlebrown','yellowgreen','yellowgreen','palevioletred','darkkhaki']
+    else:
+        df_raw = df_raw.set_index('Organism')
+        palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','yellowgreen','palevioletred','darkkhaki']
+    plt.figure(figsize=(7,ifig_H))
+    sns.barplot(data=df_raw.loc[:,freq_col].to_frame().T,palette=palette,orient='h',capsize=.2)
+    for idx in df_raw.index:
+        ci_lo=df_raw.loc[idx,lower_col]
+        ci_hi=df_raw.loc[idx,upper_col]
+        if ci_lo == 0 and ci_hi == 0:
+            plt.plot([ci_lo,ci_hi],[idx,idx],'|-',color='black',markersize=12,linewidth=0,markeredgewidth=0)
+        else:
+            plt.plot([ci_lo,ci_hi],[idx,idx],'|-',color='black',markersize=12,linewidth=3,markeredgewidth=3)
+    plt.locator_params(axis="x", nbins=7) #set number of bins for x-axis
+    plt.xlim(0,round(df_raw[upper_col].max())+50)
+    plt.xlabel('*Frequency of infection\n(per 100,000 tested patients)',fontsize=14)
+    plt.ylabel('', fontsize=11)
+    # sns.despine(left=True)
+    sns.despine(top=True,right=True) #set REMOVED border line
+    plt.xticks(fontname='sans-serif',style='normal',fontsize=18)
+    plt.yticks(np.arange(len(lst_org)),lst_org,fontname='sans-serif',style='normal',fontsize=18)
+    # plt.yticks("",fontname='sans-serif',style='normal',fontsize=20)
+    plt.tight_layout()
+    plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+def create_graph_mortal_V3(df, organism, origin, prefix, org_col="Organism", ori_col="Infection_origin", drug_col="Antibiotic", perc_col="Mortality (n)", lower_col="Mortality_lower_95ci", upper_col="Mortality_upper_95ci"):
+    ##Creating graph of mortality
+    df_1 = df.loc[df[org_col]==organism,:]
+    df_1 = df_1.loc[df[ori_col]==origin,:].replace(regex=["3GC-NS"],value="3GC-NS**").replace(regex=["3GC-S"], value="3GC-S***").set_index(drug_col)
+    ifig_H =2*cal_sec6_fig_height(len(df_1))
+    plt.figure(figsize=(7,ifig_H))
+    sns.barplot(data=df_1.loc[:,perc_col].to_frame().astype(int).T, palette=['darkorange','darkorange'],orient='h',capsize=.2)
+    for drug in df_1.index:
+        ci_lo=df_1.loc[drug,lower_col]
+        ci_hi=df_1.loc[drug,upper_col]
+        if ci_lo == 0 and ci_hi == 0:
+            plt.plot([ci_lo,ci_hi],[drug,drug],'|-',color='black',markersize=12,linewidth=0,markeredgewidth=0)
+        else:
+            plt.plot([ci_lo,ci_hi],[drug,drug],'|-',color='black',markersize=12,linewidth=3,markeredgewidth=3)
+    plt.xlim(0, 100)
+    plt.xlabel('*Mortality (%)',fontsize=14)
+    plt.ylabel('', fontsize=11)
+    sns.despine(left=True)
+    plt.xticks(fontname='sans-serif',style='normal',fontsize=20)
+    plt.yticks(fontname='sans-serif',style='normal',fontsize=20)
+    plt.tick_params(top=False, bottom=True, left=False, right=False,labelleft=True, labelbottom=True)
+    plt.tight_layout()
+    plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+#---------------------------------------------------------------------------------
+
 def check_config(df_config, str_process_name):
     #Checking process is either able for running or not
     #df_config: Dataframe of config file
@@ -112,7 +385,7 @@ def prepare_section1_table_for_reportlab(df, checkpoint_hosp):
     #checkpoint_hosp: checkpoint of hospital_admission_data
     #return value: lst of dataframe "section1_table"
     df_sum = df.set_index(df.columns[0])
-    df = df.set_index(df.columns[0]).astype(str)
+    df = df.set_index(df.columns[0]).fillna(0).astype(int).astype(str)
     df.at["Total",df.columns[0]] = round(df_sum.iloc[:,0].sum(skipna=True))
     df = df.reset_index()
     if checkpoint_hosp:
@@ -121,6 +394,7 @@ def prepare_section1_table_for_reportlab(df, checkpoint_hosp):
         df["Number_of_hospital_records_in_hospital_admission_data_file"] = ""
         df.loc[df["Month"]=="Total","Number_of_hospital_records_in_hospital_admission_data_file"] = "NA"
     df = df.rename(columns={"Number_of_specimen_in_microbiology_data_file":"Number of specimen\ndata records in\nmicrobiology_data file", "Number_of_hospital_records_in_hospital_admission_data_file":"Number of admission\ndata records in\nhospital_admission_data file"})
+    
     lst_col = [list(df.columns)]
     lst_df = df.values.tolist()
     lst_df = lst_col + lst_df
@@ -243,7 +517,8 @@ def create_table_nons(raw_df, org_full, origin="", org_col="Organism", drug_col=
     sel_df_1 = sel_df_1.replace("0% (0/0)","NA").replace("0% - 0%","-")
     col = pd.DataFrame(list(sel_df_1.columns)).T
     col.columns = list(sel_df_1.columns)
-    return col.append(sel_df_1)
+    #return col.append(sel_df_1)
+    return pd.concat([col,sel_df_1],ignore_index = True)
 
 def create_graph_nons(raw_df, org_full, org_short, palette, drug_col, perc_col, upper_col, lower_col, origin=""):
     #Creating graph for PDF
@@ -438,7 +713,8 @@ def create_table_mortal(df, organism, origin, ori_col="Infection_origin", org_co
     df_1 = df.loc[df[ori_col]==origin,:]
     df_2 = df_1.loc[df_1[org_col]==organism].drop(columns=[org_col,ori_col])
     df_col = pd.DataFrame(df_2.columns,index=df_2.columns).T #column name
-    df_3 = df_col.append(df_2).replace("0% (0/0)","NA").replace('0% - 0%',"-") #column name + content
+    #df_3 = df_col.append(df_2).replace("0% (0/0)","NA").replace('0% - 0%',"-") #column name + content
+    df_3 = pd.concat([df_col,df_2]).replace("0% (0/0)","NA").replace('0% - 0%',"-")
     return df_3
 
 def create_graph_mortal_1(df, organism, origin, prefix, org_col="Organism", ori_col="Infection_origin", drug_col="Antibiotic", perc_col="Mortality (n)", lower_col="Mortality_lower_95ci", upper_col="Mortality_upper_95ci"):
@@ -659,7 +935,13 @@ def create_annexA_mortality_graph(df_mor, lst_org, death_col="Number_of_deaths",
 
 def prepare_annexB_summary_table_for_reportlab(df,indi_col="Indicators",total_col="Total(%)",cri_col="Critical_priority(%)",high_col="High_priority(%)",med_col="Medium_priority(%)"):
     df = df.fillna("NA").loc[:,[indi_col,total_col, cri_col,high_col,med_col]]
-    df.at[:,indi_col] = ["Blood culture\ncontamination rate*", "Proportion of notifiable\nantibiotic-pathogen\ncombinations**","Proportion of isolates with\ninfrequent phenotypes or\npotential errors in AST results\n***"]
+    lstind = ["Blood culture\ncontamination rate*", "Proportion of notifiable\nantibiotic-pathogen\ncombinations**","Proportion of isolates with\ninfrequent phenotypes or\npotential errors in AST results\n***"]
+    for i in range(len(lstind)):
+        try:
+            df.loc[i,indi_col] = lstind[i]
+        except:
+            pass    
+    #df.at[:,indi_col] = ["Blood culture\ncontamination rate*", "Proportion of notifiable\nantibiotic-pathogen\ncombinations**","Proportion of isolates with\ninfrequent phenotypes or\npotential errors in AST results\n***"]
     for idx in df.index:
         for col in [1,2,3,4]:
             df.iloc[idx,col] = df.iloc[idx,col].replace("(","\n(")
@@ -739,9 +1021,18 @@ def report2_table(df):
 
 def report3_table(df):
     return Table(df,style=[('FONT',(0,0),(-1,0),'Helvetica-Bold'), 
-                           ('FONT',(0,1),(-1,-1),'Helvetica-BoldOblique'),
+                           ('FONT',(1,1),(-1,-1),'Helvetica-BoldOblique'),
                            ('FONTSIZE',(0,0),(-1,-1),11),
-                           ('TEXTCOLOR',(0,1),(-1,-1),colors.darkblue),
+                           ('TEXTCOLOR',(1,1),(-1,-1),colors.darkblue),
+                           ('ALIGN',(0,0),(-1,-1),'LEFT'),
+                           ('VALIGN',(0,0),(-1,-1),'MIDDLE')], 
+                 colWidths=[2.2*inch,1.8*inch,1.0*inch,0.9*inch,1.0*inch])
+
+def report6_table(df):
+    return Table(df,style=[('FONT',(0,0),(-1,0),'Helvetica-Bold'), 
+                           ('FONT',(1,1),(-1,-1),'Helvetica-BoldOblique'),
+                           ('FONTSIZE',(0,0),(-1,-1),11),
+                           ('TEXTCOLOR',(1,1),(-1,-1),colors.darkblue),
                            ('ALIGN',(0,0),(-1,-1),'LEFT'),
                            ('VALIGN',(0,0),(-1,-1),'MIDDLE')])
 

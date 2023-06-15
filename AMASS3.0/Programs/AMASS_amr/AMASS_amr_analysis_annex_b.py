@@ -13,13 +13,18 @@ from AMASS_amr_commonlib_annex_b import * #for importing data indicators functio
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 
-def generate_annex_b(df_dict_micro,df_micro,logger):
+def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_micro):
     AL.printlog("Start Data Indicator (ANNEX B): " + str(datetime.datetime.now()),False,logger)
     path = "./"
+    """
     i_micro  = path + "microbiology_data.xlsx"
     i_dict   = path + "dictionary_for_microbiology_data.xlsx"
     i_micro_csv  = path + "microbiology_data.csv"
     i_dict_csv   = path + "dictionary_for_microbiology_data.csv"
+    """
+    f_dict   = "dictionary_for_microbiology_data"
+    f_micro  ="microbiology_data"
+    f_micro_wide = "microbiology_data_reformatted"
     i_dataqc = path + "Configuration/list_of_indicators.xlsx"
     i_druglst= path + "Configuration/list_of_antibiotics.xlsx"
     
@@ -55,8 +60,19 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
         datai = pd.DataFrame()
         micro_0 = pd.DataFrame()
         try:
-
-            dict_micro = df_dict_micro.iloc[:,:2].fillna("")
+            if (bisusingmappeddata == True) or (bisreload_micro == False):
+                dict_micro = df_dict_micro.iloc[:,:2].fillna("")
+            else:                   
+                dict_micro = AL.readxlsxorcsv(path, f_dict).iloc[:,:2].fillna("")
+                """
+                try:
+                    dict_micro = pd.read_excel(i_dict).iloc[:,:2].fillna("")
+                except:
+                    try:
+                        dict_micro = pd.read_csv(i_dict_csv).iloc[:,:2].fillna("")
+                    except:
+                        dict_micro = pd.read_csv(i_dict_csv, encoding="windows-1252").iloc[:,:2].fillna("")
+                """
             dict_micro.columns = ["amass_name","user_name"]
             dict_micro["amass_name"] = dict_micro["amass_name"].fillna("zzzz")
             hn      = AC.CONST_VARNAME_HOSPITALNUMBER
@@ -64,6 +80,12 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
             spctype = AC.CONST_VARNAME_SPECTYPE
             spcnum  = AC.CONST_VARNAME_SPECNUM
             organism= AC.CONST_VARNAME_ORG
+            if bisusingmappeddata != True:
+                hn      = retrieve_uservalue(dict_micro, "hospital_number")
+                spcdate = retrieve_uservalue(dict_micro, "specimen_collection_date")
+                spctype = retrieve_uservalue(dict_micro, "specimen_type")
+                spcnum  = retrieve_uservalue(dict_micro, "specimen_number")
+                organism= retrieve_uservalue(dict_micro, "organism")
             fmt     = retrieve_uservalue(dict_micro, "file_format")
             lst_no_growth   = retrieve_userlist(dict_micro,"organism_no_growth")
             lst_blood       = retrieve_userlist(dict_micro,"specimen_blood")
@@ -81,6 +103,9 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
             idx_micro_spc = dict_micro.iloc[:,0].tolist().index(head_dict_3) #index of part3 header
             idx_micro_org = dict_micro.iloc[:,0].tolist().index(head_dict_4) #index of part4 header
             dict_drug = dict_micro.copy().iloc[idx_micro_drug+1:idx_micro_spc,:2].reset_index().drop(columns=['index']).fillna("").rename(columns={"amass_name":"amass_drug","user_name":"user_drug"})
+            #!!!This in case using df_micro that already map drug column to AMASS val if directly loaded please remove
+            if bisusingmappeddata == True:
+                dict_drug.loc[dict_drug["user_drug"].astype("string").str.len() >0, "user_drug"] = dict_drug["amass_drug"]
             #Merging antibiotic list among amass drug, amass class, user drug name
             try:
                 df_drug = pd.read_excel(i_druglst).iloc[:,:2]
@@ -132,16 +157,19 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
             datai_part2 = datai_part2.rename(columns={col[0]:"organism",col[1]:"antibiotic",col[2]:"rule_id", 
                                                     col[3]:"priority",col[4]:"report_status",col[5]:"reference"})
             #Assigning tax_level and user_drug
+            
             datai_part2_1 = prepare_datai_org(df = datai_part2, 
                                             lst_fam = lst_fam,
                                             lst_ge = lst_ge,
                                             lst_sci = lst_sci,
                                             col_org = "organism")
+
             datai_part2_2 = prepare_datai_drug(df_datai = datai_part2_1, 
                                             df_drug  = df_drug, 
                                             col_drug = "antibiotic", 
                                             lst_drugclass = lst_cl, 
                                             lst_drugname  = lst_dr)
+
             datai_part2_export = datai_part2_2.copy().astype(str)
             datai_part2_2 = datai_part2_2.astype(str).loc[datai_part2_2["tax_level"] != "NA"] ##Selecting only available organism based on dictionary
             #Deleting noused dataframes
@@ -157,6 +185,17 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
         AL.printlog("ANNEX B microbiology_data file loading",False,logger)
         try:
             nogrowth_status = False
+            if (bisusingmappeddata == True) or (bisreload_micro == False):
+                micro_0 = df_micro.copy()
+            else:
+                if AL.checkxlsorcsv(path, f_micro_wide) == True:
+                    micro_0 = AL.readxlsxorcsv(path, f_micro_wide).fillna("")
+                else:
+                    micro_0 = AL.readxlsxorcsv(path, f_micro).fillna("")
+            if (spcnum == "") or (spcnum not in micro_0.columns): #If there is no available specimen_nember column >>> create specimen_column from index
+                micro_0["mapped_specimen_number"] = range(len(micro_0))
+            else:
+                pass
             #Creating dataframe containing records with positive cultures
             d_blood = create_dict_for_map(lst_blood,"blood")
             d_no_growth = create_dict_for_map(lst_no_growth,"negative")
@@ -175,15 +214,11 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
             for i in lst_susceptible:
                 d_ast[i] = "S"
             #Mapping blood, spctype,culture
-            micro_0 = df_micro.copy()
-            if (spcnum == "") or (spcnum not in micro_0.columns): #If there is no available specimen_nember column >>> create specimen_column from index
-                micro_0["mapped_specimen_number"] = range(len(micro_0))
-            else:
-                pass
             micro_1 = micro_0.copy()
-            micro_1["mapped_blood"] = micro_1[AC.CONST_NEWVARNAME_BLOOD].astype("string")
-            micro_1["mapped_spctype"] = micro_1[AC.CONST_VARNAME_SPECTYPE].map(d_allspc).fillna("unknown")
-            micro_1["mapped_culture"] = micro_1[AC.CONST_VARNAME_ORG].map(d_no_growth).fillna("positive")
+            micro_1["mapped_blood"] = micro_1[spctype].map(d_blood).fillna("non-blood")
+            micro_1["mapped_spctype"] = micro_1[spctype].map(d_allspc).fillna("unknown")
+            micro_1["mapped_culture"] = micro_1[organism].map(d_no_growth).fillna("positive")
+
             micro_1 = map_ast_result(micro_1, df_drug, d_ast)
             
             micro_pos = micro_1.copy().loc[micro_1["mapped_culture"]=="positive",:].reset_index().drop(columns=["index"]) #dataframe with possitive cultures
@@ -195,16 +230,17 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
             minimum_date = date.min().strftime("%d %b %Y")
             hospital_name = dict_micro.loc[dict_micro["amass_name"]=="hospital_name","user_name"].tolist()[0]
             hospital_country = dict_micro.loc[dict_micro["amass_name"]=="country","user_name"].tolist()[0]
-            overall = pd.DataFrame(columns=["Type_of_data_file","Parameters","Values"])
-            overall.at[0,:] = ["microbiology_data","Hospital_name",hospital_name]
-            overall.at[1,:] = ["microbiology_data","Country",hospital_country]
-            overall.at[2,:] = ["microbiology_data","Minimum_date",minimum_date]
-            overall.at[3,:] = ["microbiology_data","Maximum_date",maximum_date]
-            overall.at[4,:] = ["microbiology_data","Number_of_records",len(micro_0)]
-            overall.at[5,:] = ["microbiology_data","Number_of_all_cultue_positive",len(micro_pos)]
-            overall.at[6,:] = ["microbiology_data","Number_of_blood_specimens_collected",len(micro_1.loc[micro_1["mapped_blood"]=="blood"])]
-            overall.at[7,:] = ["microbiology_data","Number_of_blood_culture_positive",len(micro_pos.loc[micro_pos["mapped_blood"]=="blood"])]
-            overall.at[8,:] = ["microbiology_data","Number_of_blood_culture_negative",len(micro_1.loc[(micro_1["mapped_culture"]=="negative")&(micro_1["mapped_blood"]=="blood")])]
+            #overall = pd.DataFrame(columns=["Type_of_data_file","Parameters","Values"])
+            temp_list = [["microbiology_data","Hospital_name",hospital_name], 
+                         ["microbiology_data","Country",hospital_country], 
+                         ["microbiology_data","Minimum_date",minimum_date], 
+                         ["microbiology_data","Maximum_date",maximum_date], 
+                         ["microbiology_data","Number_of_records",len(micro_0)], 
+                         ["microbiology_data","Number_of_all_cultue_positive",len(micro_pos)], 
+                         ["microbiology_data","Number_of_blood_specimens_collected",len(micro_1.loc[micro_1["mapped_blood"]=="blood"])], 
+                         ["microbiology_data","Number_of_blood_culture_positive",len(micro_pos.loc[micro_pos["mapped_blood"]=="blood"])], 
+                         ["microbiology_data","Number_of_blood_culture_negative",len(micro_1.loc[(micro_1["mapped_culture"]=="negative")&(micro_1["mapped_blood"]=="blood")])]]
+            overall = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
             overall.to_csv(path + "ResultData/Supplementary_data_indicators_results.csv",index=False)
             ##### RULE1 #####
             rule1 = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="1",:] #filtering only rule1
@@ -433,7 +469,9 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
                                 micro_data.at[idx_mi,"warning_indicator_3b"] = "AST results of " + rule3b_sel.loc[idx_qc,"antibiotic"] + " of this " + micro_data.loc[idx_mi,"mapped_sci"] + " isolate are discordant" + "markednewline(" + str(warning) +")"
                 count += 1
                 print_round(count, len(micro_data))
-            micro_data_append = micro_data.append(temp_df, ignore_index = True)
+            #micro_data_append = micro_data.append(temp_df, ignore_index = True)
+            micro_data_append = pd.concat([micro_data,temp_df], ignore_index = True)
+            #AL.fn_savexlsx(micro_data_append, AC.CONST_PATH_RESULT + "raw_annex_B.xlsx", logger)
             #Deleting noused dataframes
             del [[df_drug, datai_part2_2, temp_df]]
             del idx_micro_rule1, idx_micro_rule2, idx_micro_rule3a, idx_micro_rule3b
@@ -556,6 +594,26 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
                 micro_onlywarning = create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num="mapped_specimen_number",org=organism)
             else:
                 micro_onlywarning = create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num=spcnum,org=organism)
+            if (bisusingmappeddata == True) or (fmt == "wide"):
+                export_records_withwarning_wide(df = micro_onlywarning,
+                                            dict_datai = d_datai_part1,
+                                            str_filename_withstatus    = o_list_withstatus, 
+                                            str_filename_withoutstatus = o_list_withoutstatus, 
+                                            col_hn = hn, 
+                                            col_spcdate = spcdate,
+                                            col_spcnum  = spcnum)
+            else:
+                export_records_withwarning_long(df = micro_onlywarning,
+                                                dict_datai = d_datai_part1,
+                                                str_filename_rawmicro = path + f_micro +".xlsx",
+                                                str_filename_withstatus    = o_list_withstatus, 
+                                                str_filename_withoutstatus = o_list_withoutstatus, 
+                                                col_hn=hn,
+                                                col_spcdate=spcdate,
+                                                col_spctype=spctype,
+                                                col_organism=organism,
+                                                col_spcnum  = spcnum)
+            """
             if fmt == "wide":
                 export_records_withwarning_wide(df = micro_onlywarning,
                                                 dict_datai = d_datai_part1,
@@ -577,6 +635,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger):
                                                 col_spcnum  = spcnum)
             else:
                 pass
+            """
             #Deleting noused dataframes
             del [[micro_onlywarning]]
             gc.collect()
