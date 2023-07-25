@@ -154,3 +154,62 @@ def fn_df_strstrips(df,list_col,logger) :
             except Exception as e: # work on python 3.x
                 printlog("Warning : unable to trim data in column : " + curcol+ " : "+ str(e),False,logger)         
     return df
+def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
+    CDATEFORMAT_YMD =["%Y/%m/%d","%y/%m/%d"] 
+    CDATEFORMAT_DMY =["%d/%m/%Y","%d/%m/%y"]
+    CDATEFORMAT_MDY =["%m/%d/%Y","%m/%d/%y"]
+    CDATEFORMAT_OTH =["%d/%b/%Y","%d/%b/%y","%d/%B/%Y","%d/%B/%y"]
+    cleanfieldtemp = cleanfield + "_tmpamassf"
+    cft_1 = cleanfield + "_d1"
+    cft_2 = cleanfield + "_d2"
+    if oldfield != cleanfield:
+        try:
+            isalreadydatecol = pd.api.types.is_datetime64_any_dtype(df[oldfield])
+        except:
+            isalreadydatecol = False
+        if isalreadydatecol != True:
+            df[cleanfield] = df[oldfield].astype("string")
+            df[cleanfield] = df[cleanfield].fillna("1900-01-01")
+            df[cleanfield] = df[cleanfield].str.split(" ", n = 1, expand = True)[0]
+            iDMY = 0
+            iYMD = 0
+            iMDY = 0
+            iOTH = 0
+            try:
+                df[cleanfield] = df[cleanfield].str.replace('-', '/', regex=False)
+                df[cft_1] = df[cleanfield].str.split("/", n = 2, expand = True)[0]
+                df[cft_1] = pd.to_numeric(df[cft_1],downcast='signed',errors='coerce')
+                df[cft_2] = df[cleanfield].str.split("/", n = 2, expand = True)[1]
+                df[cft_2] = pd.to_numeric(df[cft_2],downcast='signed',errors='coerce')
+                iDMY = len(df[(df[cft_1]>12) & (df[cft_1]<32)])                   
+                iYMD = len(df[(df[cft_1]>31)])
+                iMDY = len(df[(df[cft_2]>12) & (df[cft_2]<32)])
+                df = df.drop(columns=[cft_1])  
+                df = df.drop(columns=[cft_2]) 
+                print('Count date format DMY:' + str(iDMY) + ', MDY:' + str(iMDY) + ', YMD:' + str(iYMD))
+            except Exception as e:
+                printlog("Warning date format of " + oldfield + " may be not in convert format defined or in other format", False, logger)
+                logger.exception(e)
+                iOTH = 1
+            df_format = pd.DataFrame({'fname':['YMD','DMY','MDY','Others'],'fcount':[iYMD,iDMY,iMDY,iOTH],'cformat':[CDATEFORMAT_YMD,CDATEFORMAT_DMY,CDATEFORMAT_MDY,CDATEFORMAT_OTH]}) 
+            df_format = df_format.sort_values(by=['fcount'],ascending=False)
+            df[cleanfieldtemp] = df[cleanfield]
+            bfirstformat = True
+            for index, row in df_format.iterrows():
+                print('Convert data format: ' + row['fname'] )
+                for sf in row['cformat']:
+                    if bfirstformat:
+                        df[cleanfield] = pd.to_datetime(df[cleanfield], format=sf, errors="coerce")
+                    else:
+                        if df[cleanfield].isnull().values.any() == False:
+                            break
+                        df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[cleanfieldtemp], format=sf, errors="coerce"))
+                    bfirstformat = False
+            if df[cleanfield].isnull().values.any() == True:
+                df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[oldfield], errors="coerce"))
+            #df.loc[df[cleanfield]<datetime(1900, 1, 1),cleanfield] = np.nan
+            df = df.drop(columns=[cleanfieldtemp])  
+        else:
+            df[cleanfield] = df[oldfield]
+            print("Note: " + oldfield + " is already date time data type")
+    return df

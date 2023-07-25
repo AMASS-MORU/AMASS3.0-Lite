@@ -332,6 +332,8 @@ def create_assign_annexB_bymonth(df, df_blo_posneg, df_blo_ast, col_spcdate):
             "Jan":"January",   "Feb":"February",  "Mar":"March",    "Apr":"April", "May":"May",       "Jun":"June",      "Jul":"July",     "Aug":"August", "Sep":"September", "Oct":"October",   "Nov":"November", "Dec":"December", 
             "jan":"January",   "feb":"February",  "mar":"March",    "apr":"April", "may":"May",       "jun":"June",      "jul":"July",     "aug":"August", "sep":"September", "oct":"October",   "nov":"November", "dec":"December"}
     ##Based on denominator : positive blood culture
+    #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+    """
     #Grouping total micro_blood_dedup by month
     df["specimen_collection_date_fmt"] = pd.to_datetime(df[col_spcdate])
     df["month"] = df["specimen_collection_date_fmt"].dt.month
@@ -345,6 +347,18 @@ def create_assign_annexB_bymonth(df, df_blo_posneg, df_blo_ast, col_spcdate):
     df_blo_ast["specimen_collection_date_fmt"] = pd.to_datetime(df_blo_ast[col_spcdate])
     df_blo_ast["month"] = df_blo_ast["specimen_collection_date_fmt"].dt.month
     df_blo_ast["count"] = 1
+    """
+    #Grouping total micro_blood_dedup by month
+    df["month"] = df[col_spcdate].dt.month
+    df["count"] = 1
+    ##Based on denominator : positive + negative blood culture
+    #Grouping total micro_blood_dedup by month
+    df_blo_posneg["month"] = df_blo_posneg[col_spcdate].dt.month
+    df_blo_posneg["count"] = 1
+    #Grouping total micro_blood_dedup_ast by month
+    df_blo_ast["month"] = df_blo_ast[col_spcdate].dt.month
+    df_blo_ast["count"] = 1
+    #----------------------------------------------------------------------------
     #Counting number of warning of each month
     df_blo_posneg_bymonth = df_blo_posneg.loc[:,["month","count"]].groupby("month").count().rename(index=d_month,columns={"count":"total"}) #Based on denominator : positive + negative blood culture
     df_blo_ast_bymonth    = df_blo_ast.loc[:,["month","count"]].groupby("month").count().rename(index=d_month,columns={"count":"total_ast"})
@@ -422,8 +436,8 @@ def export_records_withwarning_wide(df,
                             "warning_indicator_2":"2",
                             "warning_indicator_3a":"3a",
                             "warning_indicator_3b":"3b"}).sort_values(by=[col_hn, "1", "2", "3a", "3b"]).rename(columns=dict_datai)
-    df_withstatus = format_date_forexportation(df = df,
-                                               col_date = col_spcdate)
+    #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+    df_withstatus = format_date_forexportation(df = df,col_date = col_spcdate)
     df_withstatus.to_excel(str_filename_withstatus,index=False)
     df_withoutstatus = df_withstatus.drop(columns=["mapped_spctype","mapped_sci","mapped_gen","status_indicator_1","status_indicator_2","status_indicator_3a","status_indicator_3b","car_3gc","flu_3gc"])
     df_withoutstatus["Notifiable antibiotic-pathogen combination"] = df_withoutstatus["Notifiable antibiotic-pathogen combination"].replace(regex=["markednewline\("],value=" (")

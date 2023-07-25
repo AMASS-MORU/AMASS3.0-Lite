@@ -9,7 +9,8 @@ import logging #for creating logfile
 import pandas as pd #for creating and manipulating dataframe
 import gc #for returning memory to system
 import datetime #for setting date-time format
-from AMASS_amr_commonlib_annex_b import * #for importing data indicators functions
+#from AMASS_amr_commonlib_annex_b import * #for importing data indicators functions
+import AMASS_amr_commonlib_annex_b as ALB
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 
@@ -52,7 +53,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
         except:
             config = pd.read_csv(path + "Configuration/Configuration.csv", encoding="windows-1252")
     
-    if check_config(config, "data_indicators_function"):
+    if ALB.check_config(config, "data_indicators_function"):
         lst_fam = []
         lst_sci = []
         lst_ge = []
@@ -77,27 +78,28 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             dict_micro["amass_name"] = dict_micro["amass_name"].fillna("zzzz")
             hn      = AC.CONST_VARNAME_HOSPITALNUMBER
             spcdate = AC.CONST_VARNAME_SPECDATERAW
+            CLEANSPECDATE = AC.CONST_NEWVARNAME_CLEANSPECDATE
             spctype = AC.CONST_VARNAME_SPECTYPE
             spcnum  = AC.CONST_VARNAME_SPECNUM
             organism= AC.CONST_VARNAME_ORG
             if bisusingmappeddata != True:
-                hn      = retrieve_uservalue(dict_micro, "hospital_number")
-                spcdate = retrieve_uservalue(dict_micro, "specimen_collection_date")
-                spctype = retrieve_uservalue(dict_micro, "specimen_type")
-                spcnum  = retrieve_uservalue(dict_micro, "specimen_number")
-                organism= retrieve_uservalue(dict_micro, "organism")
-            fmt     = retrieve_uservalue(dict_micro, "file_format")
-            lst_no_growth   = retrieve_userlist(dict_micro,"organism_no_growth")
-            lst_blood       = retrieve_userlist(dict_micro,"specimen_blood")
-            lst_resistant   = retrieve_userlist(dict_micro,"resistant")
-            lst_susceptible = retrieve_userlist(dict_micro,"susceptible")
-            lst_intermediate= retrieve_userlist(dict_micro,"intermediate")
-            lst_csf         = retrieve_userlist(dict_micro,"specimen_cerebrospinal_fluid")
-            lst_spu         = retrieve_userlist(dict_micro,"specimen_respiratory_tract")
-            lst_gen         = retrieve_userlist(dict_micro,"specimen_genital_swab")
-            lst_uri         = retrieve_userlist(dict_micro,"specimen_urine")
-            lst_sto         = retrieve_userlist(dict_micro,"specimen_stool")
-            lst_oth         = retrieve_userlist(dict_micro,"specimen_others")
+                hn      = ALB.retrieve_uservalue(dict_micro, "hospital_number")
+                spcdate = ALB.retrieve_uservalue(dict_micro, "specimen_collection_date")
+                spctype = ALB.retrieve_uservalue(dict_micro, "specimen_type")
+                spcnum  = ALB.retrieve_uservalue(dict_micro, "specimen_number")
+                organism= ALB.retrieve_uservalue(dict_micro, "organism")
+            fmt     = ALB.retrieve_uservalue(dict_micro, "file_format")
+            lst_no_growth   = ALB.retrieve_userlist(dict_micro,"organism_no_growth")
+            lst_blood       = ALB.retrieve_userlist(dict_micro,"specimen_blood")
+            lst_resistant   = ALB.retrieve_userlist(dict_micro,"resistant")
+            lst_susceptible = ALB.retrieve_userlist(dict_micro,"susceptible")
+            lst_intermediate= ALB.retrieve_userlist(dict_micro,"intermediate")
+            lst_csf         = ALB.retrieve_userlist(dict_micro,"specimen_cerebrospinal_fluid")
+            lst_spu         = ALB.retrieve_userlist(dict_micro,"specimen_respiratory_tract")
+            lst_gen         = ALB.retrieve_userlist(dict_micro,"specimen_genital_swab")
+            lst_uri         = ALB.retrieve_userlist(dict_micro,"specimen_urine")
+            lst_sto         = ALB.retrieve_userlist(dict_micro,"specimen_stool")
+            lst_oth         = ALB.retrieve_userlist(dict_micro,"specimen_others")
             #Retrieving all antibiotic list from dictionary_for_microbiology_data.xlsx
             idx_micro_drug = dict_micro.iloc[:,0].tolist().index(head_dict_2) #index of part2 header
             idx_micro_spc = dict_micro.iloc[:,0].tolist().index(head_dict_3) #index of part3 header
@@ -115,21 +117,21 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 except:
                     df_drug = pd.read_csv(path + "Configuration/list_of_antibiotics.csv", encoding="windows-1252").iloc[:,:2]
             df_drug.columns = ["amass_drug","amass_class"]
-            df_drug = merge_drug_drugclass(drug_class= df_drug, 
+            df_drug = ALB.merge_drug_drugclass(drug_class= df_drug, 
                                         drug_user = dict_drug, 
                                         col_merge = "amass_drug")
-            df_drug = create_new_drugcol(df          = df_drug, 
+            df_drug = ALB.create_new_drugcol(df          = df_drug, 
                                         col_drug    = "amass_drug", 
                                         col_drug_new= "amass_drug_rename")
-            lst_cl = select_value(set(df_drug.loc[:,"amass_class"].tolist())) #list of available family
-            lst_dr = select_value(set(df_drug.loc[:,"amass_drug"].tolist())) #list of available family
+            lst_cl = ALB.select_value(set(df_drug.loc[:,"amass_class"].tolist())) #list of available family
+            lst_dr = ALB.select_value(set(df_drug.loc[:,"amass_drug"].tolist())) #list of available family
             
-            dict_org_fam = retrieve_all_family(dict_micro) ##Retrieving all family
-            dict_org_sci = retrieve_ava_scientific_name(dict_micro) ##Retrieving all organisms
-            lst_fam = select_value(list(set(dict_org_fam["amass_name"].replace(regex=["family_"],value="")))) #list of available family
-            lst_sci = select_value(list(set(dict_org_sci["amass_name"].replace(regex=["organism_"],value="").replace(regex=["_"],value=" ")))) #list of available org
+            dict_org_fam = ALB.retrieve_all_family(dict_micro) ##Retrieving all family
+            dict_org_sci = ALB.retrieve_ava_scientific_name(dict_micro) ##Retrieving all organisms
+            lst_fam = ALB.select_value(list(set(dict_org_fam["amass_name"].replace(regex=["family_"],value="")))) #list of available family
+            lst_sci = ALB.select_value(list(set(dict_org_sci["amass_name"].replace(regex=["organism_"],value="").replace(regex=["_"],value=" ")))) #list of available org
             #For rule1
-            lst_ge = select_value(list(set(dict_org_sci["amass_name"].replace(regex=["organism_"],value=""))))
+            lst_ge = ALB.select_value(list(set(dict_org_sci["amass_name"].replace(regex=["organism_"],value=""))))
             lst_ge = [i.split("_")[0] for i in lst_ge] #list of available genus
         except Exception as e:
             #logger.exception(e)
@@ -158,13 +160,13 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                                     col[3]:"priority",col[4]:"report_status",col[5]:"reference"})
             #Assigning tax_level and user_drug
             
-            datai_part2_1 = prepare_datai_org(df = datai_part2, 
+            datai_part2_1 = ALB.prepare_datai_org(df = datai_part2, 
                                             lst_fam = lst_fam,
                                             lst_ge = lst_ge,
                                             lst_sci = lst_sci,
                                             col_org = "organism")
 
-            datai_part2_2 = prepare_datai_drug(df_datai = datai_part2_1, 
+            datai_part2_2 = ALB.prepare_datai_drug(df_datai = datai_part2_1, 
                                             df_drug  = df_drug, 
                                             col_drug = "antibiotic", 
                                             lst_drugclass = lst_cl, 
@@ -196,16 +198,18 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 micro_0["mapped_specimen_number"] = range(len(micro_0))
             else:
                 pass
+            #Reformat specimen date
+            micro_0 = AL.fn_clean_date(micro_0, spcdate, CLEANSPECDATE, AC.CONST_CDATEFORMAT, logger)
             #Creating dataframe containing records with positive cultures
-            d_blood = create_dict_for_map(lst_blood,"blood")
-            d_no_growth = create_dict_for_map(lst_no_growth,"negative")
+            d_blood = ALB.create_dict_for_map(lst_blood,"blood")
+            d_no_growth = ALB.create_dict_for_map(lst_no_growth,"negative")
             d_allspc = dict(d_blood)
-            d_allspc.update(create_dict_for_map(lst_csf,"csf"))
-            d_allspc.update(create_dict_for_map(lst_spu,"rts"))
-            d_allspc.update(create_dict_for_map(lst_gen,"genital swab"))
-            d_allspc.update(create_dict_for_map(lst_sto,"stool"))
-            d_allspc.update(create_dict_for_map(lst_uri,"urine"))
-            d_allspc.update(create_dict_for_map(lst_oth,"others"))
+            d_allspc.update(ALB.create_dict_for_map(lst_csf,"csf"))
+            d_allspc.update(ALB.create_dict_for_map(lst_spu,"rts"))
+            d_allspc.update(ALB.create_dict_for_map(lst_gen,"genital swab"))
+            d_allspc.update(ALB.create_dict_for_map(lst_sto,"stool"))
+            d_allspc.update(ALB.create_dict_for_map(lst_uri,"urine"))
+            d_allspc.update(ALB.create_dict_for_map(lst_oth,"others"))
             d_ast = {} #dictionary for mapping RIS
             for i in lst_resistant:
                 d_ast[i] = "R"
@@ -219,13 +223,16 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             micro_1["mapped_spctype"] = micro_1[spctype].map(d_allspc).fillna("unknown")
             micro_1["mapped_culture"] = micro_1[organism].map(d_no_growth).fillna("positive")
 
-            micro_1 = map_ast_result(micro_1, df_drug, d_ast)
+            micro_1 = ALB.map_ast_result(micro_1, df_drug, d_ast)
             
             micro_pos = micro_1.copy().loc[micro_1["mapped_culture"]=="positive",:].reset_index().drop(columns=["index"]) #dataframe with possitive cultures
-            micro_pos = map_fam_org_gen_name(micro_pos, organism, dict_org_fam, dict_org_sci)
+            micro_pos = ALB.map_fam_org_gen_name(micro_pos, organism, dict_org_fam, dict_org_sci)
             nogrowth_status = len(micro_1.loc[micro_1["mapped_culture"]=="negative",:]) > 0 #nogrowth_status
             #Exporting Supplementary_data_indicators_overall.csv
-            date = pd.to_datetime(micro_0[spcdate])
+            #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+            #date = pd.to_datetime(micro_0[spcdate])
+            date = micro_0[CLEANSPECDATE]
+            #-----------------------------------------------------------------------------
             maximum_date = date.max().strftime("%d %b %Y")
             minimum_date = date.min().strftime("%d %b %Y")
             hospital_name = dict_micro.loc[dict_micro["amass_name"]=="hospital_name","user_name"].tolist()[0]
@@ -244,21 +251,21 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             overall.to_csv(path + "ResultData/Supplementary_data_indicators_results.csv",index=False)
             ##### RULE1 #####
             rule1 = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="1",:] #filtering only rule1
-            rule1 = assign_org_pocon(rule1)
+            rule1 = ALB.assign_org_pocon(rule1)
             #### RULE2 #####
             rule2 = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="2",:] #filtering only rule2
-            rule2 = assign_drug_oth(micro_pos, rule2)
+            rule2 = ALB.assign_drug_oth(micro_pos, rule2)
             #### RULE3a #####
             rule3a = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="3a",:] #filtering only rule3a
-            rule3a = assign_drug_oth(micro_pos, rule3a)
+            rule3a = ALB.assign_drug_oth(micro_pos, rule3a)
             #### RULE3b #####
             rule3b = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="3b",:] #filtering only rule2
-            rule3b = assign_drug_oth(micro_pos, rule3b)
+            rule3b = ALB.assign_drug_oth(micro_pos, rule3b)
             #Retrieving df which have to process for each rule
-            idx_micro_rule1 = retrieve_idx_basedon_spc(micro_pos, rule1)
-            idx_micro_rule2 = retrieve_idx_basedon_org(micro_pos, rule2)
-            idx_micro_rule3a = retrieve_idx_basedon_org(micro_pos, rule3a)
-            idx_micro_rule3b = retrieve_idx_basedon_org(micro_pos, rule3b)
+            idx_micro_rule1 = ALB.retrieve_idx_basedon_spc(micro_pos, rule1)
+            idx_micro_rule2 = ALB.retrieve_idx_basedon_org(micro_pos, rule2)
+            idx_micro_rule3a = ALB.retrieve_idx_basedon_org(micro_pos, rule3a)
+            idx_micro_rule3b = ALB.retrieve_idx_basedon_org(micro_pos, rule3b)
             #Retrieving df of raw set of indicators
             rule1_export = datai_part2_export.loc[datai_part2_export['rule_id']=="1",:]
             rule2_export = datai_part2_export.loc[datai_part2_export['rule_id']=="2",:]
@@ -277,40 +284,40 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             pass
         AL.printlog("ANNEX B prepare antibiotic group",False,logger)
         try:
-            lst_3gc = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="3GC","amass_drug_rename"].tolist(),
+            lst_3gc = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="3GC","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_car = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Carbapenems","amass_drug_rename"].tolist(),
+            lst_car = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Carbapenems","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_flu = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Fluoroquinolones","amass_drug_rename"].tolist(),
+            lst_flu = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Fluoroquinolones","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
             #Penicillins; (Ampicillin_and_sulbactam=S) AND (Piperacillin_and_tazobactam=NS OR Ticarcillin_and_clavulanic_acid=NS)
-            lst_asu = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Ampicillin_and_sulbactam","amass_drug_rename"].tolist(),
+            lst_asu = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Ampicillin_and_sulbactam","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_com = select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_drug"]=="Piperacillin_and_tazobactam")|(df_drug["amass_drug"]=="Ticarcillin_and_clavulanic_acid"),"amass_drug_rename"].tolist(),
+            lst_com = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_drug"]=="Piperacillin_and_tazobactam")|(df_drug["amass_drug"]=="Ticarcillin_and_clavulanic_acid"),"amass_drug_rename"].tolist(),
                                         lst_micro_col= micro_pos.columns.tolist())
             #Penicillins and betalactam combinations; (betalactam combinations=NS) AND (PEN=S)
-            lst_pen = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Penicillins","amass_drug_rename"].tolist(),
+            lst_pen = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Penicillins","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_betcom = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Betalactam_combinations","amass_drug_rename"].tolist(),
+            lst_betcom = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Betalactam_combinations","amass_drug_rename"].tolist(),
                                         lst_micro_col= micro_pos.columns.tolist())
             #Quinolones, Fluoroquinolones; (Nalidixic_acid=S) AND (Fluoroquinolones=NS)
-            lst_qui = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Nalidixic_acid","amass_drug_rename"].tolist(),
+            lst_qui = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Nalidixic_acid","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_flu = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Fluoroquinolones","amass_drug_rename"].tolist(),
+            lst_flu = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="Fluoroquinolones","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
             #Cephems; (1GC=S OR 2GC=S) AND (3GC=NS)
-            lst_gc = select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_class"]=="1GC")|(df_drug["amass_class"]=="2GC"),"amass_drug_rename"].tolist(),
+            lst_gc = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_class"]=="1GC")|(df_drug["amass_class"]=="2GC"),"amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_3gc = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="3GC","amass_drug_rename"].tolist(),
+            lst_3gc = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_class"]=="3GC","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
             #Aminoglycoside; (AMK=NS) AND (GEN=S OR TOB=S OR NET=S)
-            lst_amk = select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Amikacin","amass_drug_rename"].tolist(),
+            lst_amk = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[df_drug["amass_drug"]=="Amikacin","amass_drug_rename"].tolist(),
                                     lst_micro_col= micro_pos.columns.tolist())
-            lst_othami = select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_drug"]=="Gentamicin")|(df_drug["amass_drug"]=="Tobramycin")|(df_drug["amass_drug"]=="Netilmicin"),"amass_drug_rename"].tolist(),
+            lst_othami = ALB.select_ava_drug(lst_qc_drug  = df_drug.loc[(df_drug["amass_drug"]=="Gentamicin")|(df_drug["amass_drug"]=="Tobramycin")|(df_drug["amass_drug"]=="Netilmicin"),"amass_drug_rename"].tolist(),
                                         lst_micro_col= micro_pos.columns.tolist())
             
     
-            micro_data = retrieve_record_basedon_spc(df=micro_pos, lst_spc=list(set(rule1["antibiotic"])) + ["blood_specimen"])
+            micro_data = ALB.retrieve_record_basedon_spc(df=micro_pos, lst_spc=list(set(rule1["antibiotic"])) + ["blood_specimen"])
             print ("Total positive samples tested with indicator: " + str(len(micro_data)))
             micro_data[["warning_indicator_1","priority_indicator_1","status_indicator_1",
                     "warning_indicator_2","priority_indicator_2","status_indicator_2","antibiotic_indicator_2",
@@ -324,7 +331,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 ##### RULE1 #####
                 if idx_mi in idx_micro_rule1 and nogrowth_status:
                     for idx_qc in rule1.index:
-                        boolean_warning = check_blocon(qc_ge=rule1.loc[idx_qc,"rule_ge"], 
+                        boolean_warning = ALB.check_blocon(qc_ge=rule1.loc[idx_qc,"rule_ge"], 
                                                         qc_ex=rule1.loc[idx_qc,"except_sp"], 
                                                         qc_in=rule1.loc[idx_qc,"include_sp"], 
                                                         qc_spc=rule1.loc[idx_qc,"antibiotic"].replace("_specimen",""), 
@@ -344,20 +351,20 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
     
                 ##### RULE2 #####
                 if idx_mi in idx_micro_rule2:
-                    rule2_sel = select_indicator_by_org_v2(micro_data, idx_mi, rule2)
+                    rule2_sel = ALB.select_indicator_by_org_v2(micro_data, idx_mi, rule2)
                     for idx_qc in rule2_sel.index:
                         warning = ""
                         drug = rule2_sel.loc[idx_qc,"amass_drug_ava"]
                         lst_amr = micro_data.loc[idx_mi,drug].tolist()
-                        boolean_warning = check_poerr_pathogen(tax_qc=rule2_sel.loc[idx_qc,"tax_level"], 
+                        boolean_warning = ALB.check_poerr_pathogen(tax_qc=rule2_sel.loc[idx_qc,"tax_level"], 
                                                             org_qc=rule2_sel.loc[idx_qc,"rule_organism"], 
                                                             fam_mi=micro_data.loc[idx_mi,"mapped_fam"], 
                                                             org_mi=micro_data.loc[idx_mi,"mapped_sci"], 
                                                             lst_amr=lst_amr, 
                                                             criteria="NS")
                         if boolean_warning is True: #If boolean_warning is True >>> do next process
-                            micro_data.at[idx_mi,"priority_indicator_2"] = check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_2"],rule2_sel.loc[idx_qc,"priority"])
-                            micro_data.at[idx_mi,"status_indicator_2"] = check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_2"],rule2_sel.loc[idx_qc,"report_status"])
+                            micro_data.at[idx_mi,"priority_indicator_2"] = ALB.check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_2"],rule2_sel.loc[idx_qc,"priority"])
+                            micro_data.at[idx_mi,"status_indicator_2"] = ALB.check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_2"],rule2_sel.loc[idx_qc,"report_status"])
                             warning = "; ".join([drug[i][:-8] + "=" + lst_amr[i] for i in range(len(lst_amr)) if lst_amr[i] != ""])
                             if micro_data.loc[idx_mi,"warning_indicator_2"] != "":
                                 temp_df.loc[temp_idx,:] = micro_data.loc[idx_mi,:]
@@ -371,14 +378,14 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 ##### RULE2-combination #####
                 boolean_warning = False
                 if micro_data.loc[idx_mi,"mapped_fam"] == "enterobacteriaceae":
-                    boolean_warning = check_disast_fixS(lst_amr_NS = micro_data.loc[idx_mi,lst_3gc].tolist(),
+                    boolean_warning = ALB.check_disast_fixS(lst_amr_NS = micro_data.loc[idx_mi,lst_3gc].tolist(),
                                                         lst_amr_S = micro_data.loc[idx_mi,lst_car].tolist())
                     if boolean_warning is True:
                         micro_data.at[idx_mi,"car_3gc"] = 1
                     else:
                         pass
                 elif micro_data.loc[idx_mi,"mapped_sci"] == "neisseria gonorrhoeae":
-                    boolean_warning = check_disast_fixS(lst_amr_NS = micro_data.loc[idx_mi,lst_flu].tolist(),
+                    boolean_warning = ALB.check_disast_fixS(lst_amr_NS = micro_data.loc[idx_mi,lst_flu].tolist(),
                                                         lst_amr_S = micro_data.loc[idx_mi,lst_3gc].tolist())
                     if boolean_warning is True:
                         micro_data.at[idx_mi,"flu_3gc"] = 1
@@ -388,20 +395,20 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 ##### RULE3a #####
                 if idx_mi in idx_micro_rule3a:
                     boolean_warning = False
-                    rule3a_sel = select_indicator_by_org_v2(micro_data, idx_mi, rule3a)
+                    rule3a_sel = ALB.select_indicator_by_org_v2(micro_data, idx_mi, rule3a)
                     for idx_qc in rule3a_sel.index:
                         warning = ""
                         drug = rule3a_sel.loc[idx_qc,"amass_drug_ava"]
                         lst_amr = micro_data.loc[idx_mi,drug].tolist()
-                        boolean_warning = check_poerr_pathogen(tax_qc=rule3a_sel.loc[idx_qc,"tax_level"], 
+                        boolean_warning = ALB.check_poerr_pathogen(tax_qc=rule3a_sel.loc[idx_qc,"tax_level"], 
                                                             org_qc=rule3a_sel.loc[idx_qc,"rule_organism"], 
                                                             fam_mi=micro_data.loc[idx_mi,"mapped_fam"], 
                                                             org_mi=micro_data.loc[idx_mi,"mapped_sci"], 
                                                             lst_amr=lst_amr,  
                                                             criteria="S")
                         if boolean_warning is True: #If result_warn is True >>> do next process
-                            micro_data.at[idx_mi,"priority_indicator_3a"] = check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_3a"],rule3a_sel.loc[idx_qc,"priority"])
-                            micro_data.at[idx_mi,"status_indicator_3a"] = check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_3a"],rule3a_sel.loc[idx_qc,"report_status"])
+                            micro_data.at[idx_mi,"priority_indicator_3a"] = ALB.check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_3a"],rule3a_sel.loc[idx_qc,"priority"])
+                            micro_data.at[idx_mi,"status_indicator_3a"] = ALB.check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_3a"],rule3a_sel.loc[idx_qc,"report_status"])
                             warning = "; ".join([drug[i][:-8] + "=" + lst_amr[i] for i in range(len(lst_amr)) if lst_amr[i] != ""])
                             if micro_data.loc[idx_mi,"warning_indicator_3a"] != "":
                                 temp_df.loc[temp_idx,:] = micro_data.loc[idx_mi,:]
@@ -414,7 +421,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
     
                 ##### RULE3b #####  
                 if idx_mi in idx_micro_rule3b:
-                    rule3b_sel = select_indicator_by_org_v2(micro_data, idx_mi, rule3b)
+                    rule3b_sel = ALB.select_indicator_by_org_v2(micro_data, idx_mi, rule3b)
                     for idx_qc in rule3b_sel.index:
                         warning = ""
                         drug = rule3b_sel.loc[idx_qc,"amass_drug_ava"]
@@ -423,31 +430,31 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                         boolean_warning = False
                         #Penicillins and betalactam combinations; (betalactam combinations=NS) AND (PEN=S)
                         if rule3b_sel.loc[idx_qc,"tax_level"] == "all" and (rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="penicillins, betalactam_combinations" or rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="penicillins,betalactam_combinations" or rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="betalactam_combinations, penicillins" or rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="betalactam_combinations,penicillins"):
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_pen].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_pen].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_betcom].tolist())
                         #Penicillins; (Ampicillin_and_sulbactam=S) AND (Piperacillin_and_tazobactam=NS OR Ticarcillin_and_clavulanic_acid=NS)
                         elif rule3b_sel.loc[idx_qc,"tax_level"] == "all" and (rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="penicillins"):
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_asu].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_asu].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_com].tolist())
                         #Quinolones, Fluoroquinolones; (Nalidixic_acid=S) AND (Fluoroquinolones=NS)
                         elif rule3b_sel.loc[idx_qc,"tax_level"] == "all" and (rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="quinolones, fluoroquinolones" or rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="quinolones,fluoroquinolones"):
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_qui].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_qui].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_flu].tolist())
                         #Aminoglycoside; (AMK=NS) AND (GEN=S OR TOB=S OR NET=S)
                         elif rule3b_sel.loc[idx_qc,"tax_level"] == "family" and rule3b_sel.loc[idx_qc,"rule_organism"].lower() == "enterobacteriaceae" and rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="aminoglycosides":
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_othami].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_othami].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_amk].tolist())
                         #Cephems; (1GC=S OR 2GC=S) AND (3GC=NS)
                         elif rule3b_sel.loc[idx_qc,"tax_level"] == "family" and rule3b_sel.loc[idx_qc,"rule_organism"].lower() == "enterobacteriaceae" and rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="cephems":
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_gc].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_gc].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_3gc].tolist())
                         #Aminoglycoside; (AMK=NS) AND (GEN=S OR TOB=S OR NET=S)
                         elif rule3b_sel.loc[idx_qc,"tax_level"] == "organism" and rule3b_sel.loc[idx_qc,"rule_organism"].lower() == "pseudomonas aeruginosa" and rule3b_sel.loc[idx_qc,"antibiotic"].lower()=="aminoglycosides":
-                            boolean_warning = check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_othami].tolist(), 
+                            boolean_warning = ALB.check_disast_fixS(lst_amr_S=micro_data.loc[idx_mi,lst_othami].tolist(), 
                                                                 lst_amr_NS=micro_data.loc[idx_mi,lst_amk].tolist())
                         else: #other indicators
                             if len(lst_amr_unique) >= 2: 
-                                boolean_warning = check_disast(tax_qc=rule3b_sel.loc[idx_qc,"tax_level"], 
+                                boolean_warning = ALB.check_disast(tax_qc=rule3b_sel.loc[idx_qc,"tax_level"], 
                                                             org_qc=rule3b_sel.loc[idx_qc,"rule_organism"], 
                                                             fam_mi=micro_data.loc[idx_mi,"mapped_fam"], 
                                                             org_mi=micro_data.loc[idx_mi,"mapped_sci"], 
@@ -456,8 +463,8 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                 pass
     
                         if boolean_warning is True: # if result_warn is True >>> do next process
-                            micro_data.at[idx_mi,"priority_indicator_3b"] = check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_3b"],rule3b_sel.loc[idx_qc,"priority"])
-                            micro_data.at[idx_mi,"status_indicator_3b"] = check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_3b"],rule3b_sel.loc[idx_qc,"report_status"])       
+                            micro_data.at[idx_mi,"priority_indicator_3b"] = ALB.check_assign_priority(micro_data.loc[idx_mi,"priority_indicator_3b"],rule3b_sel.loc[idx_qc,"priority"])
+                            micro_data.at[idx_mi,"status_indicator_3b"] = ALB.check_assign_reportstatus(micro_data.loc[idx_mi,"status_indicator_3b"],rule3b_sel.loc[idx_qc,"report_status"])       
                             warning = "; ".join([drug[i][:-8] + "=" + lst_amr[i] for i in range(len(lst_amr)) if lst_amr[i] != ""])
                             if micro_data.loc[idx_mi,"warning_indicator_3b"] != "":
                                 temp_df.loc[temp_idx,:] = micro_data.loc[idx_mi,:]
@@ -468,7 +475,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                 micro_data.at[idx_mi,"antibiotic_indicator_3b"] = rule3b_sel.loc[idx_qc,"antibiotic"]
                                 micro_data.at[idx_mi,"warning_indicator_3b"] = "AST results of " + rule3b_sel.loc[idx_qc,"antibiotic"] + " of this " + micro_data.loc[idx_mi,"mapped_sci"] + " isolate are discordant" + "markednewline(" + str(warning) +")"
                 count += 1
-                print_round(count, len(micro_data))
+                ALB.print_round(count, len(micro_data))
             #micro_data_append = micro_data.append(temp_df, ignore_index = True)
             micro_data_append = pd.concat([micro_data,temp_df], ignore_index = True)
             #AL.fn_savexlsx(micro_data_append, AC.CONST_PATH_RESULT + "raw_annex_B.xlsx", logger)
@@ -486,7 +493,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
         try:
             micro_blood = micro_data.copy().loc[micro_data["mapped_blood"]=="blood"]
             #Checking AST data and selecting only records with at least 1 AST data
-            micro_blood = check_ast_records(df = micro_blood, 
+            micro_blood = ALB.check_ast_records(df = micro_blood, 
                                             col_ast = "check_AST", 
                                             str_ast_found = "Y", 
                                             str_ast_notfound = "N")
@@ -497,11 +504,11 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             micro_blood_pos_neg = pd.concat([micro_blood_neg,micro_blood], axis=0) #merging nogrowth + positive for blood
             #Exporting AnnexB_proportion_table_blood.csv
             try:
-                annex_blood = create_assign_annex_v2(micro_blood)
+                annex_blood = ALB.create_assign_annex_v2(micro_blood)
                 annex_blood = annex_blood.rename(index={"indicator_1":"blood_contamination", 
                                                         "indicator_2":"antibiotic_pathogen_combinations",
                                                         "indicator_3":"potential_errors"})
-                annex_csv = export_annexB(df = annex_blood, 
+                annex_csv = ALB.export_annexB(df = annex_blood, 
                                         nogrowth_status = nogrowth_status,
                                         df_blo_posneg = micro_blood_pos_neg, 
                                         df_blo_ast    = micro_blood_ast, 
@@ -515,11 +522,19 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 pass
             #Exporting AnnexB_proportion_table_blood_bymonth.csv
             try:
-                micro_blo_bymonth = create_assign_annexB_bymonth(df = micro_blood, 
+                #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+                """
+                micro_blo_bymonth = ALB.create_assign_annexB_bymonth(df = micro_blood, 
                                                                 df_blo_posneg = micro_blood_pos_neg, 
                                                                 df_blo_ast    = micro_blood_ast, 
                                                                 col_spcdate   = spcdate)
-                micro_blo_bymonth = export_annexB_bymonth(df = micro_blo_bymonth, nogrowth_status = nogrowth_status)
+                """
+                micro_blo_bymonth = ALB.create_assign_annexB_bymonth(df = micro_blood, 
+                                                                df_blo_posneg = micro_blood_pos_neg, 
+                                                                df_blo_ast    = micro_blood_ast, 
+                                                                col_spcdate   = CLEANSPECDATE)
+                #------------------------------------------------------------------------------
+                micro_blo_bymonth = ALB.export_annexB_bymonth(df = micro_blo_bymonth, nogrowth_status = nogrowth_status)
                 micro_blo_bymonth.to_csv(o_tab_blo_bymonth,index=True,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S2): " + str(e),False,logger)
@@ -527,23 +542,23 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             #creating summary table for indicators
             #indicator_1
             try:
-                rule1_export_1 = create_summary_table_supp_pocon_v2(nogrowth_status,rule1_export,micro_data_append.loc[(micro_data_append["mapped_blood"]=="blood")&(micro_data_append["warning_indicator_1"]!=""),:],int_denominator=len(micro_blood_pos_neg))
+                rule1_export_1 = ALB.create_summary_table_supp_pocon_v2(nogrowth_status,rule1_export,micro_data_append.loc[(micro_data_append["mapped_blood"]=="blood")&(micro_data_append["warning_indicator_1"]!=""),:],int_denominator=len(micro_blood_pos_neg))
                 rule1_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator1.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S3): " + str(e),False,logger)
                 pass
             #indicator_2
             try:
-                rule2_export_1 = create_summary_table_supp_poerr_v2(df_qc=rule2_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_2")
+                rule2_export_1 = ALB.create_summary_table_supp_poerr_v2(df_qc=rule2_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_2")
                 rule2_export_2 = rule2_export_1.copy()
                 rule2_export_2["antibiotic"] = rule2_export_2["antibiotic"] + "-NS"
                 #indicator_2: Carbapenem-S and 3GC-NS
                 num_car_3gc = len(micro_data_append.loc[micro_data_append["car_3gc"]==1])
-                per_car_3gc = cal_perc_annex_v1(num_car_3gc,len(micro_blood_ast)) + " (" + str(num_car_3gc) + "/" + str(len(micro_blood_ast)) + ")"
+                per_car_3gc = ALB.cal_perc_annex_v1(num_car_3gc,len(micro_blood_ast)) + " (" + str(num_car_3gc) + "/" + str(len(micro_blood_ast)) + ")"
                 df_car_3gc = pd.DataFrame([["Enterobacteriaceae","Carbapenem-S and 3GC-NS",per_car_3gc]], columns = rule2_export_1.columns)
                 #indicator_2: Fluoroquinolones-NS and 3GC-S
                 num_flu_3gc = len(micro_data_append.loc[micro_data_append["flu_3gc"]==1])
-                per_flu_3gc = cal_perc_annex_v1(num_flu_3gc,len(micro_blood_ast)) + " (" + str(num_flu_3gc) + "/" + str(len(micro_blood_ast)) + ")"
+                per_flu_3gc = ALB.cal_perc_annex_v1(num_flu_3gc,len(micro_blood_ast)) + " (" + str(num_flu_3gc) + "/" + str(len(micro_blood_ast)) + ")"
                 df_flu_3gc = pd.DataFrame([["Neisseria gonorrhoeae","Fluoroquinolones-NS and 3GC-S",per_flu_3gc]], columns = rule2_export_1.columns)
                 #indicator_2: merging
                 rule2_export_3 = pd.concat([rule2_export_2.loc[:3,:], df_car_3gc, rule2_export_2.loc[4:11,:], df_flu_3gc]).reset_index().drop(columns=["index"])
@@ -554,14 +569,14 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 pass
             #indicator_3a and 3b
             try:
-                rule3a_export_1 = create_summary_table_supp_poerr_v2(df_qc=rule3a_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3a")
+                rule3a_export_1 = ALB.create_summary_table_supp_poerr_v2(df_qc=rule3a_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3a")
                 rule3a_export_1["blood_samples"] = rule3a_export_1["blood_samples"].replace("NA (0/0)","NA")
                 rule3a_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator3a.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S5): " + str(e),False,logger)
                 pass
             try:
-                rule3b_export_1 = create_summary_table_supp_poerr_v2(df_qc=rule3b_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3b")
+                rule3b_export_1 = ALB.create_summary_table_supp_poerr_v2(df_qc=rule3b_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3b")
                 rule3b_export_1["blood_samples"] = rule3b_export_1["blood_samples"].replace("NA (0/0)","NA")
                 rule3b_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator3b.xlsx",index=False,header=True)
             except Exception as e:
@@ -589,13 +604,15 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
         
         try:
             #Selecting dataframe containing only warning records
-            micro_onlywarning = retrieve_recordbywarning(micro_data_append)
+            micro_onlywarning = ALB.retrieve_recordbywarning(micro_data_append)
+            #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+            """
             if (spcnum == "") or (spcnum not in micro_onlywarning.columns): #If there is no available specimen_nember column >>> create specimen_column from index
-                micro_onlywarning = create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num="mapped_specimen_number",org=organism)
+                micro_onlywarning = ALB.create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num="mapped_specimen_number",org=organism)
             else:
-                micro_onlywarning = create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num=spcnum,org=organism)
+                micro_onlywarning = ALB.create_columncombine(df=micro_onlywarning,hn=hn,date=spcdate,type_=spctype,num=spcnum,org=organism)
             if (bisusingmappeddata == True) or (fmt == "wide"):
-                export_records_withwarning_wide(df = micro_onlywarning,
+                ALB.export_records_withwarning_wide(df = micro_onlywarning,
                                             dict_datai = d_datai_part1,
                                             str_filename_withstatus    = o_list_withstatus, 
                                             str_filename_withoutstatus = o_list_withoutstatus, 
@@ -603,7 +620,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                             col_spcdate = spcdate,
                                             col_spcnum  = spcnum)
             else:
-                export_records_withwarning_long(df = micro_onlywarning,
+                ALB.export_records_withwarning_long(df = micro_onlywarning,
                                                 dict_datai = d_datai_part1,
                                                 str_filename_rawmicro = path + f_micro +".xlsx",
                                                 str_filename_withstatus    = o_list_withstatus, 
@@ -614,28 +631,28 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                                 col_organism=organism,
                                                 col_spcnum  = spcnum)
             """
-            if fmt == "wide":
-                export_records_withwarning_wide(df = micro_onlywarning,
+            stmp = "mapped_specimen_number" if (spcnum == "") or (spcnum not in micro_onlywarning.columns) else spcnum
+            micro_onlywarning = ALB.create_columncombine(df=micro_onlywarning,hn=hn,date=CLEANSPECDATE,type_=spctype,num=stmp,org=organism)
+            if (bisusingmappeddata == True) or (fmt == "wide"):
+                ALB.export_records_withwarning_wide(df = micro_onlywarning,
+                                            dict_datai = d_datai_part1,
+                                            str_filename_withstatus    = o_list_withstatus, 
+                                            str_filename_withoutstatus = o_list_withoutstatus, 
+                                            col_hn = hn, 
+                                            col_spcdate = CLEANSPECDATE,
+                                            col_spcnum  = spcnum)
+            else:
+                ALB.export_records_withwarning_long(df = micro_onlywarning,
                                                 dict_datai = d_datai_part1,
-                                                str_filename_withstatus    = o_list_withstatus, 
-                                                str_filename_withoutstatus = o_list_withoutstatus, 
-                                                col_hn = hn, 
-                                                col_spcdate = spcdate,
-                                                col_spcnum  = spcnum)
-            elif fmt == "long":
-                export_records_withwarning_long(df = micro_onlywarning,
-                                                dict_datai = d_datai_part1,
-                                                str_filename_rawmicro = i_micro,
+                                                str_filename_rawmicro = path + f_micro +".xlsx",
                                                 str_filename_withstatus    = o_list_withstatus, 
                                                 str_filename_withoutstatus = o_list_withoutstatus, 
                                                 col_hn=hn,
-                                                col_spcdate=spcdate,
+                                                col_spcdate=CLEANSPECDATE,
                                                 col_spctype=spctype,
                                                 col_organism=organism,
                                                 col_spcnum  = spcnum)
-            else:
-                pass
-            """
+             #------------------------------------------------------------------
             #Deleting noused dataframes
             del [[micro_onlywarning]]
             gc.collect()
@@ -646,11 +663,18 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
     else:
         pass
     
-    if check_config(config, "amr_surveillance_function"):
+    if ALB.check_config(config, "amr_surveillance_function"):
         try:
-            export_records_annexA(df = micro_pos, 
+            #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
+            """
+            ALB.export_records_annexA(df = micro_pos, 
                                 dictionary = dict_micro, 
                                 col_spcdate = spcdate, 
+                                col_organism = organism)
+            """
+            ALB.export_records_annexA(df = micro_pos, 
+                                dictionary = dict_micro, 
+                                col_spcdate = CLEANSPECDATE, 
                                 col_organism = organism)
             #Deleting not used dataframes
             del [[micro_pos]]

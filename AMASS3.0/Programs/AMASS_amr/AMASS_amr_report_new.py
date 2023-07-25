@@ -79,9 +79,21 @@ tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
 
 
 
-def canvas_printpage(c,curpage,lastpage,today=date.today().strftime("%d %b %Y"),bisrotate90=False):
+def canvas_printpage(c,curpage,lastpage,today=date.today().strftime("%d %b %Y"),bisrotate90=False,ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1,istartpage=1):
     ARC.report_todaypage(c,55,30,"Created on: "+today)
-    ARC.report_todaypage(c,270,30,"Page " + str(curpage) + " of " + str(lastpage))
+    imode = ipagemode
+    if imode == 1:
+        ARC.report_todaypage(c,270,30,"Page " + str(curpage) + " of " + str(lastpage))
+    elif imode == 2:
+        ARC.report_todaypage(c,250,30,ssectionanme + " Page " + str(curpage) + " of " + str(isecmaxpage))
+    else:
+        iseccurpage = curpage - istartpage + 1
+        if iseccurpage <= isecmaxpage:
+            ARC.report_todaypage(c,270,30,"Page " + str(curpage) + " of " + str(lastpage))
+        else:
+            iasc = 65 + iseccurpage - isecmaxpage - 1
+            curpage = istartpage + isecmaxpage -1
+            ARC.report_todaypage(c,270,30,"Page " + str(curpage) + "-" + str(chr(iasc)) +" of " + str(lastpage))
     if bisrotate90 == True:
         c.rotate(90)
     c.showPage()
@@ -214,7 +226,7 @@ def generatedby(c,logger):
     ARC.report_context(c,generatedby_2, 1.0*inch, 0.6*inch, 460, 80, font_size=11, line_space=16)
     c.showPage()
     
-def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %b %Y")):
+def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden_ed = "</para>"
@@ -266,12 +278,7 @@ def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %
     ########## INTRO: PAGE1 ###########
     ARC.report_title(c,'Introduction',1.07*inch, 10.5*inch,'#3e4444', font_size=16)
     ARC.report_context(c,intro_page1, 1.07*inch, 1.0*inch, 460, 650, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-    """
-    ARC.report_todaypage(c,55,30,"Created on: "+today)
-    ARC.report_todaypage(c,270,30,"Page " + str(icurpage_num) + " of " + lastpage)
-    c.showPage()
-    """
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
     ########## INTRO: PAGE2 ###########
     ARC.report_context(c,intro_page2_1, 1.07*inch, 4.5*inch, 460, 450, font_size=11)
     ARC.report_context(c,intro_page2_2, 1.07*inch, 0.5*inch, 460, 270, font_size=9,font_align=TA_LEFT,line_space=14) #Reference
@@ -282,82 +289,75 @@ def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %
     p.moveTo(70,315) # start point (x,y)
     p.lineTo(7.2*inch,315) # end point (x,y)
     c.drawPath(p, stroke=1, fill=1)
-    canvas_printpage(c,startpage+1,lastpage,today,True)
-    """
-    ARC.report_todaypage(c,55,30,"Created on: "+today)
-    ARC.report_todaypage(c,270,30,"Page " + str(icurpage_num) + " of " + lastpage)
-    c.rotate(90)
-    c.showPage()
-    """
-
-def nodata_micro(c,stitle,startpage,lastpage,today):
+    canvas_printpage(c,startpage+1,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage)
+def nodata_micro(c,stitle,startpage,lastpage,today,ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     page1_1_1 = "Not applicable because microbiology_data.xlsx file is not available or the format of microbiology_data file is not supported. Please save microbiology_data file in excel format (.xlsx) or csv (.csv; UTF-8)."
     page1_1 = [page1_1_1]
     ARC.report_title(c,stitle,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
     
-def section1_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")):
+def section1_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     nodata_micro(c,'Section [1]: Data overview',startpage,lastpage,today)
 
-def section2_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")):
+def section2_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     nodata_micro(c,'Section [2]: Isolate−based surveillance report',startpage,lastpage,today)
 
-def section3_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")):
+def section3_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section3_page1_1_1 = "Proportions of antimicrobial−resistance infection stratified by origin of infection is not calculated because hospital admission date data is not available and infection origin variable is not available."
     section3_page1_1 = [section3_page1_1_1] 
     ######### SECTION3: PAGE1 #########
     ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section3_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def section4_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
+def section4_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section4_page1_1_1 = "Incidence of infections per 100,000 tested population is not calculated because data on blood specimen with no growth is not available."
     section4_page1_1 = [section4_page1_1_1]
     ######### SECTION4: PAGE1 #########
     ARC.report_title(c,'Report [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section4_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def section5_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
+def section5_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section5_page1_1_1 = "Incidence of infections per 100,000 tested population stratified by infection origin is not calculated because data on blood specimen with no growth is not available, or stratification by origin of infection cannot be done (due to hospital admission date variable is not available)."
     section5_page1_1 = [section5_page1_1_1]
     ######### SECTION5: PAGE1 #########
     ARC.report_title(c,'Report [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section5_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def section6_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
+def section6_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section6_page1_1_1 = "Not applicable because hospital_admission_data.csv file is not available, or in−hospital outcome (in hospital_admission_data.csv file) is not available."
     section6_page1_1 = [section6_page1_1_1]  
     ######### SECTION6: PAGE1 #########
     ARC.report_title(c,'Report [6] Mortality in AMR',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'antimicrobial−susceptible infections',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section6_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)  
-def annexA_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)  
+def annexA_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     annexA_page1_1_1 = "Supplementary report on notifiable bacterial disease is not applicable because microbiology_data.xlsx file is not available."
     annexA_page1_1 = [annexA_page1_1_1]
     ######### ANNEXA: PAGE1 #########
     ARC.report_title(c,'Annex A: Supplementary report on notifiable bacterial',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'diseases',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,annexA_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def annexA_nodata_mortality(c,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
+def annexA_nodata_mortality(c,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##Page1
     annexA_page1_1_1 = "Mortality involving the notifiable bacterial diseases is not applicable because hospital_admission_data.csv file is not available, or in−hospital outcome (in hospital_admission_data.csv file) is not available."
     annexA_page1_1 = [annexA_page1_1_1]
     ######### ANNEXA: PAGE3 #########
     ARC.report_title(c,'Annex A2: Mortality involving notifiable bacterial infections',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,annexA_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def annexB_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
+def annexB_nodata(c,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     annexB_page1_1_1 = "Supplementary report on data indicators is not applicable because microbiology_data.xlsx is not available, list_of_indicators.xlsx is not available, or number of observation is not estimated."
     annexB_page1_1 = [annexB_page1_1_1]
     ######### ANNEXB: PAGE1 #########
     ARC.report_title(c,"Annex B: Supplementary report on data indicators",1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,annexB_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,False)
-def section1(c,logger,bishosp_ava,section1_result, section1_table, startpage, lastpage, today=date.today().strftime("%d %b %Y")):
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
+def section1(c,logger,bishosp_ava,section1_result, section1_table, startpage, lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden_ed = "</para>"
@@ -425,7 +425,7 @@ def section1(c,logger,bishosp_ava,section1_result, section1_table, startpage, la
     ARC.report_context(c,section1_page1_2, 1.0*inch, 4.0*inch, 460, 250, font_size=11)
     ARC.report_title(c,'Note:',1.07*inch, 3.5*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section1_page1_3, 1.0*inch, 1.8*inch, 460, 120, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today,True)
+    canvas_printpage(c,startpage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION1: PAGE2 #########
     ARC.report_title(c,'Reporting period by months:',1.07*inch, 10.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section1_page2_1, 1.0*inch, 8.0*inch, 460, 150, font_size=11)
@@ -434,10 +434,10 @@ def section1(c,logger,bishosp_ava,section1_result, section1_table, startpage, la
     table_draw.drawOn(c, 1.5*inch, 4.3*inch)
     ARC.report_title(c,'Note:',1.07*inch, 3.0*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section1_page2_2, 1.0*inch, 2.3*inch, 460, 50, font_size=11)
-    canvas_printpage(c,startpage+1,lastpage,today,True)
+    canvas_printpage(c,startpage+1,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
 
 def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, lst_org_short, list_sec2_org_table,list_sec2_atbcountperorg,list_sec2_atbnote, 
-             startpage, lastpage, today=date.today().strftime("%d %b %Y")):
+             startpage, lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variable
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
@@ -501,27 +501,31 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
     ##Page3-7
     section2_note_1 = "*Proportion of non−susceptible (NS) isolates represents the number of patients with blood culture positive for non−susceptible isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
                     "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        section2_note_1 = "*Proportion of resistant isolates represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
+                        "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+
     section2_note_2_1 = "CI=confidence interval; NA=Not available/reported/tested; "
 
     ######### SECTION2: PAGE1 #########
     ARC.report_title(c,'Section [2]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section2_page1_1, 1.0*inch, 6.5*inch, 460, 200, font_size=11)
-    ARC.report_title(c,'Organisms under this survey:',1.07*inch, 6.7*inch,'#3e4444',font_size=12)
-    ARC.report_context(c,section2_page1_2, 1.0*inch, 3.8*inch, 460, 200, font_size=11)
+    ARC.report_title(c,'Organisms under this survey:',1.07*inch, 6.8*inch,'#3e4444',font_size=12)
+    ARC.report_context(c,section2_page1_2, 1.0*inch, 4.0*inch, 460, 200, font_size=11)
     ARC.report_title(c,'Results',1.07*inch, 4.0*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section2_page1_3, 1.0*inch, 0.2*inch, 460, 270, font_size=11, font_align=TA_LEFT)
-    canvas_printpage(c,startpage,lastpage,today,True)
+    canvas_printpage(c,startpage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION2: PAGE2 #########
-    ARC.report_context(c,section2_page2_1, 1.0*inch, 8.7*inch, 460, 100, font_size=11)
-    ARC.report_context(c,section2_page2_2, 1.0*inch, 3.0*inch, 460, 120, font_size=11)
+    ARC.report_context(c,section2_page2_1, 1.0*inch, 9*inch, 460, 100, font_size=11)
+    ARC.report_context(c,section2_page2_2, 1.0*inch, 3.3*inch, 460, 120, font_size=11)
     ARC.report_context(c,section2_page2_3, 1.0*inch, 1.8*inch, 460, 50, font_size=11)
     table_draw = ARC.report2_table(summary_table)
     
     table_draw.wrapOn(c, 500, 300)
     table_draw.drawOn(c, 1.0*inch, 5.5*inch)
     
-    canvas_printpage(c,startpage+1,lastpage,today,True)
+    canvas_printpage(c,startpage+1,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION2: PAGE3-7 #########
     bIsStartofnewpage = True
     bPrintPage = False
@@ -591,7 +595,7 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
                 scurnote = section2_note_1 + section2_note_2_1 + ARC.get_atbnote(list_curnote)
                 ARC.report_context(c,[scurnote] ,1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 iPage = iPage + 1
-                canvas_printpage(c,iPage,lastpage,today,True)
+                canvas_printpage(c,iPage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
                 bIsStartofnewpage = True
         except Exception as e:
              AL.printlog("Error SECTION 2 at " + lst_org_format[i] +  " : " + str(e),True,logger) 
@@ -599,7 +603,7 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
              pass
 
 def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_numpat_HO, lst_org_short,list_sec3_org_table_CO,list_sec3_org_table_HO,list_sec3_atbcountperorg,list_sec3_atbnote_CO,list_sec3_atbnote_HO,
-             startpage,  lastpage, today=date.today().strftime("%d %b %Y")):
+             startpage,  lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variable
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
@@ -673,6 +677,9 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
     section3_page2_2 = [section3_page2_2_1]
     section3_note_1 = "*Proportion of non−susceptible (NS) isolates represents the number of patients with blood culture positive for non−susceptible isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
                     "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        section3_note_1 = "*Proportion of resistant isolates represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
+                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
     section3_note_2_1 = "CI=confidence interval; NA=Not available/reported/tested; "
     ######### SECTION3: PAGE1 #########
     ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
@@ -681,7 +688,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
     ARC.report_context(c,section3_page1_1, 1.0*inch, 5.9*inch, 460, 250, font_size=11)
     ARC.report_title(c,'Results',1.07*inch, 5.7*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section3_page1_2, 1.0*inch, 2.8*inch, 460, 200, font_size=11)
-    canvas_printpage(c, startpage, lastpage)
+    canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION3: PAGE2 #########
     ARC.report_title(c,'Note',1.07*inch, 6.0*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section3_page2_1, 1.0*inch, 2.5*inch, 460, 250, font_size=11)
@@ -695,7 +702,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
     table_draw.wrapOn(c, 500, 300)
     #table_draw.drawOn(c, 3.2*inch, 6.9*inch)
     table_draw.drawOn(c, 1.0*inch, 6.9*inch)
-    canvas_printpage(c, startpage+1, lastpage)
+    canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION3: PAGE3-12 #########   
     ipage = startpage+2
     for i in range(len(lst_org_format)):
@@ -734,7 +741,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
                 snote = [section3_note_1 + section3_note_2_1 + ARC.get_atbnote(list_sec3_atbnote_CO[i])]
                 ARC.report_context(c,snote, 1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 
-                canvas_printpage(c, ipage, lastpage)
+                canvas_printpage(c, ipage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
                 ipage = ipage+1
             #HO
             y = 1 #specify which print position in y position list to be used
@@ -754,7 +761,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[y]+3.5)-((len(list_sec3_org_table_HO[i])*0.25)+0.5))*inch)
             snote = [section3_note_1 + section3_note_2_1 + ARC.get_atbnote(list_sec3_atbnote_HO[i])]
             ARC.report_context(c,snote, 1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
-            canvas_printpage(c, ipage, lastpage)
+            canvas_printpage(c, ipage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
             ipage = ipage+1
         except Exception as e:
              AL.printlog("Error SECTION 3 at " + lst_org_format[i] +  " : " + str(e),True,logger) 
@@ -762,7 +769,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
              pass
     
 def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
-             startpage, lastpage, today=date.today().strftime("%d %b %Y")):
+             startpage, lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variable
     iden1_op = "<para leftindent=\"35\">"
     iden_ed = "</para>"
@@ -816,7 +823,7 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     ARC.report_title(c,'Note',1.07*inch, 3.5*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section4_page1_3, 1.0*inch, 2.7*inch, 460, 50, font_size=11)
     ARC.report_context(c,section4_page1_4, 1.0*inch, 1.5*inch, 460, 50, font_size=11)
-    canvas_printpage(c, startpage, lastpage)
+    canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION4: PAGE2 #########
     ARC.report_title(c,'Section [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Pathogens" + "</b>"]
@@ -830,7 +837,7 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     #table_draw.drawOn(c, 4.3*inch, 5.5*inch)
     table_draw.drawOn(c, 4.3*inch, ((6.42+3.5)-((len(result_blo_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section4_page2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+1, lastpage)
+    canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION4: PAGE3 #########
     ARC.report_title(c,'Section [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Non-susceptible pathogens" + "</b>"]
@@ -843,10 +850,10 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     table_draw.wrapOn(c, 240, 300)
     table_draw.drawOn(c, 4.3*inch, ((6.42+3.5)-((len(result_pat_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section4_page3, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+2, lastpage)
+    canvas_printpage(c, startpage+2, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
 
 def section5(c,logger,result_table, result_com_table, result_hos_table, result_com_amr_table, result_hos_amr_table,sec5_pat,
-             startpage, lastpage, today=date.today().strftime("%d %b %Y")):
+             startpage, lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
@@ -924,7 +931,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     ARC.report_title(c,'Note:',2.0*inch, 3.0*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section5_page1_3, 1.0*inch, 1.5*inch, 460, 100, font_size=11)
     ARC.report_context(c,section5_page1_4, 1.0*inch, 1.0*inch, 460, 50, font_size=11)
-    canvas_printpage(c, startpage, lastpage)
+    canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE2 #########
     ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
@@ -942,7 +949,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     #table_draw.drawOn(c, 4.3*inch, 5.2*inch)
     table_draw.drawOn(c, 4.3*inch, ((6.3+3.5)-((len(result_com_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section5_page2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+1, lastpage)
+    canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE3 #########
     ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
@@ -959,7 +966,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     table_draw.wrapOn(c, 230, 300)
     table_draw.drawOn(c, 4.3*inch, ((6.3+3.5)-((len(result_hos_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section5_page2v2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+2, lastpage)
+    canvas_printpage(c, startpage+2, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE4 #########
     ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
@@ -975,7 +982,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     table_draw.wrapOn(c, 240, 300)
     table_draw.drawOn(c, 4.3*inch, ((6.3+3.5)-((len(result_com_amr_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section5_page2v4, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+3, lastpage)
+    canvas_printpage(c, startpage+3, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE5 #########
     ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
@@ -991,11 +998,11 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     table_draw.wrapOn(c, 240, 300)
     table_draw.drawOn(c, 4.3*inch, ((6.3+3.5)-((len(result_hos_amr_table)*0.45)+0.5))*inch)
     ARC.report_context(c,section5_page2v3, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c, startpage+4, lastpage)
+    canvas_printpage(c, startpage+4, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
 def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl_CO,list_sec6_mor_tbl_HO,
              lst_org, lst_org_short, lst_org_full, df_numpat_com, df_numpat_hos,
-             startpage, lastpage="47", today=date.today().strftime("%d %b %Y")):
+             startpage, lastpage="47", today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
@@ -1141,7 +1148,7 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
     ARC.report_context(c,section6_page1_1, 1.0*inch, 6.0*inch, 460, 250,font_size=11)
     ARC.report_title(c,'Results',1.07*inch, 5.9*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section6_page1_2, 1.0*inch, 0.7*inch, 460, 370,font_size=11)
-    canvas_printpage(c, startpage, lastpage)
+    canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION6: PAGE2 #########
     ARC.report_context(c,section6_page2_1, 1.0*inch, 8.5*inch, 460, 120,font_size=11)
     #ARC.report_context(c,section6_page2_org, 1.0*inch, 5.0*inch, 460, 250, font_size=11, line_space=18.0)
@@ -1149,7 +1156,7 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
     table_draw.wrapOn(c, 500, 300)
     table_draw.drawOn(c, 1.0*inch, 5.9*inch)
     ARC.report_context(c,section6_page2_2, 1.0*inch, 4.0*inch, 460, 50,font_size=11)
-    canvas_printpage(c, startpage+1, lastpage)
+    canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION3: PAGE3-12 #########   
     iPage = startpage+1
     bIsStartofnewpage = True
@@ -1248,7 +1255,7 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
                 #ARC.report_context(c,[scurenote] ,1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 ARC.report_context(c,[section6_page3] ,1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 iPage = iPage + 1
-                canvas_printpage(c,iPage,lastpage,today,True)
+                canvas_printpage(c,iPage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
                 #scurenote  = ""
                 list_curnote = []
                 bIsStartofnewpage = True
@@ -1258,7 +1265,7 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
              pass
     
 def annexA_A1(c,logger,result_table, org_table, pat_table,
-                    startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+                    startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
@@ -1329,7 +1336,7 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     table_draw.wrapOn(c, 700, 700)
     table_draw.drawOn(c, 1.2*inch, 3.0*inch)
     ARC.report_context(c,annexA_page1_2, 1.0*inch, 0.5*inch, 460, 100,font_size=11)
-    canvas_printpage(c,startpage,lastpage,today)
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### ANNEX A: PAGE2 ##########
     ARC.report_title(c,'Annex A1: Isolated-based notifiable bacterial infections',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Results',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
@@ -1341,9 +1348,9 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     else:
         table_draw.drawOn(c, 1.2*inch, 2.5*inch)
     ARC.report_context(c,annexA_page2_2, 1.0*inch, 1.0*inch, 460, 70,font_size=9,line_space=12)
-    canvas_printpage(c,startpage+1,lastpage,today)
+    canvas_printpage(c,startpage+1,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
-def annexA_A2(c,logger,mor_table, startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+def annexA_A2(c,logger,mor_table, startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     """
     iden1_op = "<para leftindent=\"35\">"
@@ -1380,9 +1387,9 @@ def annexA_A2(c,logger,mor_table, startpage,lastpage, today=date.today().strftim
     else:
         table_draw.drawOn(c, 4.2*inch, 3.5*inch)
     ARC.report_context(c,annexA_page3_2, 1.0*inch, 0.7*inch, 460, 100,font_size=9,line_space=12)
-    canvas_printpage(c,startpage,lastpage,today)
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
 
-def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     """"
     iden1_op = "<para leftindent=\"35\">"
@@ -1426,7 +1433,7 @@ def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date
     table_draw.wrapOn(c, 500, 300)
     table_draw.drawOn(c, 1.07*inch, 2.5*inch)
     ARC.report_context(c,annexB_page1_2, 1.0*inch, 0.6*inch, 460, 130, font_size=9, line_space=14)
-    canvas_printpage(c,startpage,lastpage,today)
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########### ANNEX B: PAGE2 ########
     ARC.report_title(c,"Annex B: Supplementary report on data indicators",1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Reporting period by months',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
@@ -1435,9 +1442,9 @@ def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date
     table_draw.wrapOn(c, 500, 300)
     table_draw.drawOn(c, 1.2*inch, 4.8*inch)
     ARC.report_context(c,annexB_page1_2, 1.0*inch, 0.8*inch, 460, 130, font_size=9,line_space=14)
-    canvas_printpage(c,startpage+1,lastpage,today)
+    canvas_printpage(c,startpage+1,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
-def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     """
     iden1_op = "<para leftindent=\"35\">"
@@ -1558,12 +1565,12 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
     ########## METHOD: PAGE1 ##########
     ARC.report_title(c,'Methods used by the AMASS application',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,method_page1, 1.0*inch, 0.7*inch, 460, 680, font_size=11)
-    canvas_printpage(c,startpage,lastpage,today)
+    canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE2 ##########
     ARC.report_context(c,method_page2_1, 1.0*inch, 8.0*inch, 460, 200, font_size=11)
     ARC.report_context(c,method_page2_2, 1.0*inch, 4.0*inch, 460, 300, font_size=11)
     ARC.report_context(c,method_page2_3, 1.0*inch, 1.5*inch, 460, 200, font_size=11)
-    canvas_printpage(c,startpage+1,lastpage,today)
+    canvas_printpage(c,startpage+1,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE3 ##########
     ARC.report_context(c,method_page3_1, 1.0*inch, 8.7*inch, 460, 120, font_size=11)
     ARC.report_context(c,method_page3_2, 1.0*inch, 8.0*inch, 460, 50, font_size=11)
@@ -1591,7 +1598,7 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
     table_draw.wrapOn(c, 500, 300)
     table_draw.drawOn(c, 1.0*inch, 3.0*inch)
     ARC.report_context(c,method_page3_4, 1.0*inch, 1.7*inch, 460, 80, font_size=11)
-    canvas_printpage(c,startpage+2,lastpage,today)
+    canvas_printpage(c,startpage+2,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE4 ##########
     ARC.report_context(c,method_page4_1, 1.0*inch, 9.0*inch, 460, 120, font_size=11)
     ARC.report_context(c,method_page4_2, 4.0*inch, 8.75*inch, 460, 120, font_size=11)
@@ -1604,9 +1611,9 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
     p.lineTo(7.45*inch,220) # end point (x,y)
     c.drawPath(p, stroke=1, fill=1)
     ARC.report_context(c,backcover_1, 1.0*inch, 1.0*inch, 460, 150, font_size=9)
-    canvas_printpage(c,startpage+3,lastpage,today)
+    canvas_printpage(c,startpage+3,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
 
-def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y")):
+def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
     """
     iden1_op = "<para leftindent=\"35\">"
@@ -1649,7 +1656,7 @@ def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"
     ARC.report_title(c,'Investigator team',1.07*inch, 9.0*inch,'#3e4444',font_size=16)
     ARC.report_context(c,invest_1, 1.0*inch, 4.5*inch, 460, 300, font_size=11)
     ARC.report_context(c,invest_2, 1.0*inch, 1.5*inch, 460, 200, font_size=11)
-    canvas_printpage(c,startpage+1,lastpage,today,True)
+    canvas_printpage(c,startpage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
 
 # Main function called by AMR Analysis module -----------------------------------------------------------------------------------------------------------
@@ -1717,76 +1724,117 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         logger.exception(e)
         pass
     ### Table of content -------------------------------------------------------------------------------------------------
+    ssecname_intro = 'Introduction'
+    ssecname_sec1 = 'Section 1'
+    ssecname_sec2 = 'Section 2'
+    ssecname_sec3 = 'Section 3'
+    ssecname_sec4 = 'Section 4'
+    ssecname_sec5 = 'Section 5'
+    ssecname_sec6 = 'Section 6'
+    ssecname_annexA = 'Annex A'
+    ssecname_annexB = 'Annex B'
+    ssecname_method = 'Methods'
+    ssecname_investor = 'Ackonwledgements'
     #Table is tricky it should be calculated upfront before generate other parts
-    
-    
-    istartpage_intro = 1 #Fix no of page so fix start page
-    istartpage_sec1 = 3 #Fix no of page so fix start page
-    istartpage_sec2 = 5 #Fix start page
-    #Cal page for sec2 and 3 total page using to cal start page in sec 3 and sec 4
-    iPage = 2
-    iPage_sec3 = 2
-    bIsStartofnewpage = True
-    for i in range(len(lst_org_format)):
-        bPrintPage = False
-        if lst_atbbyorg_fromdict[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
-            #Sec 2 full page, Sec 3 2 full page
-            bPrintPage = True
-            bIsStartofnewpage = True
-            iPage_sec3 = iPage_sec3 + 2
-        elif bIsStartofnewpage: 
-            #Sec 2 top half, Sec 3 1 full page
-            ii=i+1
-            if ii>= len(lst_org_format):
+    #Default number of page per section base on AMASS2.0
+    ipage_intro = 2
+    ipage_sec1 = 2
+    ipage_sec2 = 7
+    ipage_sec3 = 12
+    ipage_sec4 = 3
+    ipage_sec5 = 5
+    ipage_sec6 = 6
+    ipage_annexA1 = 2
+    ipage_annexA2 = 1
+    ipage_annexB = 2
+    ipage_method = 4
+    ipage_investor = 1
+    #Cal page for sec2, 3 and 63 total page using to cal start page in sec 3, 4 and Annex A
+    if AC.CONST_REPORTPAGENUM_MODE != 3: #mode 1 and 2 need to calculate total page per section (Mode-3 total page per section is fix regarding AMASS2.0)
+        ipage_sec2 = 2
+        ipage_sec3 = 2
+        bIsStartofnewpage = True
+        for i in range(len(lst_org_format)):
+            bPrintPage = False
+            if lst_atbbyorg_fromdict[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
+                #Sec 2 full page, Sec 3 2 full page
                 bPrintPage = True
-            else:
-                if lst_atbbyorg_fromdict[ii] <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
-                    bPrintPage = False
-                else:
+                bIsStartofnewpage = True
+                ipage_sec3 = ipage_sec3 + 2
+            elif bIsStartofnewpage: 
+                #Sec 2 top half, Sec 3 1 full page
+                ii=i+1
+                if ii>= len(lst_org_format):
                     bPrintPage = True
-            bIsStartofnewpage = False
-            iPage_sec3 = iPage_sec3 + 1
-        else:
-            #Sec 2 bottom half, Sec 3 1 full page
-            bPrintPage = True
-            bIsStartofnewpage = True
-            iPage_sec3 = iPage_sec3 + 1
-        if bPrintPage:
-            iPage = iPage + 1
-            bIsStartofnewpage = True
-    istartpage_sec3 = istartpage_sec2 + iPage #Base on how mangy in section 2
-    istartpage_sec4 = istartpage_sec3 + iPage_sec3 #Base on how mangy in section 3
-    istartpage_sec5 = istartpage_sec4 + 3
-    istartpage_sec6 = istartpage_sec5 + 5
-    bIsStartofnewpage = True
-    iPage = 2
-    for i in range(len(lst_org_rpt6_0)):
-        bPrintPage = False
-        if lst_itemperorg_fromdict_mor[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE_MORALITY:
-            bPrintPage = True
-            bIsStartofnewpage = True
-        elif bIsStartofnewpage: 
-            ii = i+1
-            if ii>= len(lst_org_rpt6_0):
+                else:
+                    if lst_atbbyorg_fromdict[ii] <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
+                        bPrintPage = False
+                    else:
+                        bPrintPage = True
+                bIsStartofnewpage = False
+                ipage_sec3 = ipage_sec3 + 1
+            else:
+                #Sec 2 bottom half, Sec 3 1 full page
                 bPrintPage = True
-            else:
-                if lst_itemperorg_fromdict_mor[ii] <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE_MORALITY:
-                    bPrintPage = False
-                else:
+                bIsStartofnewpage = True
+                ipage_sec3 = ipage_sec3 + 1
+            if bPrintPage:
+                ipage_sec2 = ipage_sec2 + 1
+                bIsStartofnewpage = True
+        bIsStartofnewpage = True
+        ipage_sec6 = 2
+        for i in range(len(lst_org_rpt6_0)):
+            bPrintPage = False
+            if lst_itemperorg_fromdict_mor[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE_MORALITY:
+                bPrintPage = True
+                bIsStartofnewpage = True
+            elif bIsStartofnewpage: 
+                ii = i+1
+                if ii>= len(lst_org_rpt6_0):
                     bPrintPage = True
-            bIsStartofnewpage = False
-        else:
-            bPrintPage = True
-            bIsStartofnewpage = True
-        if bPrintPage:
-            iPage = iPage + 1
-            bIsStartofnewpage = True
-    istartpage_annexA1 = istartpage_sec6 + iPage
-    istartpage_annexA2 = istartpage_annexA1 + 2
-    istartpage_annexB = istartpage_annexA2 + 1
-    istartpage_method = istartpage_annexB + 2
-    istartpage_investor = istartpage_method + 3
-    ilastpage = istartpage_investor + 1
+                else:
+                    if lst_itemperorg_fromdict_mor[ii] <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE_MORALITY:
+                        bPrintPage = False
+                    else:
+                        bPrintPage = True
+                bIsStartofnewpage = False
+            else:
+                bPrintPage = True
+                bIsStartofnewpage = True
+            if bPrintPage:
+                ipage_sec6 = ipage_sec6 + 1
+                bIsStartofnewpage = True
+    if AC.CONST_REPORTPAGENUM_MODE != 2: #Mode 1 and 3 is continue page number through out the report
+        #Start cal start page number of each section base on total page (or max page in mode==3) of each section
+        istartpage_intro = 1 
+        istartpage_sec1 = istartpage_intro + ipage_intro 
+        istartpage_sec2 = istartpage_sec1 + ipage_sec1     
+        istartpage_sec3 = istartpage_sec2 + ipage_sec2  
+        istartpage_sec4 = istartpage_sec3 + ipage_sec3 
+        istartpage_sec5 = istartpage_sec4 + ipage_sec4
+        istartpage_sec6 = istartpage_sec5 + ipage_sec5
+        istartpage_annexA1 = istartpage_sec6 + ipage_sec6
+        istartpage_annexA2 = istartpage_annexA1 + ipage_annexA1
+        istartpage_annexB = istartpage_annexA2 + ipage_annexA2
+        istartpage_method = istartpage_annexB + ipage_annexB
+        istartpage_investor = istartpage_method + ipage_method
+        ilastpage = istartpage_investor + ipage_investor
+        ilastpage = ilastpage - 1
+    else:
+        istartpage_intro = 1 
+        istartpage_sec1 = 1 
+        istartpage_sec2 = 1    
+        istartpage_sec3 = 1  
+        istartpage_sec4 = 1 
+        istartpage_sec5 = 1
+        istartpage_sec6 = 1
+        istartpage_annexA1 = 1
+        istartpage_annexA2 = 1
+        istartpage_annexB = 1
+        istartpage_method = 1
+        istartpage_investor = 1
+        ilastpage = 1
+    #End page calculate and setting
     bgotdata_sec1 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA + sec1_num_i)
     bgotdata_sec2 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec2_res_i)
     bgotdata_sec3 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec3_res_i)
@@ -1814,12 +1862,13 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     ############# CONTENT #############
     ARC.report_title(canvas_rpt,'Content',1.07*inch, 10.5*inch,'#3e4444', font_size=16)
     ARC.report_context(canvas_rpt,content, 1.0*inch, 6.0*inch, 435, 300, font_size=11)
-    ARC.report_context(canvas_rpt,content_page, 7.0*inch, 6.0*inch, 30, 300, font_size=11)
+    if AC.CONST_REPORTPAGENUM_MODE != 2: 
+        ARC.report_context(canvas_rpt,content_page, 7.0*inch, 6.0*inch, 30, 300, font_size=11)
     canvas_rpt.showPage()
     ### Introduction -----------------------------------------------------------------------------------------------------
     AL.printlog("AMR surveillance report - checkpoint introduction",False,logger)
     try:
-        introduction(canvas_rpt,logger, istartpage_intro, ilastpage,strgendate)
+        introduction(canvas_rpt,logger, istartpage_intro, ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_intro,ipage_intro)
     except Exception as e:
         AL.printlog("Error at : checkpoint print introduction : " + str(e),True,logger)
         logger.exception(e)
@@ -1831,14 +1880,14 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
             try:
                 df_sec1_T = pd.read_csv(AC.CONST_DIR_RESULTDATA + sec1_num_i)
                 df_sec1_T = ARC.prepare_section1_table_for_reportlab(df_sec1_T,checkpoint_hos)
-                section1(canvas_rpt,logger,bishosp_ava,df_cover_sec1_res,df_sec1_T,istartpage_sec1,ilastpage,strgendate)
+                section1(canvas_rpt,logger,bishosp_ava,df_cover_sec1_res,df_sec1_T,istartpage_sec1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec1,ipage_sec1)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 1 : " + str(e),True,logger)
                 logger.exception(e)
                 pass 
         else:
            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 1",False,logger) 
-           section1_nodata(canvas_rpt,istartpage_sec1,ilastpage,strgendate)
+           section1_nodata(canvas_rpt,istartpage_sec1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec1,ipage_sec1)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 1",False,logger) 
     ### SECTION 2 -----------------------------------------------------------------------------------------------------
@@ -1852,7 +1901,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 sec2_T_pat = pd.read_csv(path_result + sec2_pat_i)
                 ##Section 2; Page 1
                 #sec2_merge = []
-                sec2_merge = ARC.prepare_section2_table_for_reportlab_V3(sec2_T_org, sec2_T_pat, lst_org_full, ARC.checkpoint(path_result + sec2_res_i),dict_orgcatwithatb)
+                #sec2_merge = ARC.prepare_section2_table_for_reportlab_V3(sec2_T_org, sec2_T_pat, lst_org_full, ARC.checkpoint(path_result + sec2_res_i),dict_orgcatwithatb)
+                sec2_merge = ARC.prepare_section2_table_for_reportlab_V3(sec2_T_org, sec2_T_pat, lst_org_full,lst_org_format, ARC.checkpoint(path_result + sec2_res_i),dict_orgcatwithatb)
                 ##Section 2; Page 2-6
                 #Retriving numper of positive patient of each organism
                 #Creating AMR grapgh of each organism
@@ -1869,20 +1919,21 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                     #Generate graph and saved to PNG files
                     iatbrow = ARC.count_atbperorg(sec2_T_amr,lst_org_full[i])
                     ifig_H = 2*ARC.cal_sec2and3_fig_height(iatbrow)
-                    sec2_G = ARC.create_graph_nons_v3(sec2_T_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H)
-                    list_sec2_org_table.append(ARC.create_table_nons(sec2_T_amr,lst_org_full[i]).values.tolist())
+                    #sec2_G = ARC.create_graph_nons_v3(sec2_T_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H)
+                    sec2_G = ARC.create_graph_nons_v3(sec2_T_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic',AC.CONST_MODE_R_OR_AST,ifig_H)
+                    list_sec2_org_table.append(ARC.create_table_nons_V3(sec2_T_amr,lst_org_full[i],"",AC.CONST_MODE_R_OR_AST).values.tolist())
                     list_sec2_atbcountperorg.append(iatbrow)
                     list_sec2_atbnote.append(ARC.get_atbnoteperorg(sec2_T_amr,lst_org_full[i]))
                 #Print the graph
                 section2(canvas_rpt,logger,sec2_res, sec2_merge, lst_org_format,lst_numpat, lst_org_short, list_sec2_org_table,list_sec2_atbcountperorg,list_sec2_atbnote,
-                         istartpage_sec2,ilastpage,strgendate)
+                         istartpage_sec2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec2,ipage_sec2)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 2 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
             AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 2",False,logger) 
-            section2_nodata(canvas_rpt,istartpage_sec2,ilastpage,strgendate)
+            section2_nodata(canvas_rpt,istartpage_sec2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec2,ipage_sec2)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 2",False,logger) 
     ### SECTION 3 -----------------------------------------------------------------------------------------------------
@@ -1930,25 +1981,26 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                     for ori in ['Community_origin','Hospital_origin']:
                         numpat = ARC.create_num_patient(sec3_pat_1.astype(str), lst_org_full[i], 'Organism', ori)
                         palette = ARC.create_graphpalette(sec3_amr,'Total(N)','Organism',lst_org_full[i],float(numpat),cutoff=70.0,origin=ori[:-7])
-                        sec3_G = ARC.create_graph_nons_v3(sec3_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H,origin=ori[:-7])
+                        #sec3_G = ARC.create_graph_nons_v3(sec3_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H,origin=ori[:-7])
+                        sec3_G = ARC.create_graph_nons_v3(sec3_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic',AC.CONST_MODE_R_OR_AST,ifig_H,origin=ori[:-7])
                         if ori == 'Community_origin':
                             sec3_lst_numpat_CO.append(numpat)
-                            list_sec3_org_table_CO.append(ARC.create_table_nons(sec3_amr,lst_org_full[i],origin='Community').values.tolist())
+                            list_sec3_org_table_CO.append(ARC.create_table_nons_V3(sec3_amr,lst_org_full[i],origin='Community',iMODE=AC.CONST_MODE_R_OR_AST).values.tolist())
                             list_sec3_atbnote_CO.append(ARC.get_atbnoteperorg(sec3_amr,lst_org_full[i],origin='Community'))
                         else:
                             sec3_lst_numpat_HO.append(numpat)
-                            list_sec3_org_table_HO.append(ARC.create_table_nons(sec3_amr,lst_org_full[i],origin='Hospital').values.tolist())
+                            list_sec3_org_table_HO.append(ARC.create_table_nons_V3(sec3_amr,lst_org_full[i],origin='Hospital',iMODE=AC.CONST_MODE_R_OR_AST).values.tolist())
                             list_sec3_atbnote_HO.append(ARC.get_atbnoteperorg(sec3_amr,lst_org_full[i],origin='Hospital'))
                 #Print 
                 section3(canvas_rpt,logger,sec3_res, sec3_pat_val,lst_org_format, sec3_lst_numpat_CO,sec3_lst_numpat_HO, lst_org_short,list_sec3_org_table_CO,list_sec3_org_table_HO,list_sec3_atbcountperorg,list_sec3_atbnote_CO,list_sec3_atbnote_HO,
-                             istartpage_sec3,  ilastpage, strgendate)
+                             istartpage_sec3,  ilastpage, strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec3,ipage_sec3)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 3 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
             AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 3",False,logger) 
-            section3_nodata(canvas_rpt,istartpage_sec3,ilastpage,strgendate)
+            section3_nodata(canvas_rpt,istartpage_sec3,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec3,ipage_sec3)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 3",False,logger) 
     ##### section4 #####
@@ -1982,14 +2034,14 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 sec4_pat_1 = ARC.create_table_surveillance_1(sec4_pat, lst_org_rpt4_table_page3, text_work_drug="Y")
                 ifig_H = 2*ARC.cal_sec4_fig_height(len(sec4_pat))
                 ARC.create_graph_surveillance_V3(sec4_pat, lst_org_rpt4_graph_page3, 'Report4_frequency_pathogen', text_work_drug="Y",ifig_H=ifig_H)
-                section4(canvas_rpt,logger,sec4_res,sec4_blo_1,sec4_pat_1,sec4_pat,istartpage_sec4,ilastpage,strgendate)
+                section4(canvas_rpt,logger,sec4_res,sec4_blo_1,sec4_pat_1,sec4_pat,istartpage_sec4,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec4,ipage_sec4)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 4 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
             AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 4",False,logger) 
-            section4_nodata(canvas_rpt,istartpage_sec4,ilastpage,strgendate)
+            section4_nodata(canvas_rpt,istartpage_sec4,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec4,ipage_sec4)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 4",False,logger) 
     ##### section5 #####
@@ -2034,14 +2086,14 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 ifig_H = 2*ARC.cal_sec4_fig_height(len(sec5_hos_amr))
                 ARC.create_graph_surveillance_V3(sec5_hos_amr, lst_org_rpt5_graph_page3, 'Report5_incidence_hospital_antibiotic', text_work_drug="Y",ifig_H=ifig_H)
                 section5(canvas_rpt,logger,sec5_res, sec5_com_1, sec5_hos_1, sec5_com_amr_1, sec5_hos_amr_1,sec5_hos_amr,
-                         istartpage_sec5,ilastpage,strgendate)
+                         istartpage_sec5,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec5,ipage_sec5)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 5 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
             AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 5",False,logger) 
-            section5_nodata(canvas_rpt,istartpage_sec5,ilastpage,strgendate)
+            section5_nodata(canvas_rpt,istartpage_sec5,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec5,ipage_sec5)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 5",False,logger) 
     ##### section6 #####
@@ -2073,14 +2125,14 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 sec6_numpat_hos = ARC.prepare_section6_numpat_dict(sec6_mor_byorg, "Hospital-origin")
                 section6(canvas_rpt,logger,sec6_res,sec6_mor, sec6_mor_all, list_sec6_mor_tbl_CO,list_sec6_mor_tbl_HO,
                          lst_org_format_rpt6_0,lst_org_short_rpt6_0,lst_org_rpt6_0,sec6_numpat_com, sec6_numpat_hos,
-                         istartpage_sec6,ilastpage,strgendate)
+                         istartpage_sec6,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec6,ipage_sec6)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print SECTION 6 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
             AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 6",False,logger) 
-            section6_nodata(canvas_rpt,istartpage_sec6,ilastpage,strgendate)
+            section6_nodata(canvas_rpt,istartpage_sec6,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec6,ipage_sec6)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 6",False,logger)   
     ##### AnnexA #####
@@ -2120,13 +2172,13 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 #Creating formatted organism for AnnexB's table on page2
                 secA_pat2 = ARC.prepare_annexA_numpat_table_for_reportlab(secA_pat, lst_page2)
                 annexA_A1(canvas_rpt,logger,secA_res, annexA_org_page1, secA_pat2,
-                          istartpage_annexA1,ilastpage,strgendate)
+                          istartpage_annexA1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print ANNEX A, A1 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
-            annexA_nodata(canvas_rpt,istartpage_annexA1,ilastpage,strgendate)
+            annexA_nodata(canvas_rpt,istartpage_annexA1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
             pass
         AL.printlog("AMR surveillance report - checkpoint annex A2",False,logger)
         if bgotdata_annexA2:
@@ -2147,13 +2199,13 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 secA_mortal3 = ARC.prepare_annexA_mortality_table_for_reportlab(secA_mortal, annexA_org_page3)
                 ##Creating graph for AnnexB page3
                 ARC.create_annexA_mortality_graph(secA_mortal,lst_page3_graph)
-                annexA_A2(canvas_rpt,logger,secA_mortal3,istartpage_annexA2,ilastpage,strgendate)
+                annexA_A2(canvas_rpt,logger,secA_mortal3,istartpage_annexA2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print ANNEX A2 : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
-            annexA_nodata_mortality(canvas_rpt,istartpage_annexA2,ilastpage,strgendate)
+            annexA_nodata_mortality(canvas_rpt,istartpage_annexA2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
             pass
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled ANNEX A",False,logger) 
@@ -2181,17 +2233,29 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
             try:
-                annexB(canvas_rpt,logger,secB_blo_1, secB_blo_bymonth,istartpage_annexB,ilastpage,strgendate)
+                annexB(canvas_rpt,logger,secB_blo_1, secB_blo_bymonth,istartpage_annexB,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexB,ipage_annexB)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print ANNEX B (Print page) : " + str(e),True,logger)
                 logger.exception(e)
                 pass
         else:
-            annexB_nodata(canvas_rpt,istartpage_annexB,ilastpage,strgendate)
+            annexB_nodata(canvas_rpt,istartpage_annexB,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexB,ipage_annexB)
             pass
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled ANNEX B",False,logger) 
     #Save PDF to file
-    method(canvas_rpt,logger,lst_org_full,istartpage_method,ilastpage,strgendate)
-    investor(canvas_rpt,logger,istartpage_investor,ilastpage,strgendate)
+    method(canvas_rpt,logger,lst_org_full,istartpage_method,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_method,ipage_method)
+    investor(canvas_rpt,logger,istartpage_investor,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_investor,ipage_investor)
+    #For testing remove when production
+    """
+    section1_nodata(canvas_rpt,istartpage_sec1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec1,ipage_sec1)
+    section2_nodata(canvas_rpt,istartpage_sec2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec2,ipage_sec2)
+    section3_nodata(canvas_rpt,istartpage_sec3,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec3,ipage_sec3)
+    section4_nodata(canvas_rpt,istartpage_sec4,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec4,ipage_sec4)
+    section5_nodata(canvas_rpt,istartpage_sec5,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec5,ipage_sec5)
+    section6_nodata(canvas_rpt,istartpage_sec6,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec6,ipage_sec6)
+    annexA_nodata(canvas_rpt,istartpage_annexA1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA1)
+    annexA_nodata_mortality(canvas_rpt,istartpage_annexA2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA1)
+    annexB_nodata(canvas_rpt,istartpage_annexB,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexB,ipage_annexB)
+    """
     canvas_rpt.save()
