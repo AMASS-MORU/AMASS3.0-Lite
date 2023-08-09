@@ -378,7 +378,7 @@ except:
 if ALogL.checkpoint(dict_i):
     try:
         s_dict_column =["amass_name","user_name","requirements","explanations"]
-        dict_raw = AL.readxlsorcsv_noheader(path,"dictionary_for_microbiology_data",s_dict_column)
+        dict_raw = AL.readxlsorcsv_noheader(path,"dictionary_for_microbiology_data",s_dict_column,logger)
         file_format = ALogL.retrieve_uservalue(dict_raw, "file_format")
         lst_opt_2 = ["1", 
                     "hospital_number", ALogL.retrieve_uservalue(dict_raw, "hospital_number"), 

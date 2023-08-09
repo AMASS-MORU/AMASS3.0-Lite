@@ -90,8 +90,9 @@ def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
             #dict_micro = df_dict_micro.iloc[:,:2].fillna("")
             if bisusingmappeddata == True:
                 dict_micro = df_dict_micro.iloc[:,:2].fillna("")
-            else:                   
-                dict_micro = AL.readxlsxorcsv(path, "dictionary_for_microbiology_data").iloc[:,:2].fillna("")
+            else:            
+                print("Supplementary reload dict")
+                dict_micro = AL.readxlsxorcsv(path, "dictionary_for_microbiology_data",logger).iloc[:,:2].fillna("")
             dict_micro.columns = ["amass_name","user_name"]
             #The following change because annex b file generated are from microfile after match with dictionary thusm column name changed
             """hn      = retrieve_uservalue(dict_micro, "hospital_number")

@@ -179,8 +179,8 @@ def generatedby(c,logger):
     if len(section1_result) > 0:
         hospital_name   = ARC.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Hospital_name","Values"].tolist()[0]), coverpage=False)
         country_name    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Country","Values"].tolist()[0]), coverpage=False)
-        spc_date_start  = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=False)
-        spc_date_end    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=False)
+        spc_date_start  = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=False)
+        spc_date_end    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=False)
     else:
         hospital_name    = "NA"
         country_name    = "NA"
@@ -1711,7 +1711,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     strgendate = dgendate.strftime("%d %b %Y %H:%M")
     checkpoint_mic = ARC.checkpoint(path_input + "microbiology_data.xlsx") or ARC.checkpoint(path_input + "microbiology_data.csv")
     checkpoint_hos = ARC.checkpoint(path_input + "hospital_admission_data.xlsx") or ARC.checkpoint(path_input + "hospital_admission_data.csv")
-    config=AL.readxlsxorcsv(path_input + "Configuration/", "Configuration")
+    config=AL.readxlsxorcsv(path_input + "Configuration/", "Configuration",logger)
     canvas_rpt = canvas.Canvas(path_input +"AMR_surveillance_report.pdf")
     ### Cover, genrate by -----------------------------------------------------------------------------------------------
     AL.printlog("AMR surveillance report - checkpoint cover",False,logger)
@@ -1886,7 +1886,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass 
         else:
-           AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 1",False,logger) 
+           AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 1",False,logger) 
            section1_nodata(canvas_rpt,istartpage_sec1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec1,ipage_sec1)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 1",False,logger) 
@@ -1932,7 +1932,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
         else:
-            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 2",False,logger) 
+            AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 2",False,logger) 
             section2_nodata(canvas_rpt,istartpage_sec2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec2,ipage_sec2)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 2",False,logger) 
@@ -1999,7 +1999,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
         else:
-            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 3",False,logger) 
+            AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 3",False,logger) 
             section3_nodata(canvas_rpt,istartpage_sec3,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec3,ipage_sec3)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 3",False,logger) 
@@ -2040,7 +2040,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
         else:
-            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 4",False,logger) 
+            AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 4",False,logger) 
             section4_nodata(canvas_rpt,istartpage_sec4,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec4,ipage_sec4)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 4",False,logger) 
@@ -2092,7 +2092,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
         else:
-            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 5",False,logger) 
+            AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 5",False,logger) 
             section5_nodata(canvas_rpt,istartpage_sec5,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec5,ipage_sec5)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 5",False,logger) 
@@ -2131,7 +2131,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 logger.exception(e)
                 pass
         else:
-            AL.printlog("WARNING : AMR surveillance report - no micro data for SECTION 6",False,logger) 
+            AL.printlog("WARNING : AMR surveillance report - no analysis data for SECTION 6",False,logger) 
             section6_nodata(canvas_rpt,istartpage_sec6,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec6,ipage_sec6)
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 6",False,logger)   

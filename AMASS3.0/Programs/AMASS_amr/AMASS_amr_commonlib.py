@@ -46,7 +46,7 @@ def checkxlsorcsv(spath,sfilename) :
         bfound = False
     return bfound
 # Read csv or xlsx file, csv first, if no file convert xlsx to csv beflor load
-def readxlsxorcsv(spath,sfilename) :
+def readxlsxorcsv(spath,sfilename,logger) :
     df = pd.DataFrame()
     try:
         df = pd.read_csv(spath + sfilename + ".csv").fillna("")
@@ -54,38 +54,27 @@ def readxlsxorcsv(spath,sfilename) :
         try:
             df= pd.read_csv(spath + sfilename + ".csv", encoding="windows-1252").fillna("")
         except:
-            df= pd.read_excel(spath + sfilename + ".xlsx").fillna("")
-            """
-            stmpfilename = spath + sfilename + "_temp.csv"
-            if os.path.exists(stmpfilename):
-                os.remove(stmpfilename)
-            if os.path.exists(spath + sfilename + ".xlsx") :
-                #Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(stmpfilename,sheetid=1)
-                Xlsx2csv(spath + sfilename + ".xlsx").convert(stmpfilename,sheetid=1)
-                df = pd.read_csv(stmpfilename)
-            if os.path.exists(stmpfilename):
-               os.remove(stmpfilename)
-            """
+            try:
+                df= pd.read_excel(spath + sfilename + ".xlsx").fillna("")
+            except Exception as e:
+                printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+                Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
+                df = pd.read_csv(spath + sfilename + "_temp.csv").fillna("")
     return df
 # Read csv or xlsx file and specify header in columnheader list, csv first, if no file convert xlsx to csv beflor load
-def readxlsorcsv_noheader(spath,sfilename,columnheader) :
+def readxlsorcsv_noheader(spath,sfilename,columnheader,logger) :
     try:
         df = pd.read_csv(spath + sfilename + ".csv",header=None,names=columnheader).fillna("")
     except:
         try:
             df= pd.read_csv(spath + sfilename + ".csv", encoding="windows-1252",header=None,names=columnheader).fillna("")
         except:
-            df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader).fillna("")
-            """
-            stmpfilename = spath + sfilename + "_temp.csv"
-            if os.path.exists(stmpfilename):
-                os.remove(stmpfilename)
-            #Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(stmpfilename,sheetid=1)    
-            Xlsx2csv(spath + sfilename + ".xlsx").convert(stmpfilename,sheetid=1)
-            df = pd.read_csv(stmpfilename,header=None,names=columnheader)
-            if os.path.exists(stmpfilename):
-                os.remove(stmpfilename)
-            """
+            try:
+                df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader).fillna("")
+            except Exception as e:
+                printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+                Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
+                df = pd.read_csv(spath + sfilename + "_temp.csv",header=None,names=columnheader).fillna("")
     return df
 # Save to csv
 def fn_savecsv(df,fname,iquotemode,logger) :
@@ -170,7 +159,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
         if isalreadydatecol != True:
             df[cleanfield] = df[oldfield].astype("string")
             df[cleanfield] = df[cleanfield].fillna("1900-01-01")
-            df[cleanfield] = df[cleanfield].str.split(" ", n = 1, expand = True)[0]
+            df[cleanfield] = df[cleanfield].str.rsplit(" ", n = 1, expand = True)[0]
             iDMY = 0
             iYMD = 0
             iMDY = 0

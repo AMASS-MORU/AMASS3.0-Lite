@@ -316,7 +316,14 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             df_merged = fn_clean_date_andcalday_year_month(df_merged, AC.CONST_VARNAME_BIRTHDAY, AC.CONST_NEWVARNAME_CLEANBIRTHDATE, AC.CONST_NEWVARNAME_DAYTOBIRTHDATE, "","", AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
             #cal end date to get admission period
             df_merged[AC.CONST_NEWVARNAME_DAYTOENDDATE] = df_merged[AC.CONST_NEWVARNAME_DAYTODISDATE]
-            calcolmaxdayinclude(df_merged,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_merged,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOENDDATE,AC.CONST_ORIGIN_DATE,logger)     
+            df_merged[AC.CONST_NEWVARNAME_DAYTOSTARTDATE] = df_merged[AC.CONST_NEWVARNAME_DAYTOADMDATE]
+            try:
+                calcolmaxdayinclude(df_merged,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_merged,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOENDDATE,AC.CONST_ORIGIN_DATE,"",logger)   
+                calcolmindayinclude(df_merged,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_merged,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOSTARTDATE,AC.CONST_ORIGIN_DATE,"",logger)  
+            except Exception as e:
+                AL.printlog("Warning : calculate min max include date (Merged data)"  + str(e),True,logger)
+                logger.exception(e)
+                pass
             # Remove unmatched
             sErrorat = "(do remove unmatch spec date vs admission period)"
             #df_merged = df_merged[(df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]>=df_merged[AC.CONST_NEWVARNAME_DAYTOADMDATE]) & (df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]<=df_merged[AC.CONST_NEWVARNAME_DAYTODISDATE])]
@@ -376,19 +383,40 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             AL.printlog("Failed case no hosp data/merged error, merged data is micro data : " + str(e),True,logger)
             logger.exception(e)
     return df_merged
-def calcolmaxdayinclude(dfm,scolm,dfh,scolh,scolendate,dorgdate,logger) :
+def calcolmindayinclude(dfm,scolm,dfh,scolh,scolstartdate,dorgdate,ddefault,logger) :
+    try:
+        dmin_data_include = dfm[scolm].min()
+        dtemp = dfh[scolh].min()
+        if dtemp > dmin_data_include:
+            dmin_data_include = dtemp
+        idaytomin_date_include = (dmin_data_include - dorgdate).days
+        AL.printlog("Min date include = " + str(dmin_data_include) + " which is days " + str(idaytomin_date_include),False,logger)
+        dfh[scolstartdate] = dfh[scolstartdate].fillna(idaytomin_date_include)
+        dfh.loc[dfh[scolstartdate] < idaytomin_date_include, scolstartdate] = idaytomin_date_include
+        #reset those adm date is null back to null value
+        dfh.loc[dfh[scolh].isnull(), scolstartdate] = np.nan
+        return dmin_data_include
+    except Exception as e:
+        AL.printlog("Warning : Fail to calculate/set value start date data include: " +  str(e),False,logger)
+        logger.exception(e)
+        return ddefault
+def calcolmaxdayinclude(dfm,scolm,dfh,scolh,scolendate,dorgdate,ddefault,logger) :
     try:
         dmax_data_include = dfm[scolm].max()
         dtemp = dfh[scolh].max()
         if dtemp < dmax_data_include:
             dmax_data_include = dtemp
         idaytomax_date_include = (dmax_data_include - dorgdate).days
-        AL.printlog("Max dat include = " + str(dmax_data_include) + " which is days " + str(idaytomax_date_include),False,logger)
+        AL.printlog("Max date include = " + str(dmax_data_include) + " which is days " + str(idaytomax_date_include),False,logger)
         dfh[scolendate] = dfh[scolendate].fillna(idaytomax_date_include)
         dfh.loc[dfh[scolendate] > idaytomax_date_include, scolendate] = idaytomax_date_include
+        #reset those adm date is null back to null value
+        dfh.loc[dfh[scolh].isnull(), scolendate] = np.nan
+        return dmax_data_include
     except Exception as e:
         AL.printlog("Warning : Fail to calculate/set value end date data include: " +  str(e),False,logger)
         logger.exception(e)
+        return ddefault
 # Save temp file if in debug mode
 def debug_savecsv(df,fname,bdebug,iquotemode,logger)  :
     if bdebug :
@@ -413,7 +441,7 @@ def sub_printprocmem(sstate,logger) :
 def fn_clean_ward(df,scol_wardid,scol_wardtype,path,f_dict_ward,logger):
     bOK = False
     try:
-        df_dict_ward = AL.readxlsorcsv_noheader(path,f_dict_ward, [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"])
+        df_dict_ward = AL.readxlsorcsv_noheader(path,f_dict_ward, [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],logger)
         df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip() != ""]
         scol_wardorg = df_dict_ward[df_dict_ward [AC.CONST_DICTCOL_AMASS] == AC.CONST_VARNAME_WARD].iloc[0][AC.CONST_DICTCOL_DATAVAL]
         df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
@@ -432,6 +460,11 @@ def fn_clean_ward(df,scol_wardid,scol_wardtype,path,f_dict_ward,logger):
     if bOK == False:
         df[scol_wardid] = np.nan
         df[scol_wardtype] = np.nan
+    try:
+        df[scol_wardid].astype("category")
+        df[scol_wardtype].astype("category")
+    except:
+        pass
     return bOK    
 def mainloop() :    
     dict_progvar = {}  
@@ -454,13 +487,13 @@ def mainloop() :
         #df_micro_original = pd.DataFrame()
         df_hosp = pd.DataFrame()
         df_hosp_formerge = pd.DataFrame()
-        df_config = AL.readxlsxorcsv(path_input +"Configuration/", "Configuration")
+        df_config = AL.readxlsxorcsv(path_input +"Configuration/", "Configuration",logger)
         if check_config(df_config, "amr_surveillance_function") :
             #import microbiology
             if AL.checkxlsorcsv(path_input,"microbiology_data_reformatted") :
-                df_micro = AL.readxlsxorcsv(path_input,"microbiology_data_reformatted")
+                df_micro = AL.readxlsxorcsv(path_input,"microbiology_data_reformatted",logger)
             else :
-                df_micro = AL.readxlsxorcsv(path_input,"microbiology_data")
+                df_micro = AL.readxlsxorcsv(path_input,"microbiology_data",logger)
             df_micro_annexb = df_micro.copy(deep=True)
         AL.printlog("Succesful read micro data file with " + str(len(df_micro)) + " records",False,logger)  
         #Special task for log ast --------------------------------------------------------------------------------------------------
@@ -480,7 +513,7 @@ def mainloop() :
         #--------------------------------------------------------------------------------------------------------------------------
         #df_micro_original = df_micro.copy(deep=True)
         if AL.checkxlsorcsv(path_input,"hospital_admission_data"):
-            df_hosp = AL.readxlsxorcsv(path_input,"hospital_admission_data")
+            df_hosp = AL.readxlsxorcsv(path_input,"hospital_admission_data",logger)
             AL.printlog("Succesful read hospital data file with " + str(len(df_hosp)) + " records",False,logger)  
         else:
             AL.printlog("Note : No hospital data file",False,logger)  
@@ -488,11 +521,11 @@ def mainloop() :
         #sub_printprocmem("complete load xlsx or csv data file and dictionary",logger)
         # Import dictionary
         s_dict_column =[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"REQ","EXPLAINATION"]
-        df_dict_micro = AL.readxlsorcsv_noheader(path_input,"dictionary_for_microbiology_data",s_dict_column)
+        df_dict_micro = AL.readxlsorcsv_noheader(path_input,"dictionary_for_microbiology_data",s_dict_column,logger)
         df_dict_micro.loc[df_dict_micro[s_dict_column[1]].isnull() == True, s_dict_column[1]] = AC.CONST_DICVAL_EMPTY
         df_dict_hosp = pd.DataFrame()
         if bishosp_ava:
-            df_dict_hosp = AL.readxlsorcsv_noheader(path_input,"dictionary_for_hospital_admission_data",s_dict_column)
+            df_dict_hosp = AL.readxlsorcsv_noheader(path_input,"dictionary_for_hospital_admission_data",s_dict_column,logger)
             df_dict_hosp.loc[df_dict_hosp[s_dict_column[1]].isnull() == True, s_dict_column[1]] = AC.CONST_DICVAL_EMPTY
         # The following part may be optional  --------------------------------------------------------------------------------------------------
         # Export the list of variables
@@ -624,7 +657,8 @@ def mainloop() :
         df_micro = clean_hn(df_micro,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN)
         df_micro = fn_clean_date_andcalday_year_month(df_micro, AC.CONST_VARNAME_SPECDATERAW, AC.CONST_NEWVARNAME_CLEANSPECDATE, AC.CONST_NEWVARNAME_DAYTOSPECDATE, AC.CONST_NEWVARNAME_SPECYEAR, AC.CONST_NEWVARNAME_SPECMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
         df_micro = fn_clean_date_andcalday_year_month(df_micro, AC.CONST_VARNAME_SPECRPTDATERAW, AC.CONST_NEWVARNAME_CLEANSPECRPTDATE, AC.CONST_NEWVARNAME_DAYTOSPECRPTDATE, AC.CONST_NEWVARNAME_SPECRPTYEAR, AC.CONST_NEWVARNAME_SPECRPTMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
-        
+        dict_progvar["date_include_min"] = df_micro[AC.CONST_NEWVARNAME_CLEANSPECDATE].min().strftime("%d %b %Y")
+        dict_progvar["date_include_max"] = df_micro[AC.CONST_NEWVARNAME_CLEANSPECDATE].max().strftime("%d %b %Y")
         # Transform data hm
         if bishosp_ava:
             fn_clean_ward(df_hosp,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE,path_input,"dictionary_for_wards",logger) 
@@ -649,8 +683,22 @@ def mainloop() :
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_DISCHARGEDATE, AC.CONST_NEWVARNAME_CLEANDISDATE, AC.CONST_NEWVARNAME_DAYTODISDATE, AC.CONST_NEWVARNAME_DISYEAR, AC.CONST_NEWVARNAME_DISMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_BIRTHDAY, AC.CONST_NEWVARNAME_CLEANBIRTHDATE, AC.CONST_NEWVARNAME_DAYTOBIRTHDATE, "","", AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
             #V3.0.3 Calculate max date include
+            df_hosp[AC.CONST_NEWVARNAME_DAYTOSTARTDATE] = df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE]
             df_hosp[AC.CONST_NEWVARNAME_DAYTOENDDATE] = df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE]
-            calcolmaxdayinclude(df_micro,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_hosp,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOENDDATE,AC.CONST_ORIGIN_DATE,logger)           
+            try:
+                dict_progvar["date_include_min"] = calcolmindayinclude(df_micro,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_hosp,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOSTARTDATE,AC.CONST_ORIGIN_DATE,dict_progvar["date_include_min"],logger)   
+                dict_progvar["date_include_max"] = calcolmaxdayinclude(df_micro,AC.CONST_NEWVARNAME_CLEANSPECDATE,df_hosp,AC.CONST_NEWVARNAME_CLEANADMDATE,AC.CONST_NEWVARNAME_DAYTOENDDATE,AC.CONST_ORIGIN_DATE,dict_progvar["date_include_max"],logger) 
+            except Exception as e:
+                AL.printlog("Warning : calculate min max include date "  + str(e),True,logger)
+                logger.exception(e)
+                pass
+            
+            """
+            if dtmp != "":
+               dict_progvar["date_include_min"]  = dtmp
+            if dtmp != "":
+               dict_progvar["date_include_max"]  = dtmp
+            """
             """
             try:
                 print("--------------------------------------")
@@ -1326,7 +1374,9 @@ def mainloop() :
             temp_list = ["microbiology_data", ovar[1],  dict_amasstodataval[ovar[0]]]
             df_report1_page3.loc[len(df_report1_page3)] = temp_list
         if bishosp_ava:
-            temp_list = [['microbiology_data','Number_of_records', len(df_micro)], 
+            temp_list = [['overall_data','Minimum_date', dict_progvar["date_include_min"]], 
+                         ['overall_data','Maximum_date', dict_progvar["date_include_max"]], 
+                         ['microbiology_data','Number_of_records', len(df_micro)], 
                          ['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
                          ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]], 
                          ['hospital_admission_data','Number_of_records', len(df_hosp)], 

@@ -64,7 +64,8 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             if (bisusingmappeddata == True) or (bisreload_micro == False):
                 dict_micro = df_dict_micro.iloc[:,:2].fillna("")
             else:                   
-                dict_micro = AL.readxlsxorcsv(path, f_dict).iloc[:,:2].fillna("")
+                print("ANNEX B reload dict")
+                dict_micro = AL.readxlsxorcsv(path, f_dict,logger).iloc[:,:2].fillna("")
                 """
                 try:
                     dict_micro = pd.read_excel(i_dict).iloc[:,:2].fillna("")
@@ -191,9 +192,11 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 micro_0 = df_micro.copy()
             else:
                 if AL.checkxlsorcsv(path, f_micro_wide) == True:
-                    micro_0 = AL.readxlsxorcsv(path, f_micro_wide).fillna("")
+                    print("ANNEX B reload micro wide format")
+                    micro_0 = AL.readxlsxorcsv(path, f_micro_wide,logger).fillna("")
                 else:
-                    micro_0 = AL.readxlsxorcsv(path, f_micro).fillna("")
+                    print("ANNEX B reload micro")
+                    micro_0 = AL.readxlsxorcsv(path, f_micro,logger).fillna("")
             if (spcnum == "") or (spcnum not in micro_0.columns): #If there is no available specimen_nember column >>> create specimen_column from index
                 micro_0["mapped_specimen_number"] = range(len(micro_0))
             else:
