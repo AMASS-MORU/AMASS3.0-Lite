@@ -5,7 +5,7 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_VERSION ="3.0 Build 3004 on 8 August 2023"
+CONST_SOFTWARE_VERSION ="3.0 Build 3006 on 21 September 2023"
 
 CONST_DIR_INPUT = "./"
 CONST_DIR_RESULTDATA = "./ResultData/"
@@ -68,13 +68,14 @@ CONST_VARNAME_BIRTHDAY = "birthday"
 CONST_VARNAME_AGEY = "age_year"
 CONST_VARNAME_AGEGROUP = "age_group"
 CONST_VARNAME_SPECNUM = "specimen_number"
-CONST_VARNAME_WARD = "ward"
+CONST_VARNAME_WARD_HOSP = "ward_hosp"
 
 CONST_VARNAME_SPECDATERAW = "specimen_collection_date"
 CONST_VARNAME_SPECRPTDATERAW = "specimen_result_report_date"
 CONST_VARNAME_COHO = "infection_origin"
 CONST_VARNAME_ORG = "organism"
 CONST_VARNAME_SPECTYPE = "specimen_type"
+CONST_VARNAME_WARD = "ward"
 
 
 # COnst for new column hospital data
@@ -95,8 +96,8 @@ CONST_NEWVARNAME_DAYTOSTARTDATE = "startdate2"
 CONST_NEWVARNAME_DAYTOENDDATE = "enddate2"
 CONST_NEWVARNAME_PATIENTDAY= "patientdays"
 CONST_NEWVARNAME_PATIENTDAY_HO= "patientdays_his"
-CONST_NEWVARNAME_WARDCODE= "ward_code"
-CONST_NEWVARNAME_WARDTYPE= "ward_type"
+CONST_NEWVARNAME_WARDCODE_HOSP= "ward_code_hosp"
+CONST_NEWVARNAME_WARDTYPE_HOSP= "ward_type_hosp"
 # Const for new column micro
 CONST_NEWVARNAME_AMASSSPECTYPE ="amass_spectype"
 CONST_NEWVARNAME_BLOOD ="blood"
@@ -113,6 +114,8 @@ CONST_NEWVARNAME_DAYTOSPECRPTDATE = "spcrptdate2"
 CONST_NEWVARNAME_CLEANSPECRPTDATE = "DateSpcRpt"
 CONST_NEWVARNAME_SPECRPTYEAR = "YearSpcRpt"
 CONST_NEWVARNAME_SPECRPTMONTHNAME = "MonthSpcRpt"
+CONST_NEWVARNAME_WARDCODE= "ward_code"
+CONST_NEWVARNAME_WARDTYPE= "ward_type"
 #Antibiotic group RIS value
 CONST_NEWVARNAME_AST3GC_RIS = CONST_NEWVARNAME_PREFIX_RIS + "3gc"
 CONST_NEWVARNAME_ASTCBPN_RIS = CONST_NEWVARNAME_PREFIX_RIS + "Carbapenem"
@@ -200,6 +203,17 @@ def getlist_amr_atb(dict_orgatb):
         return list_atb
     except Exception:
         return []
+def dict_atbgroup():
+    return {
+        CONST_NEWVARNAME_AST3GC:[CONST_NEWVARNAME_AST3GC_RIS,["RISCeftriaxone","RISCefotaxime","RISCeftazidime","RISCefixime"]],
+        CONST_NEWVARNAME_ASTCBPN:[CONST_NEWVARNAME_ASTCBPN_RIS,["RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem"]],
+        CONST_NEWVARNAME_ASTFRQ:[CONST_NEWVARNAME_ASTFRQ_RIS,["RISCiprofloxacin","RISLevofloxacin"]],
+        CONST_NEWVARNAME_ASTTETRA:[CONST_NEWVARNAME_ASTTETRA_RIS,["RISTigecycline","RISMinocycline"]],
+        CONST_NEWVARNAME_ASTAMINOGLY:[CONST_NEWVARNAME_ASTAMINOGLY_RIS,["RISGentamicin","RISAmikacin"]],
+        CONST_NEWVARNAME_ASTMRSA:[CONST_NEWVARNAME_ASTMRSA_RIS,["RISMethicillin","RISOxacillin","RISCefoxitin"]],
+        CONST_NEWVARNAME_ASTPEN:[CONST_NEWVARNAME_ASTPEN_RIS,["RISPenicillin_G","RISOxacillin"]]
+    }
+
 def dict_orgcatwithatb(bisabom,bisentspp):
     dict_org = get_dict_orgcatwithatb(bisabom,bisentspp)
     lst_delkey = []
@@ -276,128 +290,6 @@ def get_dict_orgcatwithatb(bisabom,bisentspp): #Last line of antibiotic list is 
                                       "<i>Acinetobacter baumannii</i>" if bisabom==True else "<i>Acinetobacter</i> spp."],
     CONST_ORG_NOGROWTH:[CONST_ORG_NOGROWTH_ORGCAT,0,"No growth",[],[],"No growth"]
     }
-"""
-def get_dict_orgcatwithatb_V3old(bisabom,bisentspp): #Last line of antibiotic list is antibiotic added in version 3.0
-    return {
-    "organism_staphylococcus_aureus":[10,1,"Staphylococcus aureus",
-                                      [CONST_ATBNAME_ASTMRSA,"Vancomycin","Clindamycin","Cefoxitin",
-                                       "Oxacillin"],
-                                      [CONST_NEWVARNAME_ASTMRSA,"RISVancomycin","RISClindamycin","RISCefoxitin"
-                                       ,"RISOxacillin"],
-                                      "<i>Staphylococcus aureus</i>"],
-    "organism_enterococcus_spp":[20,1 if bisentspp==True else CONST_SPECIFY_CODE_AS_NOTUSEDORG,"Enterococcus spp.",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus</i> spp."],
-    "organism_enterococcus_faecalis":[21,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecalis",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin",
-                                  "Gentamicin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin",
-                                  "RISGentamicin"],
-                                 "<i>Enterococcus Faecalis</i>"],
-    "organism_enterococcus_faecium":[22,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecium",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin",
-                                  "Gentamicin","Amoxicillin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin",
-                                  "RISGentamicin","RISAmoxicillin"],
-                                 "<i>Enterococcus Faecium</i>"],
-    "organism_streptococcus_pneumoniae":[70,1,"Streptococcus pneumoniae",
-                                         ["Penicillin G","Oxacillin","Co-trimoxazole",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Erythromycin","Clindamycin","Levofloxacin"],
-                                         ["RISPenicillin_G","RISOxacillin","RISSulfamethoxazole_and_trimethoprim",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISErythromycin","RISClindamycin","RISLevofloxacin"],
-                                         "<i>Streptococcus pneumoniae</i>"],
-    "organism_salmonella_spp":[80,1,"Salmonella spp.",
-                                      [CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Ceftazidime","Cefixime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem"],
-                                      [CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISCeftazidime","RISCefixime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem"],
-                                      "<i>Salmonella</i> spp."],
-    "organism_escherichia_coli":[30,1,"Escherichia coli",
-                                      ["Gentamicin","Amikacin","Co-trimoxazole","Ampicillin",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Cefpodoxime","Ceftriaxone","Cefotaxime","Ceftazidime",
-                                       "Cefepime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem","Colistin",
-                                       "Piperacillin/tazobactam","cefoperazone/sulbactam"],
-                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim","RISAmpicillin",CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCefpodoxime","RISCeftriaxone","RISCefotaxime","RISCeftazidime",
-                                       "RISCefepime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin",
-                                       "RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
-                                      "<i>Escherichia coli</i>"],
-    "organism_klebsiella_pneumoniae":[40,1,"Klebsiella pneumoniae",
-                                      ["Gentamicin","Amikacin","Co-trimoxazole","Cefpodoxime",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Ceftazidime","Cefixime",
-                                       "Cefepime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem","Colistin",
-                                       "Piperacillin/tazobactam","cefoperazone/sulbactam"],
-                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim","RISCefpodoxime",CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISCeftazidime","RISCefixime",
-                                       "RISCefepime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin",
-                                       "RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
-                                      "<i>Klebsiella pneumoniae</i>"],
-    "organism_pseudomonas_aeruginosa":[50,1,"Pseudomonas aeruginosa",
-                                      ["Ceftazidime","Ciprofloxacin","Piperacillin/tazobactam",CONST_ATBNAME_ASTAMINOGLY,
-                                       "Gentamicin","Amikacin",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin",
-                                       "Levofloxacin","Tobramycin"],
-                                      ["RISCeftazidime","RISCiprofloxacin","RISPiperacillin_and_tazobactam",CONST_NEWVARNAME_ASTAMINOGLY,
-                                       "RISGentamicin","RISAmikacin",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin",
-                                       "RISLevofloxacin","RISTobramycin"],
-                                      "<i>Pseudomonas aeruginosa</i>"],
-    "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":[60,1,"Acinetobacter baumannii" if bisabom==True else "Acinetobacter spp.",
-                                      ["Tigecycline","Minocycline",CONST_ATBNAME_ASTAMINOGLY,"Gentamicin","Amikacin",
-                                       CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin",
-                                       CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Ceftazidime","Cefepime","Piperacillin/tazobactam","cefoperazone/sulbactam"],
-                                      ["RISTigecycline","RISMinocycline",CONST_NEWVARNAME_ASTAMINOGLY,"RISGentamicin","RISAmikacin",
-                                       CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin",
-                                       CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISCeftazidime","RISCefepime","RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
-                                      "<i>Acinetobacter baumannii</i>" if bisabom==True else "<i>Acinetobacter</i> spp."],
-    CONST_ORG_NOGROWTH:[CONST_ORG_NOGROWTH_ORGCAT,0,"No growth",[],[],"No growth"]
-    }
-"""
-"""
-def get_dict_orgcatwithatb_V2(bisabom,bisentspp):
-    return {
-    "organism_staphylococcus_aureus":[10,1,"Staphylococcus aureus",
-                                      [CONST_ATBNAME_ASTMRSA,"Vancomycin","Clindamycin","Cefoxitin"],
-                                      [CONST_NEWVARNAME_ASTMRSA,"RISVancomycin","RISClindamycin","RISCefoxitin"],
-                                      "<i>Staphylococcus aureus</i>"],
-    "organism_enterococcus_spp":[20,1 if bisentspp==True else CONST_SPECIFY_CODE_AS_NOTUSEDORG,"Enterococcus spp.",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus</i> spp."],
-    "organism_enterococcus_faecalis":[21,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecalis",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus Faecalis</i>"],
-    "organism_enterococcus_faecium":[22,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecium",
-                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
-                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus Faecium</i>"],
-    "organism_streptococcus_pneumoniae":[70,1,"Streptococcus pneumoniae",
-                                         ["Penicillin G","Oxacillin","Co-trimoxazole",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Erythromycin","Clindamycin","Levofloxacin"],
-                                         ["RISPenicillin_G","RISOxacillin","RISSulfamethoxazole_and_trimethoprim",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISErythromycin","RISClindamycin","RISLevofloxacin"],
-                                         "<i>Streptococcus pneumoniae</i>"],
-    "organism_salmonella_spp":[80,1,"Salmonella spp.",
-                                      [CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Ceftazidime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem"],
-                                      [CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCeftriaxone","RISCefotaxime","RISCeftazidime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem"],
-                                      "<i>Salmonella</i> spp."],
-    "organism_escherichia_coli":[30,1,"Escherichia coli",
-                                      ["Gentamicin","Amikacin","Co-trimoxazole","Ampicillin",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Cefpodoxime","Ceftriaxone","Cefotaxime","Ceftazidime",
-                                       "Cefepime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem","Colistin"],
-                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim","RISAmpicillin",CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCefpodoxime","RISCeftriaxone","RISCefotaxime","RISCeftazidime",
-                                       "RISCefepime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin"],
-                                      "<i>Escherichia coli</i>"],
-    "organism_klebsiella_pneumoniae":[40,1,"Klebsiella pneumoniae",
-                                      ["Gentamicin","Amikacin","Co-trimoxazole",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Cefpodoxime","Ceftriaxone","Cefotaxime","Ceftazidime",
-                                       "Cefepime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem","Colistin"],
-                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim",CONST_NEWVARNAME_ASTFRQ,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC,"RISCefpodoxime","RISCeftriaxone","RISCefotaxime","RISCeftazidime",
-                                       "RISCefepime",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin"],
-                                      "<i>Klebsiella pneumoniae</i>"],
-    "organism_pseudomonas_aeruginosa":[50,1,"Pseudomonas aeruginosa",
-                                      ["Ceftazidime","Ciprofloxacin","Piperacillin/tazobactam",CONST_ATBNAME_ASTAMINOGLY,
-                                       "Gentamicin","Amikacin",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin"],
-                                      ["RISCeftazidime","RISCiprofloxacin","RISPiperacillin_and_tazobactam",CONST_NEWVARNAME_ASTAMINOGLY,
-                                       "RISGentamicin","RISAmikacin",CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin"],
-                                      "<i>Pseudomonas aeruginosa</i>"],
-    "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":[60,1,"Acinetobacter baumannii" if bisabom==True else "Acinetobacter spp.",
-                                      ["Tigecycline","Minocycline",CONST_ATBNAME_ASTAMINOGLY,"Gentamicin","Amikacin",
-                                       CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin"],
-                                      ["RISTigecycline","RISMinocycline",CONST_NEWVARNAME_ASTAMINOGLY,"RISGentamicin","RISAmikacin",
-                                       CONST_NEWVARNAME_ASTCBPN,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin"],
-                                      "<i>Acinetobacter baumannii</i>" if bisabom==True else "<i>Acinetobacter</i> spp."],
-    CONST_ORG_NOGROWTH:[CONST_ORG_NOGROWTH_ORGCAT,0,"No growth",[],[],"No growth"]
-    }
-"""
 def dict_orgwithatb_mortality(bisabom):
     dict_org = get_dict_orgwithatb_mortality(bisabom)
     return dict_org

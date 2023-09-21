@@ -45,6 +45,26 @@ def checkxlsorcsv(spath,sfilename) :
     except:
         bfound = False
     return bfound
+# Read csv or xlsx file, csv first, if no file convert xlsx to csv beflor load [WITH FORCE LOAD SOME COLUMNS as STRING]
+def readxlsxorcsv_forcehntostring(spath,sfilename,hncol,logger) :
+    df = pd.DataFrame()
+    if hncol.strip() == "":
+        df = readxlsxorcsv(spath,sfilename,logger)
+    else:
+        dict_converter = {hncol:str}
+        try:
+            df = pd.read_csv(spath + sfilename + ".csv",converters=dict_converter).fillna("")
+        except:
+            try:
+                df= pd.read_csv(spath + sfilename + ".csv", encoding="windows-1252",converters=dict_converter).fillna("")
+            except:
+                try:
+                    df= pd.read_excel(spath + sfilename + ".xlsx",converters=dict_converter).fillna("")
+                except Exception as e:
+                    printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+                    Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
+                    df = pd.read_csv(spath + sfilename + "_temp.csv",converters=dict_converter).fillna("")
+    return df
 # Read csv or xlsx file, csv first, if no file convert xlsx to csv beflor load
 def readxlsxorcsv(spath,sfilename,logger) :
     df = pd.DataFrame()
@@ -119,6 +139,48 @@ def fn_keeponlycol(df,list_col) :
         return df[list_colexist]
     else:
         return df
+# Add antibiotic group base of antibiotic in group configure read from amr_const
+def fn_addatbgroupbyconfig(df,dict_atbgroup,dict_ast,logger) :
+    for satbg in dict_atbgroup:
+        try:
+            printlog("Note : Start determine RIS for antibiotic group : " +  satbg ,False,logger)
+            oatbg = dict_atbgroup[satbg]
+            satbgRIS = oatbg[0]
+            #For test ------------------------
+            #satbgRIS = satbgRIS +"_TEST"
+            #---------------------------------
+            df[satbgRIS] = ""
+            latb = oatbg[1]
+            dictR = {}
+            dictI = {}
+            dictS = {}
+            bisempty = True
+            #Buid dict for create condiftion
+            for i in range(len(latb)):
+                atb =  latb[i]
+                print(atb)
+                if atb in df.columns:
+                    dictR.update({atb: "R"})
+                    dictI.update({atb: "I"})
+                    dictS.update({atb: "S"})
+                    bisempty = False
+            if bisempty:
+                printlog("Warning : No antibiotic columns for determine RIS for antibiotic group : " +  satbg ,False,logger)
+            else:
+                qR = ' | '.join(['({}=="{}")'.format(k, v) for k, v in dictR.items()])
+                qI = ' | '.join(['({}=="{}")'.format(k, v) for k, v in dictI.items()])
+                qS = ' | '.join(['({}=="{}")'.format(k, v) for k, v in dictS.items()])
+                printlog("Note : Condition for determine RIS (R) for antibiotic group : " +  satbg + " : " + qR ,False,logger)
+                df.loc[df.eval(qS), satbgRIS] = "S"
+                df.loc[df.eval(qI), satbgRIS] = "I"
+                df.loc[df.eval(qR), satbgRIS] = "R"
+                df[satbg] = df[satbgRIS].map(dict_ast).fillna("NA") 
+                df[satbgRIS] = df[satbgRIS].astype("category")
+                df[satbg] = df[satbg].astype("category")
+        except Exception as e:
+            printlog("Warning : unable to determine RIS for antibiotic group : " +  satbg + " : "+ str(e),False,logger)   
+    return df
+   
 # Change field type to category to save mem space
 def fn_df_tocategory_datatype(df,list_col,logger) :
     curcol = ""
@@ -178,7 +240,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
                 print('Count date format DMY:' + str(iDMY) + ', MDY:' + str(iMDY) + ', YMD:' + str(iYMD))
             except Exception as e:
                 printlog("Warning date format of " + oldfield + " may be not in convert format defined or in other format", False, logger)
-                logger.exception(e)
+                #logger.exception(e)
                 iOTH = 1
             df_format = pd.DataFrame({'fname':['YMD','DMY','MDY','Others'],'fcount':[iYMD,iDMY,iMDY,iOTH],'cformat':[CDATEFORMAT_YMD,CDATEFORMAT_DMY,CDATEFORMAT_MDY,CDATEFORMAT_OTH]}) 
             df_format = df_format.sort_values(by=['fcount'],ascending=False)

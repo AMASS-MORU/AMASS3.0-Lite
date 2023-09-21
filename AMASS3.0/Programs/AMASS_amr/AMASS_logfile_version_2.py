@@ -230,12 +230,18 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
         #log_1_4 = fn_dateexample(df_spcdate,"Collection date",logger)
         list_log_1_4 = fn_dateexample(df_spcdate,"Collection date",logger)
         list_log_1_5 = fn_hnexample(df_hn,"Microbiology data's hospital number",logger)
+        list_log_1_5_1 = ""
+        try:
+            if int(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_HN_with_leadingzero","Parameters")) > 0:
+                list_log_1_5_1 = indent3("hospital number are some with leading zero.")
+        except:
+            pass
         log_1_6 = indent2("Missing data.")
-        log_1_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_specimen_date","Parameters"))) + " records are missing collection date.")
+        log_1_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_or_unknown_specimen_date","Parameters"))) + " records are missing or unknown format of collection date.")
         log_1_8 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_specimen_type","Parameters"))) + " records are missing specimen type.")
         log_1_9 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_culture_result","Parameters"))) + " records are missing culture result.")
         #log_1 = [log_1_1,log_1_2,log_1_3,log_1_4,log_1_5,log_1_6,log_1_7,log_1_8,log_1_9]
-        log_1 = [log_1_1,log_1_2,log_1_3] + list_log_1_4 + list_log_1_5 + [log_1_6,log_1_7,log_1_8,log_1_9]
+        log_1 = [log_1_1,log_1_2,log_1_3] + list_log_1_4 + list_log_1_5 + [list_log_1_5_1] + [log_1_6,log_1_7,log_1_8,log_1_9]
         #Hosp data , merged data
         log_2 = ['<br/>No hospital_admission_data file found in the same folder as the application file. Thus, no hsopital admission data set information.']
         log_3 = ['<br/>No hospital_admission_data file found in the same folder as the application file. Thus, no merged data set information.']
@@ -255,18 +261,34 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
             list_log_2_3 = fn_dateexample(df_admdate,"Admission date",logger)
             list_log_2_4 = fn_dateexample(df_disdate,"Discharge date",logger)
             list_log_2_5 = fn_hnexample(df_hosp_hn,"hospital admission data's hospital number",logger)
+            list_log_2_5_1 = ""
+            try:
+                if int(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_HN_with_leadingzero","Parameters")) > 0:
+                    list_log_2_5_1 = indent3("hospital number are some with leading zero.")
+            except:
+                pass
             log_2_6 = indent2("Missing data.")
-            log_2_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_admission_date","Parameters"))) + " records are missing admission date.")
-            log_2_8 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_discharge_date","Parameters"))) + " records are missing discharge date.")
+            log_2_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_or_unknown_admission_date","Parameters"))) + " records are missing or unknown format of admission date.")
+            log_2_8 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_or_unknown_discharge_date","Parameters"))) + " records are missing or unknown format of discharge date.")
             log_2_9 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_outcome_result","Parameters"))) + " records are missing outcome.")
             log_2_10 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_age","Parameters"))) + " records are missing age.")
             log_2_11 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_gender","Parameters"))) + " records are missing gender.")
             #log_2 = [log_2_1,log_2_2 ,log_2_3,log_2_4,log_2_5,log_2_6,log_2_7,log_2_8,log_2_9,log_2_10,log_2_11]
-            log_2 = [log_2_1,log_2_2] + list_log_2_3 + list_log_2_4 + list_log_2_5 + [log_2_6,log_2_7,log_2_8,log_2_9,log_2_10,log_2_11]
+            log_2 = [log_2_1,log_2_2] + list_log_2_3 + list_log_2_4 + list_log_2_5 + [list_log_2_5_1] + [log_2_6,log_2_7,log_2_8,log_2_9,log_2_10,log_2_11]
             #Merge data
             log_3_1 = "<br/>The merged data set between microbiology data and hospital admission data had:"
             log_3_2 = indent2("Microbiology data records unable to merged with hospital admission data records.")
-            log_3_3 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"merged_data","Type_of_data_file","Number_of_unmatchhn","Parameters"))) + " records are unable to merge due to no hospital number found in hospital admission data.")
+            tempstr =  ""
+            try:
+                mm = int(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_HN_with_leadingzero","Parameters"))
+                mh = int(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_HN_with_leadingzero","Parameters"))
+                if ((mm>0) and (mh<=0)): 
+                    tempstr = boldstr("This may due to microbiology data's hospital number are some with leading zero while hospital admission data's hospital number doesn't have.")
+                elif ((mm<=0) and (mh>0)):
+                    tempstr = boldstr("This may due to hospital admission data's hospital number are some with leading zero while microbiology data's hospital number doesn't have.")
+            except:
+                pass
+            log_3_3 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"merged_data","Type_of_data_file","Number_of_unmatchhn","Parameters"))) + " records are unable to merge due to no hospital number found in hospital admission data." + tempstr)
             log_3_4 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"merged_data","Type_of_data_file","Number_of_unmatchperiod","Parameters"))) + " records are unable to merge due to have hospital number found in hospital admission data but collection date not in admission period.")
             log_3_5 = indent2("Merged data.")
             log_3_6 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"merged_data","Type_of_data_file","Number_of_matchall","Parameters"))) + " records are merged (All specimen type).")
@@ -276,15 +298,15 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
         if bhosp_avi:
             log_all = log_1
             ALogL.report_title(c,'Data verification log file',1.07*inch, 10.5*inch,'#3e4444', font_size=16)
-            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=8)
+            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=11)
             c.showPage()
             log_all = log_2 + log_3
-            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=8)
+            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=11)
             c.showPage()
         else:
             log_all = log_1 + log_2 + log_3
             ALogL.report_title(c,'Data verification log file',1.07*inch, 10.5*inch,'#3e4444', font_size=16)
-            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=8)
+            ALogL.report_context(c,log_all, 1.07*inch, 1.2*inch, 460, 650, font_size=11)
             c.showPage()
     except Exception as e:
         AL.printlog("Error : generate data verification log summary page",True,logger)
