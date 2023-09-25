@@ -1242,7 +1242,9 @@ def mainloop() :
                          ['hospital_admission_data','Patient_days', dict_progvar["patientdays"]],
                          ['hospital_admission_data','Patient_days_his', dict_progvar["patientdays_ho"]]]     
         else:
-            temp_list = [['microbiology_data','Number_of_records', len(df_micro)], 
+            temp_list = [['overall_data','Minimum_date', dict_progvar["date_include_min"]], 
+                         ['overall_data','Maximum_date', dict_progvar["date_include_max"]], 
+                         ['microbiology_data','Number_of_records', len(df_micro)], 
                          ['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
                          ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]]]
         temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
