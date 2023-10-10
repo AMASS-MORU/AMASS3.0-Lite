@@ -9,6 +9,7 @@
 # Created on: 20 Oct 2022
 
 import os
+#import sys
 #import csv
 #import logging #for creating error_log
 import pandas as pd #for creating and manipulating dataframe
@@ -27,26 +28,42 @@ import AMASS_supplementary_report as SUP_REPORT
 from scipy.stats import norm # -> must moveto common lib
 
 bisdebug = True
-
-
+"""
+def getcmdargtodict(logger):
+    dictarg = {}
+    try:
+        AL.printlog("Command argument parameter is " + str(sys.argv), False, logger)
+        listarg = list(str(sys.argv).strip("][").split(","))
+        for sarg in listarg:
+            li = list(sarg.replace("'","").split(":"))
+            try:
+                dictarg[str(li[0]).strip()] = str(li[1]).strip()
+            except:
+                pass
+    except Exception as e: 
+        AL.printlog("Warning : unable to read command argument parameter", False, logger)
+        logger.exception(e)
+    #print(dictarg)
+    return dictarg
+"""
 # Function for get lower uper CI -> must moveto common lib
 # to calculate lower 95% CI
 def fn_wilson_lowerCI(x, n, conflevel, decimalplace):
-  zalpha = abs(norm.ppf((1-conflevel)/2))
-  phat = x/n
-  bound = (zalpha*((phat*(1-phat)+(zalpha**2)/(4*n))/n)**(1/2))/(1+(zalpha**2)/n)
-  midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
-  lowlim = round((midpnt - bound)*100, decimalplace)
-  return lowlim
+    zalpha = abs(norm.ppf((1-conflevel)/2))
+    phat = x/n
+    bound = (zalpha*((phat*(1-phat)+(zalpha**2)/(4*n))/n)**(1/2))/(1+(zalpha**2)/n)
+    midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
+    lowlim = round((midpnt - bound)*100, decimalplace)
+    return lowlim
 
 # to calculate upper 95% CI
 def fn_wilson_upperCI(x, n, conflevel, decimalplace):
-  zalpha = abs(norm.ppf((1-conflevel)/2))
-  phat = x/n
-  bound = (zalpha*((phat*(1-phat)+(zalpha**2)/(4*n))/n)**(1/2))/(1+(zalpha**2)/n)
-  midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
-  uplim = round((midpnt + bound)*100, decimalplace)
-  return uplim
+    zalpha = abs(norm.ppf((1-conflevel)/2))
+    phat = x/n
+    bound = (zalpha*((phat*(1-phat)+(zalpha**2)/(4*n))/n)**(1/2))/(1+(zalpha**2)/n)
+    midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
+    uplim = round((midpnt + bound)*100, decimalplace)
+    return uplim
 
 # function that print obj if in debug mode (bisdebug = true)
 def printdebug(obj) :
@@ -69,14 +86,15 @@ def check_config(df_config, str_process_name):
     return result
 
 
-def clean_hn(df,oldfield,newfield) :
+def clean_hn(df,oldfield,newfield,logger) :
     df[newfield] = df[oldfield].fillna("").astype("string").str.strip()
     try:
         df[newfield] = df[newfield].str.replace(" ","").str.lower()
         #Case read and add .0 at the end of HN as number 
         df[newfield] = df[newfield].str.replace(r'\.0$','',regex=True)
     except Exception as e: # work on python 3.x
-        print(e)
+        #print(e)
+        AL.printlog("Warning : unable to clean ',' and hn '.0' bug convertion", False, logger)
     return df
 def caldays(df,coldate,dbaselinedate) :
     return (df[coldate] - dbaselinedate).dt.days
@@ -356,17 +374,22 @@ def fn_clean_ward(df,scol_wardindict,scol_wardid,scol_wardtype,path,f_dict_ward,
         try:
             df_dict_ward = AL.readxlsorcsv_noheader(path,f_dict_ward, [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],logger)
             df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip() != ""]
-            scol_wardorg = df_dict_ward[df_dict_ward [AC.CONST_DICTCOL_AMASS] == scol_wardindict].iloc[0][AC.CONST_DICTCOL_DATAVAL]
-            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
-            if scol_wardorg in df.columns:
-                tempdict = pd.Series(df_dict_ward[AC.CONST_DICTCOL_AMASS].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
-                df[scol_wardid] = df[scol_wardorg].astype("string").map(tempdict)
-                tempdict = pd.Series(df_dict_ward["WARDTYPE"].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
-                df[scol_wardtype] = df[scol_wardorg].astype("string").map(tempdict)
-                df.rename(columns={scol_wardorg:scol_wardindict}, inplace=True)
-                bOK = True
+            if len(df_dict_ward[df_dict_ward [AC.CONST_DICTCOL_AMASS] == scol_wardindict]) > 0:
+                scol_wardorg = df_dict_ward[df_dict_ward [AC.CONST_DICTCOL_AMASS] == scol_wardindict].iloc[0][AC.CONST_DICTCOL_DATAVAL]
+                #print(scol_wardindict)
+                #print(scol_wardorg )
+                df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
+                if scol_wardorg in df.columns:
+                    tempdict = pd.Series(df_dict_ward[AC.CONST_DICTCOL_AMASS].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
+                    df[scol_wardid] = df[scol_wardorg].astype("string").map(tempdict)
+                    tempdict = pd.Series(df_dict_ward["WARDTYPE"].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
+                    df[scol_wardtype] = df[scol_wardorg].astype("string").map(tempdict)
+                    df.rename(columns={scol_wardorg:scol_wardindict}, inplace=True)
+                    bOK = True
+                else:
+                    AL.printlog("Warning : Fail to convert ward data: " + "No ward column as specify in dictionary of ward",False,logger)
             else:
-                AL.printlog("Warning : Fail to convert ward data: " + "No ward column as specify in dictionary of ward",False,logger)
+                AL.printlog("Warning : No ward configuration : " + scol_wardindict + " : in dictionary of ward",False,logger)
         except Exception as e:
             AL.printlog("Warning : Fail to convert ward data: " +  str(e),False,logger)
             logger.exception(e) 
@@ -391,6 +414,14 @@ def mainloop() :
     ## Date format
     fmtdate_text = "%d %b %Y"
     try:
+        dict_cmdarg  = AL.getcmdargtodict(logger)
+        bIsDoAnnexC = True
+        try:
+            if dict_cmdarg['annex_c'] == "no":
+                bIsDoAnnexC = False
+                AL.printlog("Note : Command line specify not do Annex C",False,logger)
+        except:
+            pass
         # If folder doesn't exist, then create it.
         if not os.path.isdir(AC.CONST_PATH_RESULT) : os.makedirs(AC.CONST_PATH_RESULT)
         path_repwithPID = AC.CONST_PATH_REPORTWITH_PID
@@ -560,8 +591,11 @@ def mainloop() :
         df_micro.rename(columns=dict_datavaltoamass, inplace=True)   
         if bishosp_ava:
             df_hosp.rename(columns=dict_datavaltoamass, inplace=True)
+        #CLean ward before remove column
+        AL.printlog("-- Clean ward in micro --",False,logger) 
+        fn_clean_ward(df_micro,AC.CONST_VARNAME_WARD,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE,path_input,"dictionary_for_wards",logger) 
         #Remove unused column to save memory
-        list_micorcol = [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_SPECDATERAW,AC.CONST_VARNAME_COHO,AC.CONST_VARNAME_ORG,AC.CONST_VARNAME_SPECTYPE]
+        list_micorcol = [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_SPECDATERAW,AC.CONST_VARNAME_COHO,AC.CONST_VARNAME_ORG,AC.CONST_VARNAME_SPECTYPE,AC.CONST_VARNAME_WARD,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE]
         list_micorcol = list_micorcol + list_antibiotic
         df_micro = AL.fn_keeponlycol(df_micro, list_micorcol)
         #-----------------------------------------------------------------------------------------------------------------------------------------    
@@ -582,21 +616,22 @@ def mainloop() :
         df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE] = df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE].fillna("undefined")
         #df_micro[AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_VARNAME_ORG].str.strip().map(dict_datavaltoamass).fillna(df_micro[AC.CONST_VARNAME_ORG])
         df_micro[AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_VARNAME_ORG].astype("string").map(dict_datavaltoamass).fillna(df_micro[AC.CONST_VARNAME_ORG])
-        df_micro = clean_hn(df_micro,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN)
+        df_micro = clean_hn(df_micro,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN,logger)
         df_micro = fn_clean_date_andcalday_year_month(df_micro, AC.CONST_VARNAME_SPECDATERAW, AC.CONST_NEWVARNAME_CLEANSPECDATE, AC.CONST_NEWVARNAME_DAYTOSPECDATE, AC.CONST_NEWVARNAME_SPECYEAR, AC.CONST_NEWVARNAME_SPECMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
         df_micro = fn_clean_date_andcalday_year_month(df_micro, AC.CONST_VARNAME_SPECRPTDATERAW, AC.CONST_NEWVARNAME_CLEANSPECRPTDATE, AC.CONST_NEWVARNAME_DAYTOSPECRPTDATE, AC.CONST_NEWVARNAME_SPECRPTYEAR, AC.CONST_NEWVARNAME_SPECRPTMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
-        fn_clean_ward(df_micro,AC.CONST_VARNAME_WARD,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE,path_input,"dictionary_for_wards",logger) 
+        
         dict_progvar["date_include_min"] = df_micro[AC.CONST_NEWVARNAME_CLEANSPECDATE].min().strftime("%d %b %Y")
         dict_progvar["date_include_max"] = df_micro[AC.CONST_NEWVARNAME_CLEANSPECDATE].max().strftime("%d %b %Y")
         # Transform data hm
         if bishosp_ava:
+            AL.printlog("-- Clean ward in hosp --",False,logger) 
             fn_clean_ward(df_hosp,AC.CONST_VARNAME_WARD_HOSP,AC.CONST_NEWVARNAME_WARDCODE_HOSP,AC.CONST_NEWVARNAME_WARDTYPE_HOSP,path_input,"dictionary_for_wards",logger) 
             df_hosp = AL.fn_keeponlycol(df_hosp, [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_ADMISSIONDATE,AC.CONST_VARNAME_DISCHARGEDATE,
                                                   AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_BIRTHDAY,AC.CONST_VARNAME_AGEY,AC.CONST_VARNAME_AGEGROUP,
                                                   AC.CONST_VARNAME_WARD_HOSP,AC.CONST_NEWVARNAME_WARDCODE_HOSP,AC.CONST_NEWVARNAME_WARDTYPE_HOSP])
             # Trim of space and unreadable charector for field that may need to map values such as spectype, organism.
             df_hosp = AL.fn_df_strstrips(df_hosp,[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_COHO],logger)
-            df_hosp = clean_hn(df_hosp,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN_HOSP)
+            df_hosp = clean_hn(df_hosp,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN_HOSP,logger)
             # Convert field to category type to save mem space
             df_hosp = AL.fn_df_tocategory_datatype(df_hosp,[AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_AGEGROUP,AC.CONST_VARNAME_COHO],logger)
             df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = 0
@@ -720,7 +755,12 @@ def mainloop() :
         df_micro[AC.CONST_NEWVARNAME_ASTPEN_RIS] = df_micro[AC.CONST_NEWVARNAME_ASTPEN_RIS].astype("category")
         df_micro[AC.CONST_NEWVARNAME_ASTPEN] = df_micro[AC.CONST_NEWVARNAME_ASTPEN].astype("category")
         """
-        #3GCCBPN
+        #3GCCBPN - RIS
+        list_ast_asvalue = ["NR","R"]
+        temp_cond = [(df_micro[AC.CONST_NEWVARNAME_AST3GC_RIS] != "R") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN_RIS] != "R") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN_RIS].isna() == True)),
+                     (df_micro[AC.CONST_NEWVARNAME_AST3GC_RIS] == "R") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN_RIS] != "R") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN_RIS].isna() == True))]
+        df_micro[AC.CONST_NEWVARNAME_AST3GCCBPN_RIS] = np.select(temp_cond,list_ast_asvalue,default="-")
+        #3GCCBPN -AST (NS)
         list_ast_asvalue = ["1","2"]
         temp_cond = [(df_micro[AC.CONST_NEWVARNAME_AST3GC] == "0") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN] != "1") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN].isna() == True)),
                      (df_micro[AC.CONST_NEWVARNAME_AST3GC] == "1") & ((df_micro[AC.CONST_NEWVARNAME_ASTCBPN] != "1") | (df_micro[AC.CONST_NEWVARNAME_ASTCBPN].isna() == True))]
@@ -900,7 +940,11 @@ def mainloop() :
                         scuratbname = list_atbname_incidence[i]
                         scuratbmicrocol =list_atbmicrocol_incidence[i]
                         sCurastvalue = list_astvalue_incidence[i]
-                        nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
+                        nPatient = 0
+                        if type(sCurastvalue) == list:
+                            nPatient = len(temp_df[temp_df[scuratbmicrocol] in sCurastvalue])
+                        else:
+                            nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
                         nPercent = "NA"
                         nLowerCI = "NA"
                         nUpperCI = "NA"
@@ -1024,7 +1068,11 @@ def mainloop() :
                             scuratbname = list_atbname_mortality[i]
                             scuratbmicrocol =list_atbmicrocol_mortality[i]
                             sCurastvalue = list_astvalue_mortality[i]
-                            temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] == sCurastvalue]
+                            #temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] == sCurastvalue]
+                            if type(sCurastvalue) == list:
+                                temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] in sCurastvalue]
+                            else:
+                                temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] == sCurastvalue]
                             iDied = len(temp_df2[temp_df2[AC.CONST_NEWVARNAME_DISOUTCOME] == AC.CONST_DIED_VALUE])
                             iAlive= len(temp_df2[temp_df2[AC.CONST_NEWVARNAME_DISOUTCOME] == AC.CONST_ALIVE_VALUE])
                             itotal = iDied + iAlive
@@ -1071,7 +1119,12 @@ def mainloop() :
                             scuratbname = list_atbname_incidence[i]
                             scuratbmicrocol =list_atbmicrocol_incidence[i]
                             sCurastvalue = list_astvalue_incidence[i]
-                            nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
+                            #nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
+                            nPatient = 0
+                            if type(sCurastvalue) == list:
+                                nPatient = len(temp_df[temp_df[scuratbmicrocol] in sCurastvalue])
+                            else:
+                                nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
                             nPercent = "NA"
                             nLowerCI = "NA"
                             nUpperCI = "NA"
@@ -1151,6 +1204,7 @@ def mainloop() :
         #df_annexA1_pivot = temp_df.pivot_table(index=AC.CONST_NEWVARNAME_ORG3_ANNEXA, columns=AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA, aggfunc={AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA:len}, fill_value=0)
 
         df_annexA1_pivot.columns = df_annexA1_pivot.columns.droplevel(0)
+        
         # add missing column and row to pivot table
         df_annexA1 = pd.DataFrame(columns=["Organism","Total number\nof patients*"])
         for oorg in dict_annex_a_listorg.values():
@@ -1177,6 +1231,14 @@ def mainloop() :
                 df_annexA1.loc[sorg] = list_rowvalue 
         df_annexA1.loc['Total'] = df_annexA1.sum()
         df_annexA1.loc['Total','Organism'] = "Total"
+        #put NA back in
+        for sspec in dict_annex_a_spectype.values():
+            if sspec not in df_annexA1_pivot.columns:
+                try:
+                    df_annexA1[sspec] = "NA"
+                    AL.printlog("Note : " + sspec + " set to NA for annex A1",False,logger)
+                except:
+                    pass
         sub_printprocmem("finish analyse annex A1 data",logger)
         # Start Annex A2 summary table ----------------------------------------------------------------------------------------------------------
         #df_hospmicro_annex_a = df_hospmicro.copy(deep=True) - No need deep copy only using in ANNEX A

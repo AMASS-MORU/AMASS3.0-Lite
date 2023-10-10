@@ -5,7 +5,7 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_VERSION ="3.0 Build 3006 on 21 September 2023"
+CONST_SOFTWARE_VERSION ="3.0 Build 3007 on 10 Oct 2023"
 
 CONST_DIR_INPUT = "./"
 CONST_DIR_RESULTDATA = "./ResultData/"
