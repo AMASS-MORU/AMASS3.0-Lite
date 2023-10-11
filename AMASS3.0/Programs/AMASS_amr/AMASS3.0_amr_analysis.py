@@ -609,8 +609,6 @@ def mainloop() :
         df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE] = df_micro[AC.CONST_VARNAME_SPECTYPE].astype("string").map(dict_spectype_datavaltoamass)
         #df_micro[AC.CONST_NEWVARNAME_BLOOD] = df_micro[AC.CONST_VARNAME_SPECTYPE].astype("string").map(dict_spectype_datavaltoamass)
         df_micro[AC.CONST_NEWVARNAME_BLOOD]  = df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE]
-        #df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] == "specimen_blood", "blood"] = "blood"
-        #df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] != "blood", "blood"] = "non-blood"
         df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] == "specimen_blood", AC.CONST_NEWVARNAME_BLOOD] = "blood"
         df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD] != "blood", AC.CONST_NEWVARNAME_BLOOD] = "non-blood"
         df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE] = df_micro[AC.CONST_NEWVARNAME_AMASSSPECTYPE].fillna("undefined")
@@ -853,7 +851,7 @@ def mainloop() :
         df_isoRep_blood_byorg = pd.DataFrame(columns=["Organism","Number_of_blood_specimens_culture_positive_for_the_organism"])
         df_isoRep_blood_byorg_dedup = pd.DataFrame(columns=["Organism","Number_of_blood_specimens_culture_positive_deduplicated"])
         df_isoRep_blood_incidence = pd.DataFrame(columns=["Organism","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"])
-        df_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"])
+        df_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","IncludeonlyR"])
         for sorgkey in dict_orgcatwithatb:
             ocurorg = dict_orgcatwithatb[sorgkey]
             # skip no growth
@@ -925,6 +923,7 @@ def mainloop() :
                     list_atbname_incidence = ocurorg_incidence[1]
                     list_atbmicrocol_incidence = ocurorg_incidence[2]
                     list_astvalue_incidence = ocurorg_incidence[3]
+                    list_mode = ocurorg_incidence[4]
                     nPatient = len(temp_df)
                     nPercent = "NA"
                     nLowerCI = "NA"
@@ -940,9 +939,10 @@ def mainloop() :
                         scuratbname = list_atbname_incidence[i]
                         scuratbmicrocol =list_atbmicrocol_incidence[i]
                         sCurastvalue = list_astvalue_incidence[i]
+                        sMode = list_mode[i]
                         nPatient = 0
                         if type(sCurastvalue) == list:
-                            nPatient = len(temp_df[temp_df[scuratbmicrocol] in sCurastvalue])
+                            nPatient = len(temp_df[temp_df[scuratbmicrocol].isin(sCurastvalue)])
                         else:
                             nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
                         nPercent = "NA"
@@ -952,7 +952,7 @@ def mainloop() :
                             nPercent = (nPatient/dict_progvar["n_blood_patients"])*AC.CONST_PERPOP
                             nLowerCI = (AC.CONST_PERPOP/100)*fn_wilson_lowerCI(x=nPatient, n=dict_progvar["n_blood_patients"], conflevel=0.95, decimalplace=10)
                             nUpperCI  = (AC.CONST_PERPOP/100)*fn_wilson_upperCI(x=nPatient, n=dict_progvar["n_blood_patients"], conflevel=0.95, decimalplace=10)
-                        onew_row = {"Organism":sorgname_incidence,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI  }   
+                        onew_row = {"Organism":sorgname_incidence,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI,"IncludeonlyR":sMode  }   
                         #df_isoRep_blood_incidence_atb = df_isoRep_blood_incidence_atb.append(onew_row,ignore_index = True)
                         df_isoRep_blood_incidence_atb = pd.concat([df_isoRep_blood_incidence_atb,pd.DataFrame([onew_row])],ignore_index = True)
         AL.printlog("Complete analysis (By Sample base (Section 1,2,4,5,6)): " + str(datetime.now()),False,logger)
@@ -978,10 +978,10 @@ def mainloop() :
                                                      "Intermediate(%)","Intermediate-lower95CI(%)*","Intermediate-upper95CI(%)*"])
 
         df_COHO_isoRep_blood_byorg = pd.DataFrame(columns=["Organism","Number_of_patients_with_blood_culture_positive","Number_of_patients_with_blood_culture_positive_merged_with_hospital_data_file","Community_origin","Hospital_origin","Unknown_origin"])
-        df_COHO_isoRep_blood_mortality = pd.DataFrame(columns=["Organism","Infection_origin","Antibiotic","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients"])
+        df_COHO_isoRep_blood_mortality = pd.DataFrame(columns=["Organism","Infection_origin","Antibiotic","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients","IncludeonlyR"])
         df_COHO_isoRep_blood_mortality_byorg = pd.DataFrame(columns=["Organism","Infection_origin","Number_of_deaths","Total_number_of_patients"])
         df_COHO_isoRep_blood_incidence = pd.DataFrame(columns=["Organism","Infection_origin","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"])
-        df_COHO_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"])
+        df_COHO_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","IncludeonlyR"])
         for sorgkey in dict_orgcatwithatb:
             ocurorg = dict_orgcatwithatb[sorgkey]
             # skip no growth
@@ -1063,14 +1063,16 @@ def mainloop() :
                         list_atbname_mortality = ocurorg_mortality[1]
                         list_atbmicrocol_mortality = ocurorg_mortality[2]
                         list_astvalue_mortality = ocurorg_mortality[3]
+                        list_mode = ocurorg_mortality[4]
                         # ADD CHECK if len list not the same avoid error
                         for i in range(len(list_atbname_mortality)):
                             scuratbname = list_atbname_mortality[i]
                             scuratbmicrocol =list_atbmicrocol_mortality[i]
                             sCurastvalue = list_astvalue_mortality[i]
+                            sMode = list_mode[i]
                             #temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] == sCurastvalue]
                             if type(sCurastvalue) == list:
-                                temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] in sCurastvalue]
+                                temp_df2 = temp_df.loc[temp_df[scuratbmicrocol].isin(sCurastvalue)]
                             else:
                                 temp_df2 = temp_df.loc[temp_df[scuratbmicrocol] == sCurastvalue]
                             iDied = len(temp_df2[temp_df2[AC.CONST_NEWVARNAME_DISOUTCOME] == AC.CONST_DIED_VALUE])
@@ -1086,7 +1088,7 @@ def mainloop() :
                                 nDiedPercent = int(round((iDied/itotal)*100, 0))
                                 sMortality = str(nDiedPercent) + "% " + "(" + str(iDied) + "/" + str(itotal) + ")"
                             onew_row = {"Organism":sorgname_mortality,"Infection_origin":sCOHO_mortality,"Antibiotic":scuratbname,"Mortality":sMortality,
-                                        "Mortality_lower_95ci":nLowerCI,"Mortality_upper_95ci":nUpperCI,"Number_of_deaths":iDied,"Total_number_of_patients":itotal}   
+                                        "Mortality_lower_95ci":nLowerCI,"Mortality_upper_95ci":nUpperCI,"Number_of_deaths":iDied,"Total_number_of_patients":itotal,"IncludeonlyR":sMode}   
                             #df_COHO_isoRep_blood_mortality = df_COHO_isoRep_blood_mortality.append(onew_row,ignore_index = True)
                             df_COHO_isoRep_blood_mortality = pd.concat([df_COHO_isoRep_blood_mortality,pd.DataFrame([onew_row])],ignore_index = True)         
                         #df_COHO_isoRep_blood_mortality_byorg = df_COHO_isoRep_blood_mortality_byorg.append({"Organism":sorgname_mortality,"Infection_origin":sCOHO_mortality,
@@ -1100,6 +1102,7 @@ def mainloop() :
                         list_atbname_incidence = ocurorg_incidence[1]
                         list_atbmicrocol_incidence = ocurorg_incidence[2]
                         list_astvalue_incidence = ocurorg_incidence[3]
+                        list_mode = ocurorg_incidence[4]
                         nPatient = len(temp_df)
                         nPercent = "NA"
                         nLowerCI = "NA"
@@ -1119,10 +1122,11 @@ def mainloop() :
                             scuratbname = list_atbname_incidence[i]
                             scuratbmicrocol =list_atbmicrocol_incidence[i]
                             sCurastvalue = list_astvalue_incidence[i]
+                            sMode = list_mode[i]
                             #nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
                             nPatient = 0
                             if type(sCurastvalue) == list:
-                                nPatient = len(temp_df[temp_df[scuratbmicrocol] in sCurastvalue])
+                                nPatient = len(temp_df[temp_df[scuratbmicrocol].isin(sCurastvalue)])
                             else:
                                 nPatient = len(temp_df[temp_df[scuratbmicrocol] == sCurastvalue])
                             nPercent = "NA"
@@ -1132,7 +1136,7 @@ def mainloop() :
                                 nPercent = (nPatient/nTotal)*AC.CONST_PERPOP
                                 nLowerCI = (AC.CONST_PERPOP/100)*fn_wilson_lowerCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
                                 nUpperCI  = (AC.CONST_PERPOP/100)*fn_wilson_upperCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
-                            onew_row = {"Organism":sorgname_incidence,"Infection_origin":sCOHO,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI  }   
+                            onew_row = {"Organism":sorgname_incidence,"Infection_origin":sCOHO,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI,"IncludeonlyR":sMode  }   
                             #df_COHO_isoRep_blood_incidence_atb = df_COHO_isoRep_blood_incidence_atb.append(onew_row,ignore_index = True)   
                             df_COHO_isoRep_blood_incidence_atb = pd.concat([df_COHO_isoRep_blood_incidence_atb,pd.DataFrame([onew_row])],ignore_index = True) 
                 #Save count CO/HO by org

@@ -5,7 +5,7 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_VERSION ="3.0 Build 3007 on 10 Oct 2023"
+CONST_SOFTWARE_VERSION ="3.0 (BETA) Build 3009 on 12 October 2023"
 
 CONST_DIR_INPUT = "./"
 CONST_DIR_RESULTDATA = "./ResultData/"
@@ -154,9 +154,11 @@ CONST_NEWVARNAME_ORG3_ANNEXA ="organismA"
 CONST_NEWVARNAME_ORGCAT_ANNEXA = "organismCat_A"
 CONST_NEWVARNAME_ORGNAME_ANNEXA = "organismname_A"
 
+
+
 #Mode for display only R or AST value
 CONST_VALUE_MODE_ONLYR = 1
-CONST_VALUE_MODE_AST = 2
+CONST_VALUE_MODE_AST = 0
 CONST_MODE_R_OR_AST = CONST_VALUE_MODE_AST
 
 def dict_ris(df_dict) :
@@ -174,9 +176,17 @@ def dict_ris(df_dict) :
 def dict_ast() :
     return {
         "R":"1",
+        "I":"1",
+        "S":"0"
+    }
+"""
+def dict_ast() :
+    return {
+        "R":"1",
         "I":"1" if CONST_MODE_R_OR_AST == CONST_VALUE_MODE_AST else "0",
         "S":"0"
     }
+"""
 """
 dict_ast = {
     "R":"1",
@@ -225,6 +235,64 @@ def dict_orgcatwithatb(bisabom,bisentspp):
         dict_org.pop(skey)
     return dict_org
 def get_dict_orgcatwithatb(bisabom,bisentspp): #Last line of antibiotic list is antibiotic added in version 3.0
+    return {
+    "organism_staphylococcus_aureus":[10,1,"Staphylococcus aureus",
+                                      ["Cefoxitin","Oxacillin",CONST_ATBNAME_ASTMRSA,"Vancomycin","Clindamycin"],
+                                      ["RISCefoxitin","RISOxacillin",CONST_NEWVARNAME_ASTMRSA_RIS,"RISVancomycin","RISClindamycin"],
+                                      "<i>Staphylococcus aureus</i>"],
+    "organism_enterococcus_spp":[20,1 if bisentspp==True else CONST_SPECIFY_CODE_AS_NOTUSEDORG,"Enterococcus spp.",
+                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
+                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
+                                 "<i>Enterococcus</i> spp."],
+    "organism_enterococcus_faecalis":[21,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecalis",
+                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
+                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
+                                 "<i>Enterococcus Faecalis</i>"],
+    "organism_enterococcus_faecium":[22,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,"Enterococcus Faecium",
+                                 ["Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
+                                 ["RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
+                                 "<i>Enterococcus Faecium</i>"],
+    "organism_streptococcus_pneumoniae":[70,1,"Streptococcus pneumoniae",
+                                         ["Penicillin G","Oxacillin","Co-trimoxazole",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Erythromycin","Clindamycin","Levofloxacin"],
+                                         ["RISPenicillin_G","RISOxacillin","RISSulfamethoxazole_and_trimethoprim",CONST_NEWVARNAME_AST3GC_RIS,"RISCeftriaxone","RISCefotaxime","RISErythromycin","RISClindamycin","RISLevofloxacin"],
+                                         "<i>Streptococcus pneumoniae</i>"],
+    "organism_salmonella_spp":[80,1,"Salmonella spp.",
+                                      [CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",CONST_ATBNAME_AST3GC,"Ceftriaxone","Ceftazidime","Cefotaxime",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Ertapenem","Doripenem"],
+                                      [CONST_NEWVARNAME_ASTFRQ_RIS,"RISCiprofloxacin","RISLevofloxacin",CONST_NEWVARNAME_AST3GC_RIS,"RISCeftriaxone","RISCeftazidime","RISCefotaxime",CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem"],
+                                      "<i>Salmonella</i> spp."],
+    "organism_escherichia_coli":[30,1,"Escherichia coli",
+                                      ["Gentamicin","Amikacin","Co-trimoxazole","Ampicillin",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",
+                                       CONST_ATBNAME_AST3GC,"Cefpodoxime","Ceftriaxone","Ceftazidime","Cefotaxime","Cefepime",CONST_ATBNAME_ASTCBPN,
+                                       "Imipenem","Meropenem","Ertapenem","Doripenem","Colistin","Piperacillin-tazobactam","cefoperazone/sulbactam"],
+                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim","RISAmpicillin",CONST_NEWVARNAME_ASTFRQ_RIS,"RISCiprofloxacin","RISLevofloxacin",
+                                       CONST_NEWVARNAME_AST3GC_RIS,"RISCefpodoxime","RISCeftriaxone","RISCeftazidime","RISCefotaxime","RISCefepime",CONST_NEWVARNAME_ASTCBPN_RIS,
+                                       "RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin","RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
+                                      "<i>Escherichia coli</i>"],
+    "organism_klebsiella_pneumoniae":[40,1,"Klebsiella pneumoniae",
+                                      ["Gentamicin","Amikacin","Co-trimoxazole","Ampicillin",CONST_ATBNAME_ASTFRQ,"Ciprofloxacin","Levofloxacin",
+                                       CONST_ATBNAME_AST3GC,"Cefpodoxime","Ceftriaxone","Ceftazidime","Cefotaxime","Cefepime",CONST_ATBNAME_ASTCBPN,
+                                       "Imipenem","Meropenem","Ertapenem","Doripenem","Colistin","Piperacillin-tazobactam","cefoperazone/sulbactam"],
+                                      ["RISGentamicin","RISAmikacin","RISSulfamethoxazole_and_trimethoprim","RISAmpicillin",CONST_NEWVARNAME_ASTFRQ_RIS,"RISCiprofloxacin","RISLevofloxacin",
+                                       CONST_NEWVARNAME_AST3GC_RIS,"RISCefpodoxime","RISCeftriaxone","RISCeftazidime","RISCefotaxime","RISCefepime",CONST_NEWVARNAME_ASTCBPN_RIS,
+                                       "RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin","RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
+                                      "<i>Klebsiella pneumoniae</i>"],
+    "organism_pseudomonas_aeruginosa":[50,1,"Pseudomonas aeruginosa",
+                                      ["Ceftazidime","Ciprofloxacin","Piperacillin-tazobactam",CONST_ATBNAME_ASTAMINOGLY,
+                                       "Amikacin",CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin"],
+                                      ["RISCeftazidime","RISCiprofloxacin","RISPiperacillin_and_tazobactam",CONST_NEWVARNAME_ASTAMINOGLY_RIS,
+                                       "RISAmikacin",CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin"],
+                                      "<i>Pseudomonas aeruginosa</i>"],
+    "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":[60,1,"Acinetobacter baumannii" if bisabom==True else "Acinetobacter spp.",
+                                      ["Tigecycline","Minocycline",CONST_ATBNAME_ASTAMINOGLY,"Gentamicin","Amikacin",
+                                       CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin",
+                                       "Piperacillin/tazobactam","cefoperazone/sulbactam"],
+                                      ["RISTigecycline","RISMinocycline",CONST_NEWVARNAME_ASTAMINOGLY_RIS,"RISGentamicin","RISAmikacin",
+                                       CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin",
+                                      "RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
+                                      "<i>Acinetobacter baumannii</i>" if bisabom==True else "<i>Acinetobacter</i> spp."],
+    CONST_ORG_NOGROWTH:[CONST_ORG_NOGROWTH_ORGCAT,0,"No growth",[],[],"No growth"]
+    }
+def OBSOLETED_get_dict_orgcatwithatb(bisabom,bisentspp): #Last line of antibiotic list is antibiotic added in version 3.0
     return {
     "organism_staphylococcus_aureus":[10,1,"Staphylococcus aureus",
                                       [CONST_ATBNAME_ASTMRSA,"Vancomycin","Clindamycin","Cefoxitin",
@@ -294,6 +362,90 @@ def dict_orgwithatb_mortality(bisabom):
     dict_org = get_dict_orgwithatb_mortality(bisabom)
     return dict_org
 def get_dict_orgwithatb_mortality(bisabom):
+    return {"organism_staphylococcus_aureus":["Staphylococcus aureus",["MRSA","MSSA","MRSA","MSSA"],
+                                                                [CONST_NEWVARNAME_ASTMRSA,CONST_NEWVARNAME_ASTMRSA,CONST_NEWVARNAME_ASTMRSA_RIS,CONST_NEWVARNAME_ASTMRSA_RIS],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_enterococcus_spp":["Enterococcus spp.",["Vancomycin-NS","Vancomycin-S","Vancomycin-R","Vancomycin-NR"],
+                                                                ["NS_Vancomycin","NS_Vancomycin","RISVancomycin","RISVancomycin"],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_enterococcus_faecalis":["Enterococcus Faecalis",["Vancomycin-NS","Vancomycin-S","Vancomycin-R","Vancomycin-NR"],
+                                                                ["NS_Vancomycin","NS_Vancomycin","RISVancomycin","RISVancomycin"],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_enterococcus_faecium":["Enterococcus Faecium",["Vancomycin-NS","Vancomycin-S","Vancomycin-R","Vancomycin-NR"],
+                                                                ["NS_Vancomycin","NS_Vancomycin","RISVancomycin","RISVancomycin"],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_streptococcus_pneumoniae":["Streptococcus pneumoniae",["Penicillin-NS","Penicillin-S","Penicillin-R","Penicillin-NR"],
+                                                                ["NS_Penicillin_G","NS_Penicillin_G","RISPenicillin_G","RISPenicillin_G"],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_salmonella_spp":["Salmonella spp.",["Fluoroquinolone-NS","Fluoroquinolone-S","Fluoroquinolone-R","Fluoroquinolone-NR"],
+                                                                [CONST_NEWVARNAME_ASTFRQ,CONST_NEWVARNAME_ASTFRQ,CONST_NEWVARNAME_ASTFRQ_RIS,CONST_NEWVARNAME_ASTFRQ_RIS],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_escherichia_coli":["Escherichia coli",["Carbapenem-NS","3GC-NS","3GC-S","Carbapenem-R","3GC-R","3GC-NR"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_ASTCBPN_RIS,CONST_NEWVARNAME_AST3GCCBPN_RIS,CONST_NEWVARNAME_AST3GCCBPN_RIS],
+                                                                ["1","2","1","R","R","NR"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_klebsiella_pneumoniae":["Klebsiella pneumoniae",["Carbapenem-NS","3GC-NS","3GC-S","Carbapenem-R","3GC-R","3GC-NR"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_ASTCBPN_RIS,CONST_NEWVARNAME_AST3GCCBPN_RIS,CONST_NEWVARNAME_AST3GCCBPN_RIS],
+                                                                ["1","2","1","R","R","NR"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_pseudomonas_aeruginosa":["Pseudomonas aeruginosa",["Carbapenem-NS","Carbapenem-S","Carbapenem-R","Carbapenem-NR"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN_RIS,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]],
+                             "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":["Acinetobacter baumannii" if bisabom==True else "Acinetobacter spp.",["Carbapenem-NS","Carbapenem-S","Carbapenem-R","Carbapenem-NR"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN_RIS,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                ["1","0","R",["I","S"]],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR]]
+                          } 
+def OBSOLOETED2_get_dict_orgwithatb_mortality(bisabom):
+    return {"organism_staphylococcus_aureus":["Staphylococcus aureus",["MRSA","MSSA"],
+                                                                [CONST_NEWVARNAME_ASTMRSA,CONST_NEWVARNAME_ASTMRSA],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_enterococcus_spp":["Enterococcus spp.",["Vancomycin-NS","Vancomycin-S"],
+                                                                ["NS_Vancomycin","NS_Vancomycin"],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_enterococcus_faecalis":["Enterococcus Faecalis",["Vancomycin-NS","Vancomycin-S"],
+                                                                ["NS_Vancomycin","NS_Vancomycin"],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_enterococcus_faecium":["Enterococcus Faecium",["Vancomycin-NS","Vancomycin-S"],
+                                                                ["NS_Vancomycin","NS_Vancomycin"],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_streptococcus_pneumoniae":["Streptococcus pneumoniae",["Penicillin-NS","Penicillin-S"],
+                                                                ["NS_Penicillin_G","NS_Penicillin_G"],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_salmonella_spp":["Salmonella spp.",["Fluoroquinolone-NS","Fluoroquinolone-S"],
+                                                                [CONST_NEWVARNAME_ASTFRQ,CONST_NEWVARNAME_ASTFRQ],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_escherichia_coli":["Escherichia coli",["Carbapenem-NS","3GC-NS","3GC-S"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_AST3GCCBPN],
+                                                                ["1","2","1"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_klebsiella_pneumoniae":["Klebsiella pneumoniae",["Carbapenem-NS","3GC-NS","3GC-S"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GCCBPN,CONST_NEWVARNAME_AST3GCCBPN],
+                                                                ["1","2","1"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_pseudomonas_aeruginosa":["Pseudomonas aeruginosa",["Carbapenem-NS","Carbapenem-S"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]],
+                             "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":["Acinetobacter baumannii" if bisabom==True else "Acinetobacter spp.",["Carbapenem-NS","Carbapenem-S"],
+                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN],
+                                                                ["1","0"],
+                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST]]
+                          } 
+def OBSOLETED_get_dict_orgwithatb_mortality(bisabom):
     return {"organism_staphylococcus_aureus":["Staphylococcus aureus",["MRSA","MSSA"],
                                                                 [CONST_NEWVARNAME_ASTMRSA,CONST_NEWVARNAME_ASTMRSA],["1","0"]],
                              "organism_enterococcus_spp":["Enterococcus spp.",["Vancomycin-NS","Vancomycin-S"],
@@ -319,6 +471,61 @@ def dict_orgwithatb_incidence(bisabom):
     dict_org = get_dict_orgwithatb_incidence(bisabom)
     return dict_org
 def get_dict_orgwithatb_incidence(bisabom):
+    #CONST_VALUE_MODE_ONLYR = 1
+    #CONST_VALUE_MODE_AST = 2
+    return {"organism_staphylococcus_aureus":["S. aureus",["MRSA","MRSA"],
+                                                          [CONST_NEWVARNAME_ASTMRSA,CONST_NEWVARNAME_ASTMRSA_RIS],
+                                                          ["1","R"],
+                                                          [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                          "<i>S. aureus</i>"],
+                             "organism_enterococcus_spp":["Enterococcus spp.",["Vancomycin-NS\n<i>Enterococcus</i> spp.","Vancomycin-R\n<i>Enterococcus</i> spp."],
+                                                                              ["NS_Vancomycin","RISVancomycin"],
+                                                                              ["1","R"],
+                                                                              [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                              "<i>Enterococcus</i> spp."],
+                             "organism_enterococcus_faecalis":["Enterococcus Faecalis",["Vancomycin-NS\n<i>E. faecalis</i>","Vancomycin-R\n<i>E. faecalis</i>"],
+                                                                                       ["NS_Vancomycin","RISVancomycin"],
+                                                                                       ["1","R"],
+                                                                                       [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                                       "<i>E. faecalis</i>"],
+                             "organism_enterococcus_faecium":["Enterococcus Faecium",["Vancomycin-NS\n<i>E. faecium</i>","Vancomycin-R\n<i>E. faecium</i>"],
+                                                                                      ["NS_Vancomycin","RISVancomycin"],
+                                                                                      ["1","R"],
+                                                                                      [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                                      "<i>E. faecium</i>"],
+                             "organism_streptococcus_pneumoniae":["S. pneumoniae",["Penicillin-NS\n<i>S. pneumoniae</i>","Penicillin-R\n<i>S. pneumoniae</i>"],
+                                                                                  ["NS_Penicillin_G","RISPenicillin_G"],
+                                                                                  ["1","R"],
+                                                                                  [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                                  "<i>S. pneumoniae</i>"],
+                             "organism_salmonella_spp":["Salmonella spp.",["Fluoroquinolone-NS\n<i>Salmonella</i> spp.","Fluoroquinolone-R\n<i>Salmonella</i> spp."],
+                                                                            [CONST_NEWVARNAME_ASTFRQ,CONST_NEWVARNAME_ASTFRQ_RIS],
+                                                                            ["1","R"],
+                                                                            [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                            "<i>Salmonella</i> spp."],
+                             "organism_escherichia_coli":["E. coli",["3GC-NS\n<i>E. coli</i>","Carbapenem-NS\n<i>E. coli</i>","3GC-R\n<i>E. coli</i>","Carbapenem-R\n<i>E. coli</i>"],
+                                                                      [CONST_NEWVARNAME_AST3GC,CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GC_RIS,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                      ["1","1","R","R"],
+                                                                      [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR],
+                                                                      "<i>E. coli</i>"],
+                             "organism_klebsiella_pneumoniae":["K. pneumoniae",["3GC-NS\n<i>K. pneumoniae</i>","Carbapenem-NS\n<i>K. pneumoniae</i>","3GC-R\n<i>K. pneumoniae</i>","Carbapenem-R\n<i>K. pneumoniae</i>"],
+                                                                               [CONST_NEWVARNAME_AST3GC,CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_AST3GC_RIS,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                               ["1","1","R","R"],
+                                                                               [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR,CONST_VALUE_MODE_ONLYR],
+                                                                               "<i>K. pneumoniae</i>"],
+                             "organism_pseudomonas_aeruginosa":["P. aeruginosa",["Carbapenem-NS\n<i>P. aeruginosa</i>","Carbapenem-R\n<i>P. aeruginosa</i>"],
+                                                                                [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                                ["1","R"],
+                                                                                [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                                "<i>P. aeruginosa</i>"],
+                             "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":["A. baumannii" if bisabom==True else "Acinetobacter spp.",
+                                                                                                                    ["Carbapenem-NS\n<i>A. baumannii</i>" if bisabom==True else "Carbapenem-NS\n<i>Acinetobacter</i> spp.","Carbapenem-R\n<i>A. baumannii</i>" if bisabom==True else "Carbapenem-R\n<i>Acinetobacter</i> spp."],
+                                                                                                                    [CONST_NEWVARNAME_ASTCBPN,CONST_NEWVARNAME_ASTCBPN_RIS],
+                                                                                                                    ["1","R"],
+                                                                                                                    [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
+                                                                                                                    "<i>A. baumannii</i>" if bisabom==True else "<i>Acinetobacter </i>spp."]
+                          } 
+def OBSOLETED_get_dict_orgwithatb_incidence(bisabom):
     return {"organism_staphylococcus_aureus":["S. aureus",["MRSA"],[CONST_NEWVARNAME_ASTMRSA],["1"],"<i>S. aureus</i>"],
                              "organism_enterococcus_spp":["Enterococcus spp.",["Vancomycin-NS\n<i>Enterococcus</i> spp."],["NS_Vancomycin"],["1"],"<i>Enterococcus</i> spp."],
                              "organism_enterococcus_faecalis":["Enterococcus Faecalis",["Vancomycin-NS\n<i>E. faecalis</i>"],["NS_Vancomycin"],["1"],"<i>E. faecalis</i>"],
@@ -368,7 +575,7 @@ dict_annex_a_spectype = {"specimen_blood":"Blood",
 #For Report
 CONST_MAX_ATBCOUNTFITHALFPAGE = 12
 CONST_MAX_ATBCOUNTFITHALFPAGE_MORALITY = 8
-CONST_REPORTPAGENUM_MODE = 3 #1 = NORMAL,2 = By section (Need section name), 3 = NORMAL but limit each section maximum page if exceed maximum page it will be 5A, 5B, 5C and so on
+CONST_REPORTPAGENUM_MODE = 2 #1 = NORMAL,2 = By section (Need section name), 3 = NORMAL but limit each section maximum page if exceed maximum page it will be 5A, 5B, 5C and so on
 list_atbneednote = [CONST_ATBNAME_AST3GC,CONST_ATBNAME_ASTCBPN,CONST_ATBNAME_ASTFRQ,CONST_ATBNAME_ASTAMINOGLY]
 dict_atbnote = {CONST_ATBNAME_ASTMRSA:"Methicillin: methicillin, oxacillin, or cefoxitin;",
                 CONST_ATBNAME_AST3GC:"3GC=3rd−generation cephalosporin;",

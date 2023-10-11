@@ -1,10 +1,10 @@
 #***-------------------------------------------------------------------------------------------------***#
-#*** AutoMated tool for Antimicrobial resistance Surveillance System version 2.0 (AMASS version 2.0) ***#
+#*** AutoMated tool for Antimicrobial resistance Surveillance System version 3.0 (AMASS version 3.0) ***#
 #***-------------------------------------------------------------------------------------------------***#
 # Aim: to enable hospitals with microbiology data available in electronic formats
 # to analyze their own data and generate AMR surveillance reports, Supplementary data indicators reports, and Data verification logfile reports systematically.
 
-# Created on 20th April 2022
+# Created on 20th April 2022 (V2.0)
 import math as m
 import pandas as pd #for creating and manipulating dataframe
 import matplotlib.pyplot as plt #for creating graph (pyplot)
@@ -38,6 +38,7 @@ pagenumber_ava_annexA = ["38","39","40"] #annexA; 3 pages
 pagenumber_ava_annexB = ["41","42"] #annexB; 2 pages
 pagenumber_ava_other = ["43","44","45","46","47"] #complement; 6 pages
 """
+CONST_COLORPALETTE_1 = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','yellowgreen','palevioletred','darkkhaki']
 
 # Added in verions 3.0------------------------------------------------------------
 #CONST
@@ -294,10 +295,18 @@ def create_graph_surveillance_V3(df_raw, lst_org, prefix, text_work_drug="N", fr
     #lower_col : column name of lowerCT
     if text_work_drug == "Y":
         df_raw = df_raw.set_index('Priority_pathogen')
-        palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','saddlebrown','yellowgreen','yellowgreen','palevioletred','darkkhaki']
+        try:
+            palette = create_graphpalette_sec4_5(df_raw,'Organism',CONST_COLORPALETTE_1)
+        except:
+            palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','saddlebrown','yellowgreen','yellowgreen','palevioletred','darkkhaki']
+            #print("Warning : error get color palette for sec4,5 - pathogen")
     else:
+        try:
+            palette = create_graphpalette_sec4_5(df_raw,'Organism',CONST_COLORPALETTE_1)
+        except:
+            palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','yellowgreen','palevioletred','darkkhaki']
+            #print("Warning : error get color palette for sec4,5 - organism")
         df_raw = df_raw.set_index('Organism')
-        palette = ['rebeccapurple','darkorange','firebrick','dodgerblue','saddlebrown','yellowgreen','palevioletred','darkkhaki']
     plt.figure(figsize=(7,ifig_H))
     sns.barplot(data=df_raw.loc[:,freq_col].to_frame().T,palette=palette,orient='h',capsize=.2)
     for idx in df_raw.index:
@@ -405,7 +414,26 @@ def create_num_patient(raw_df, org_full, org_col, ori_col=""):
         temp_table = raw_df.loc[:,['Organism',ori_col]]
         temp_table = temp_table.loc[raw_df[org_col]==org_full].values.tolist() #[['Staphylococcus aureus', 100]]
     return temp_table[0][1] #100
-
+def create_graphpalette_sec4_5(df,key_col,list_palettetemplate):
+    list_palette = []
+    cur_key_colval = ""
+    cur_pidx = -1
+    for idx in df.index:
+        p = 'darkorange'
+        try:
+            if df.loc[idx,key_col] == cur_key_colval:
+                p = list_palettetemplate[cur_pidx]
+            else:
+                if (cur_pidx < 0) or (cur_pidx >= (len(list_palettetemplate)-1)) :
+                    cur_pidx =0
+                else:
+                    cur_pidx = cur_pidx + 1
+                p = list_palettetemplate[cur_pidx]
+        except Exception as e:
+            print("Warning : error get palette : " + str(e))
+            pass
+        list_palette.append(p)
+    return list_palette    
 def create_graphpalette(numer_df, numer_col, org_col, org_full, denom_num, cutoff=70.0, origin=""):
     #Function for creating color palette of each organism based on 70.0 cutoff ratio (default)
     #Lower than cutoff : color gainsboro (very light grey)
@@ -431,11 +459,11 @@ def create_graphpalette(numer_df, numer_col, org_col, org_full, denom_num, cutof
 
 def create_table_surveillance_1(df_raw, lst_org, text_work_drug="N", freq_col="frequency_per_tested", upper_col="frequency_per_tested_uci", lower_col="frequency_per_tested_lci"):
     df_merge = pd.concat([pd.DataFrame(lst_org,columns=["Organism_fmt"]),df_raw],axis=1)
+    
     if text_work_drug == "N":
         df_merge = df_merge.drop(columns=["Organism"]).rename(columns={"Organism_fmt":"Organism"})
     else:
         df_merge = df_merge.drop(columns=["Organism","Priority_pathogen"]).rename(columns={"Organism_fmt":"Organism"})
-    
     for c in [freq_col,upper_col,lower_col]:
         df_merge[c+'_1'] = df_merge[c].astype(int)
         for idx in df_merge.index:

@@ -6,6 +6,7 @@
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
 import os
+import sys
 import csv
 from xlsx2csv import Xlsx2csv
 import logging #for creating error_log
@@ -33,6 +34,23 @@ def printlog(smessage,biserror,logger) :
         return True
     except:
         return False
+# read command line arguments
+def getcmdargtodict(logger):
+    dictarg = {}
+    try:
+        printlog("Command argument parameter is " + str(sys.argv), False, logger)
+        listarg = list(str(sys.argv).strip("][").split(","))
+        for sarg in listarg:
+            li = list(sarg.replace("'","").split(":"))
+            try:
+                dictarg[str(li[0]).strip()] = str(li[1]).strip()
+            except:
+                pass
+    except Exception as e: 
+        printlog("Warning : unable to read command argument parameter", False, logger)
+        logger.exception(e)
+    #print(dictarg)
+    return dictarg
 # Check that is there either CSV or XLSX with the specific file name or not
 def checkxlsorcsv(spath,sfilename) :
     bfound = False
@@ -158,7 +176,7 @@ def fn_addatbgroupbyconfig(df,dict_atbgroup,dict_ast,logger) :
             #Buid dict for create condiftion
             for i in range(len(latb)):
                 atb =  latb[i]
-                print(atb)
+                #print(atb)
                 if atb in df.columns:
                     dictR.update({atb: "R"})
                     dictI.update({atb: "I"})
