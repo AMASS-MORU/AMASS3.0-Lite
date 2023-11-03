@@ -296,7 +296,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (9.5-ioffset)*inch)
                     REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-                    df_profile = df_profile[ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE:]
+                    df_profile = df_profile[ANNEXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
                     page = page + 1
         else:
             REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of profiles" + "</b>"], 
