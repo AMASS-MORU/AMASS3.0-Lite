@@ -5,6 +5,7 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: CHALIDA RAMGSIWUTISAK
 # Created on: 30 AUG 2023 
+import AMASS_amr_const as AC
 import pandas as pd #for creating and manipulating dataframe
 CONST_SOFTWARE_VERSION ="3.0.1 Build 30 Aug 2023"
 #columns for AMASS microbiology_data.xlsx
@@ -29,6 +30,7 @@ CONST_NEWVARNAME_ASTMRSA = CONST_NEWVARNAME_PREFIX_AST + "mrsa"
 CONST_NEWVARNAME_ASTPEN = CONST_NEWVARNAME_PREFIX_AST + "pengroup"
 CONST_NEWVARNAME_AST3GCCBPN = CONST_NEWVARNAME_PREFIX_AST + "3gcsCarbs"
 CONST_NEWVARNAME_ASTVAN = CONST_NEWVARNAME_PREFIX_AST + "Vancomycin"
+CONST_NEWVARNAME_ASTVAN_RIS = AC.CONST_NEWVARNAME_PREFIX_RIS + "Vancomycin"
 #columns for AMASS dictionaries
 CONST_COL_AMASSNAME = "amass_name"
 CONST_COL_USERNAME = "user_name"
@@ -124,13 +126,13 @@ CONST_STYLE_IDEN_ED = "</para>"
 #Able to add more interested profile for pathogens
 #1 resistant profile  >>> "organism_escherichia_coli":[[CONST_NEWVARNAME_ASTCBPN,"1","crec"]]
 #2 resistant profiles >>> "organism_escherichia_coli":[[CONST_NEWVARNAME_ASTCBPN,"1","crec"], [CONST_NEWVARNAME_AST3GC,"1",CONST_NEWVARNAME_ASTCBPN,"0","3gcr-csec"]]
-dict_ast = {"organism_staphylococcus_aureus":  [[CONST_NEWVARNAME_ASTMRSA,"1","mrsa"]],
-            "organism_escherichia_coli":       [[CONST_NEWVARNAME_ASTCBPN,"1","crec"]],
-            "organism_klebsiella_pneumoniae":  [[CONST_NEWVARNAME_ASTCBPN,"1","crkp"]],
-            "organism_pseudomonas_aeruginosa": [[CONST_NEWVARNAME_ASTCBPN,"1","crpa"]],
-            "organism_acinetobacter_baumannii":[[CONST_NEWVARNAME_ASTCBPN,"1","crab"]],
-            "organism_enterococcus_faecalis":  [[CONST_NEWVARNAME_ASTVAN,"1","vrefa"]],
-            "organism_enterococcus_faecium":   [[CONST_NEWVARNAME_ASTVAN,"1","vrefm"]]}
+dict_ast = {"organism_staphylococcus_aureus":  [[AC.CONST_NEWVARNAME_ASTMRSA_RIS,"R","mrsa"]],
+            "organism_enterococcus_faecalis":  [[CONST_NEWVARNAME_ASTVAN_RIS,"R","vrefa"]],
+            "organism_enterococcus_faecium":   [[CONST_NEWVARNAME_ASTVAN_RIS,"R","vrefm"]],
+            "organism_escherichia_coli":       [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crec"]],
+            "organism_klebsiella_pneumoniae":  [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crkp"]],
+            "organism_pseudomonas_aeruginosa": [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crpa"]],
+            "organism_acinetobacter_baumannii":[[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crab"]]}
 
 dict_ris = {"resistant":"R","intermediate":"I","susceptible":"S"}
 
