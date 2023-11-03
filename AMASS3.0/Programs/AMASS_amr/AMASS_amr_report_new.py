@@ -6,6 +6,8 @@
 
 # Created on 20th April 2022 (V2.0)
 import math as m
+import gc 
+import psutil, os
 import logging #for creating error_log
 import re #for manipulating regular expression
 import pandas as pd #for creating and manipulating dataframe
@@ -77,7 +79,12 @@ tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
 
 #Global variables/CONST for report 
 
-
+def sub_printprocmem(sstate,logger) :
+    try:
+        process = psutil.Process(os.getpid())
+        AL.printlog("Memory usage at state " +sstate + " is " + str(process.memory_info().rss) + " bytes.",False,logger) 
+    except:
+        AL.printlog("Error get process memory usage at " + sstate,True,logger)
 
 def canvas_printpage(c,curpage,lastpage,today=date.today().strftime("%d %b %Y"),bisrotate90=False,ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1,istartpage=1):
     ARC.report_todaypage(c,55,30,"Created on: "+today)
@@ -122,8 +129,11 @@ def cover(c,logger,today=date.today().strftime("%d %b %Y")):
         contact_address = ARC.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Contact_address","Values"].tolist()[0]), coverpage=True)
         contact_email   = ARC.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Contact_email","Values"].tolist()[0]), coverpage=True)
         notes   = str(section1_result.loc[section1_result["Parameters"]=="notes_on_the_cover","Values"].tolist()[0])
-        spc_date_start  = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=True)
-        spc_date_end    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=True)
+        #change in v3.0 build 3010 to use overall min/max date
+        spc_date_start  = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=True)
+        spc_date_end    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=True)
+        #spc_date_start  = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=True)
+        #spc_date_end    = ARC.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="microbiology_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=True)
     else:
         hospital_name    = "NA"
         country_name    = "NA"
@@ -245,7 +255,7 @@ def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %
     intro_page1_2_6 = "− data sharing with national and international organizations to support decisions on resource allocation for interventions against AMR and to inform the implementation of action plans at national and global levels."
     intro_page1_3 = "When reporting AMR surveillance results, it is generally recommended that (a) duplicate results of bacterial isolates are removed, and (b) reports are stratified by infection origin (community−origin or hospital−origin), if possible [2]. "+ \
                     "Many hospitals in LMICs lack time and resources needed to analyze the data (particularly to deduplicate data and to generate tables and figures), write the reports, and to release the data or reports [4]."
-    intro_page1_4 = "AutoMated tool for Antimicrobial resistance Surveillance System (AMASS) was developed as an offline, open−access and easy−to−use application that allows a hospital to perform data analysis independently and generate isolate−based and sample−based surveillance reports stratified by infection origin from routinely collected electronic databases. The application was built in R, which is a free software environment. The application has been placed within a user−friendly interface that only requires the user to double−click on the application icon. The AMASS application can be downloaded at: <u><link href=\"https://www.amass.website\" color=\"blue\"fontName=\"Helvetica\">https://www.amass.website</link></u>"
+    intro_page1_4 = "AutoMated tool for Antimicrobial resistance Surveillance System (AMASS) was developed as an offline, open−access and easy−to−use application that allows a hospital to perform data analysis independently and generate AMR proportion and AMR frequency reports stratified by infection origin from routinely collected electronic databases. The application was built in R, which is a free software environment. The application has been placed within a user−friendly interface that only requires the user to double−click on the application icon. The AMASS application can be downloaded at: <u><link href=\"https://www.amass.website\" color=\"blue\"fontName=\"Helvetica\">https://www.amass.website</link></u>"
     intro_page1 = [intro_page1_1, 
                 add_blankline + intro_page1_2_1, 
                 iden1_op + intro_page1_2_2 + iden_ed, 
@@ -301,13 +311,13 @@ def section1_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")
     nodata_micro(c,'Section [1]: Data overview',startpage,lastpage,today)
 
 def section2_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
-    nodata_micro(c,'Section [2]: Isolate−based surveillance report',startpage,lastpage,today)
+    nodata_micro(c,'Section [2]: AMR proportion report',startpage,lastpage,today)
 
 def section3_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section3_page1_1_1 = "Proportions of antimicrobial−resistance infection stratified by origin of infection is not calculated because hospital admission date data is not available and infection origin variable is not available."
     section3_page1_1 = [section3_page1_1_1] 
     ######### SECTION3: PAGE1 #########
-    ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [3]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section3_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
     canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
@@ -315,14 +325,14 @@ def section4_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y")
     section4_page1_1_1 = "Incidence of infections per 100,000 tested population is not calculated because data on blood specimen with no growth is not available."
     section4_page1_1 = [section4_page1_1_1]
     ######### SECTION4: PAGE1 #########
-    ARC.report_title(c,'Report [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Report [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section4_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
     canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
 def section5_nodata(c,startpage,lastpage,today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     section5_page1_1_1 = "Incidence of infections per 100,000 tested population stratified by infection origin is not calculated because data on blood specimen with no growth is not available, or stratification by origin of infection cannot be done (due to hospital admission date variable is not available)."
     section5_page1_1 = [section5_page1_1_1]
     ######### SECTION5: PAGE1 #########
-    ARC.report_title(c,'Report [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Report [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_context(c,section5_page1_1, 1.0*inch, 8.5*inch, 460, 100, font_size=11)
     canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
@@ -456,7 +466,7 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
     blo_num_pos     = str(result_table.loc[result_table["Parameters"]=="Number_of_blood_culture_positive","Values"].tolist()[0])
     blo_num_pos_org = str(result_table.loc[result_table["Parameters"]=="Number_of_blood_culture_positive_for_organism_under_this_survey","Values"].tolist()[0])
     ##Page1
-    section2_page1_1_1 = "An isolate−based surveillance report is generated by default, even if the hospital_admission_data file is unavailable. "+ \
+    section2_page1_1_1 = "An AMR proportion report is generated by default, even if the hospital_admission_data file is unavailable. "+ \
                         "This is to enable hospitals with only microbiology data available to utilize the de−duplication and report generation functions of AMASS. " + \
                         "This report is without stratification by origin of infection."
     section2_page1_1_2 = "The report generated by the AMASS application version 3.0 includes only blood samples. " + \
@@ -494,21 +504,23 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
     section2_page2_2_1 = "*The negative culture included data values specified as 'no growth' in the dictionary_for_microbiology_data file (details on data dictionary files are in the method section) to represent specimens with negative culture for any microorganism. "
     section2_page2_2_2 = "**Only the first isolate for each patient per specimen type, per pathogen, and per evaluation period was included in the analysis."
     section2_page2_3_1 = "The following figures and tables show the proportion of patients with blood culture positive for antimicrobial non−susceptible isolates."
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        section2_page2_3_1 = "The following figures and tables show the proportion of patients with blood culture positive for antimicrobial resistant isolates."
     section2_page2_1 = [section2_page2_1_1]
     section2_page2_2 = [green_op + section2_page2_2_1 + green_ed, 
                         green_op + section2_page2_2_2 + green_ed]
     section2_page2_3 = [section2_page2_3_1]
     ##Page3-7
     section2_note_1 = "*Proportion of non−susceptible (NS) isolates represents the number of patients with blood culture positive for non−susceptible isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
-                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that AST unknown results are more than 30% of the total number of patients with blood culture positive for the organism. "
     if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
-        section2_note_1 = "*Proportion of resistant isolates represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
-                        "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+        section2_note_1 = "*Proportion of R represents represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
+                        "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that AST unknown results are more than 30% of the total number of patients with blood culture positive for the organism. "
 
-    section2_note_2_1 = "CI=confidence interval; NA=Not available/reported/tested; "
+    section2_note_2_1 = "CI=confidence interval; NA=not available/reported/tested; "
 
     ######### SECTION2: PAGE1 #########
-    ARC.report_title(c,'Section [2]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [2]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section2_page1_1, 1.0*inch, 6.5*inch, 460, 200, font_size=11)
     ARC.report_title(c,'Organisms under this survey:',1.07*inch, 6.8*inch,'#3e4444',font_size=12)
@@ -549,17 +561,17 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
             bPrintPage = False
             if list_sec2_atbcountperorg[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
                 #Fullpage
-                iPos_head_y = 9.5
+                iPos_head_y = 9.4
                 iPos_fig_y = 6.3+ifig_dis_offset
-                iPos_tbl_y =((6.42+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_sec2_atbnote[i]
                 bPrintPage = True
                 bIsStartofnewpage = True
             elif bIsStartofnewpage: 
                 #Half top page
-                iPos_head_y = 9.5
+                iPos_head_y = 9.4
                 iPos_fig_y = 6.3+ifig_dis_offset
-                iPos_tbl_y =((6.42+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_sec2_atbnote[i]
                 #Check if next require fullpage then print page (note + page no)
                 ii = i+1
@@ -573,7 +585,7 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
                 bIsStartofnewpage = False
             else:
                 #Half bottom page  
-                iPos_head_y = 5.5
+                iPos_head_y = 5.4
                 iPos_fig_y = 2.25+ifig_dis_offset
                 iPos_tbl_y =((2.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_curnote+list_sec2_atbnote[i]
@@ -581,7 +593,7 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
                 bPrintPage = True
                 bIsStartofnewpage = True
             #Print content
-            ARC.report_title(c,'Section [2]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+            ARC.report_title(c,'Section [2]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
             line_1_1 = ["<b>" + "Blood: " + lst_org_format[i] + "</b>"]
             line_1_2 = [bold_blue_ital_op + "( No. of patients = " + str(lst_numpat[i]) + " )" + bold_blue_ital_ed]
             ARC.report_context(c,line_1_1, 1.0*inch, iPos_head_y*inch, 300,50, font_size=12, font_align=TA_LEFT)
@@ -621,7 +633,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
     pat_num_pos_org_hos = str(sec3_res.loc[sec3_res["Parameters"]=="Number_of_patients_with_hospital_origin_BSI","Values"].tolist()[0])
     pat_num_pos_org_unk = str(sec3_res.loc[sec3_res["Parameters"]=="Number_of_patients_with_unknown_origin_BSI","Values"].tolist()[0])
     ##Page1
-    section3_page1_1_1 = "An isolate−based surveillance report with stratification by origin of infection is generated only if admission date data are available in the raw data file(s) with the appropriate specification in the data dictionaries."
+    section3_page1_1_1 = "An AMR proportion report with stratification by origin of infection is generated only if admission date data are available in the raw data file(s) with the appropriate specification in the data dictionaries."
     section3_page1_1_2 = "Stratification by origin of infection is used as a proxy to define where the bloodstream infection (BSI) was contracted (hospital versus community)."
     section3_page1_1_3 = "The definitions of infection origin proposed by the WHO GLASS are used. In brief, community−origin BSI is defined as patients in the hospital for less than or equal to two calendar days when the first specimen culture postive for the pathogen was taken. " + \
                         "Hospital−origin BSI is defined as patients admitted for more than two calendar days when the first specimen culture positive for the pathogen was taken."
@@ -652,16 +664,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
                         iden2_op + "<i>" + section3_page1_2_9 + "</i>" + iden_ed, 
                         iden2_op + bold_blue_ital_op + section3_page1_2_10 + bold_blue_ital_ed + iden_ed]
     ##Page2
-    """
-    section3_page2_org = ["<b>" + "Organism" + "</b>", 
-                        "<b>" + "" + "</b>", 
-                        "<b>" + "" + "</b>", 
-                        "<b>" + "" + "</b>"]
-    for i in range(len(lst_org_format)):
-        section3_page2_org.append("<b>" + lst_org_format[i] + "</b>")
-    section3_page2_org.append("<b>" + "Total:" + "</b>")
-    """
-    section3_page2_1_1 = "NA= Not applicable (hospital admission date or infection origin data are not available)"
+    section3_page2_1_1 = "NA=not applicable (hospital admission date or infection origin data are not available)"
     section3_page2_1_2 = "*Only the first isolate for each patient per specimen type per pathogen under the reporting period is included in the analysis. Please refer to Section [2] for details on how this number was calculated from the raw microbiology_data file."
     section3_page2_1_3 = "**The definitions of infection origin proposed by the WHO GLASS is used. In brief, community−origin BSI was defined as patients in the hospital for less than or equal to two calendar days when the first blood culture positive for the pathogen was taken."
     section3_page2_1_4 = "Hospital−origin BSI was defined as patients admitted for more than two calendar days when the first specimen culture positive for the pathogen was taken."
@@ -674,15 +677,17 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
                         green_op + section3_page2_1_5 + green_ed, 
                         green_op + section3_page2_1_6 + green_ed]
     section3_page2_2_1 = "The following figures and tables below show the proportion of patients with blood culture positive for antimicrobial non−susceptible isolates stratified by infection of origin."
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        section3_page2_2_1 = "The following figures and tables below show the proportion of patients with blood culture positive for antimicrobial resistant isolates stratified by infection of origin."
     section3_page2_2 = [section3_page2_2_1]
     section3_note_1 = "*Proportion of non−susceptible (NS) isolates represents the number of patients with blood culture positive for non−susceptible isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
-                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
+                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that AST unknown results are more than 30% of the total number of patients with blood culture positive for the organism. "
     if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
-        section3_note_1 = "*Proportion of resistant isolates represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
-                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that testing with the antibiotic occurred for less than 70% of the total number of patients with blood culture positive for the organism. "
-    section3_note_2_1 = "CI=confidence interval; NA=Not available/reported/tested; "
+        section3_note_1 = "*Proportion of R represents the number of patients with blood culture positive for resistant isolates (numerator) over the total number of patients with blood culture positive for the organism and the organism was tested for susceptibility against the antibiotic (denominator). " + \
+                    "The AMASS application de−duplicated the data by including only the first isolate per patient per specimen type per evaluation period. Grey bars indicate that AST unknown results are more than 30% of the total number of patients with blood culture positive for the organism. "
+    section3_note_2_1 = "CI=confidence interval; NA=not available/reported/tested"
     ######### SECTION3: PAGE1 #########
-    ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [3]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section3_page1_1, 1.0*inch, 5.9*inch, 460, 250, font_size=11)
@@ -693,11 +698,6 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
     ARC.report_title(c,'Note',1.07*inch, 6.0*inch,'darkgreen',font_size=12)
     ARC.report_context(c,section3_page2_1, 1.0*inch, 2.5*inch, 460, 250, font_size=11)
     ARC.report_context(c,section3_page2_2, 1.0*inch, 1.5*inch, 460, 50, font_size=11)
-    """
-    iorgcount = len(section3_page2_org)
-    y = 3.80+(iorgcount*0.22)
-    ARC.report_context(c,section3_page2_org, 1.0*inch, y*inch, 460, 250, font_size=11, line_space=18.1)
-    """
     table_draw = ARC.report3_table(sec3_pat_val)
     table_draw.wrapOn(c, 500, 300)
     #table_draw.drawOn(c, 3.2*inch, 6.9*inch)
@@ -713,9 +713,9 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             ifig_dis_H = ARC.cal_sec2and3_fig_height(list_sec3_atbcountperorg[i]) 
             sOrgI = "_" + str(i)
             #print y position [y is bIsOrgfitonepage,y is not bIsOrgfitonepage]
-            list_head_y =[9.5,5.5]
+            list_head_y =[9.4,5.4]
             list_fig_y =[6.3,2.25]
-            list_tbl_y =[6.42,2.45]
+            list_tbl_y =[6.45,2.45]
             """
             Layout for pic
             0.3*inch is left margin
@@ -725,7 +725,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             if only 1 org per page using the 6.3*inch and adjust by different of image high and 3.5*inch normal high
             """
             #CO
-            ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+            ARC.report_title(c,'Section [3]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
             ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
             line_1_1 = ["<b>" + "Blood: " + lst_org_format[i] + "</b>"]
             line_1_2 = ["<b>" + "Community-origin" + "</b>"]
@@ -734,11 +734,13 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             ARC.report_context(c,line_1_2, 4.0*inch, list_head_y[0]*inch, 200, 50, font_size=12, font_align=TA_LEFT)
             ARC.report_context(c,line_1_3, 5.5*inch, list_head_y[0]*inch, 200, 50, font_size=12, font_align=TA_LEFT)
             c.drawImage(path_result + 'Report3_AMR_' + lst_org_short[i] + "_Community.png", 0.3*inch, (list_fig_y[0]+(3.5 - ifig_dis_H))*inch, preserveAspectRatio=True, width=3.5*inch, height=ifig_dis_H*inch,showBoundary=False) 
+            #print(list_sec3_org_table_CO[i])
             table_draw = ARC.report2_table_nons(list_sec3_org_table_CO[i])
             table_draw.wrapOn(c, 500, 300)
             table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[0]+3.5)-((len(list_sec3_org_table_CO[i])*0.25)+0.5))*inch)
             if bIsOrgfitonepage == True:
-                snote = [section3_note_1 + section3_note_2_1 + ARC.get_atbnote(list_sec3_atbnote_CO[i])]
+                s = ARC.get_atbnote(list_sec3_atbnote_CO[i])
+                snote = [section3_note_1 + section3_note_2_1 + ("; " if len(s)>0 else " ") + s]
                 ARC.report_context(c,snote, 1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 
                 canvas_printpage(c, ipage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
@@ -747,7 +749,7 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             y = 1 #specify which print position in y position list to be used
             if bIsOrgfitonepage == True:
                 y=0
-            ARC.report_title(c,'Section [3]: Isolate−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+            ARC.report_title(c,'Section [3]: AMR proportion report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
             ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
             line_1_1 = ["<b>" + "Blood: " + lst_org_format[i] + "</b>"]
             line_1_2 = ["<b>" + "Hospital-origin" + "</b>"]
@@ -759,7 +761,8 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             table_draw = ARC.report2_table_nons(list_sec3_org_table_HO[i])
             table_draw.wrapOn(c, 500, 300)
             table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[y]+3.5)-((len(list_sec3_org_table_HO[i])*0.25)+0.5))*inch)
-            snote = [section3_note_1 + section3_note_2_1 + ARC.get_atbnote(list_sec3_atbnote_HO[i])]
+            s = ARC.get_atbnote(list_sec3_atbnote_HO[i])
+            snote = [section3_note_1 + section3_note_2_1 +  ("; " if len(s)>0 else " ") + s]
             ARC.report_context(c,snote, 1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
             canvas_printpage(c, ipage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
             ipage = ipage+1
@@ -784,8 +787,8 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     blo_num = result_table.loc[result_table["Parameters"]=="Number_of_blood_specimens_collected","Values"].tolist()[0]
     pat_num_pos_blo = result_table.loc[result_table["Parameters"]=="Number_of_patients_sampled_for_blood_culture","Values"].tolist()[0]
     ##Page1
-    section4_page1_1_1 = "A sample−based surveillance report is generated if data of culture negative is available."
-    section4_page1_1_2 = "The sample−based approach involves the collection of data on all blood samples taken for microbiological testing and includes information on the number of positive blood samples for a specific specimen type (both pathogens under the survey and other bacteria) as well as number of negative (no microbial growth) samples. " + \
+    section4_page1_1_1 = "A AMR frequency report is generated if data of culture negative is available."
+    section4_page1_1_2 = "The AMR frequency approach involves the collection of data on all blood samples taken for microbiological testing and includes information on the number of positive blood samples for a specific specimen type (both pathogens under the survey and other bacteria) as well as number of negative (no microbial growth) samples. " + \
                         "After removal of duplicate results and assuming that routine blood culture testing is applied systematically, we can use the number of tested patients as a proxy for a number of patients with new cases of bloodstream infection (BSI)."
     section4_page1_1 = [section4_page1_1_1, add_blankline + section4_page1_1_2]
     section4_page1_2_1 = "The microbiology_data file had:"
@@ -811,14 +814,16 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     section4_page2_1 = "*Frequency of infection per 100,000 tested patients represents the number of patients with blood culture positive for a pathogen (numerator) over the total number of tested patients (denominator). " + \
                         "The AMASS application de−duplicates the data by included only the first isolate of each patient per specimen type per reporting period."
                         
-    section4_page2_2 = "CI=confidence interval; NS=non−susceptible; NA=Not available/reported/tested;"
+    section4_page2_2 = "CI=confidence interval; NS=non−susceptible; NA=not available/reported/tested"
     if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
-        section4_page2_2 = "CI=confidence interval; R=Resistant; NA=Not available/reported/tested;"
+        section4_page2_2 = "CI=confidence interval; R=resistant; NA=not available/reported/tested"
+    
+    s = ARC.get_atbnoteper_priority_pathogen(sec4_pat)
     section4_page2 = [section4_page2_1, section4_page2_2]
-    section4_page2_2 = section4_page2_2 + " " + ARC.get_atbnoteper_priority_pathogen(sec4_pat)
+    section4_page2_2 = section4_page2_2 + " " + ("; " if len(s) > 0 else " ") + s
     section4_page3 = [section4_page2_1, section4_page2_2]
     ######### SECTION4: PAGE1 #########
-    ARC.report_title(c,'Section [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section4_page1_1, 1.0*inch, 6.6*inch, 460, 200, font_size=11)
     ARC.report_title(c,'Results',1.07*inch, 6.5*inch,'#3e4444',font_size=12)
@@ -828,7 +833,7 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     ARC.report_context(c,section4_page1_4, 1.0*inch, 1.5*inch, 460, 50, font_size=11)
     canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION4: PAGE2 #########
-    ARC.report_title(c,'Section [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Pathogens" + "</b>"]
     line_1_3 = [bold_blue_ital_op + " ( No. of patients = " + str(pat_num_pos_blo) + " )" + bold_blue_ital_ed]
     ARC.report_context(c,line_1_1, 1.0*inch, 9.3*inch, 300, 50, font_size=12, font_align=TA_LEFT)
@@ -842,8 +847,10 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     ARC.report_context(c,section4_page2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
     canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION4: PAGE3 #########
-    ARC.report_title(c,'Section [4]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Non-susceptible pathogens" + "</b>"]
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        line_1_1 = ["<b>" + "Blood: " + " Resistant pathogens" + "</b>"]    
     line_1_3 = [bold_blue_ital_op + " ( No. of patients = " + str(pat_num_pos_blo) + " )" + bold_blue_ital_ed]
     ARC.report_context(c,line_1_1, 1.0*inch, 9.3*inch, 300, 50, font_size=12, font_align=TA_LEFT)
     ARC.report_context(c,line_1_3, 5.5*inch, 9.3*inch, 200, 50, font_size=12, font_align=TA_LEFT)
@@ -876,7 +883,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     pat_num_unk     = result_table.loc[result_table["Parameters"]=="Number_of_patients_with_unknown_origin","Values"].tolist()[0]
     pat_num_oth     = result_table.loc[result_table["Parameters"]=="Number_of_patients_had_more_than_one_admission","Values"].tolist()[0]
     ##Page1
-    section5_page1_1_1 = "A sample−based surveillance report with stratification by origin of infection is generated only if data of culture negative is available and admission date or a variable containing the classification is available in the raw data file with the appropriate specification in the data dictionaries."
+    section5_page1_1_1 = "A AMR frequency report with stratification by origin of infection is generated only if data of culture negative is available and admission date or a variable containing the classification is available in the raw data file with the appropriate specification in the data dictionaries."
     section5_page1_1 = [section5_page1_1_1]
     section5_page1_2_1 = "The data included in the analysis had:"
     section5_page1_2_2 = "<i>" + "Specimen collection dates ranged from " + "</i>" + \
@@ -919,15 +926,16 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
                         "The AMASS application de−duplicates the data by included only the first isolate of each patient per specimen type per reporting period."
     section5_page2_1v2= "*Frequency of infection per 100,000 tested population at risk of HAI represents the number of patients with blood culture positive for a pathogen (numerator) over the total number of tested population at risk of HAI (denominator). The AMASS application de−duplicates the data by included only the first isolate of each patient per specimen type per reporting period."
     section5_page2_1v3= "*Frequency of infection per 100,000 tested patients represents the number of patients with blood culture positive for a pathogen (numerator) over the total number of tested patients (denominator). The AMASS application de−duplicates the data by included only the first isolate of each patient per specimen type per reporting period."
-    section5_page2_2 = "CI=confidence interval; NS=non−susceptible; NA=Not available/reported/tested;"
+    section5_page2_2 = "CI=confidence interval; NA=not available/reported/tested"
     if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
-        section5_page2_2 = "CI=confidence interval; R=Resistant; NA=Not available/reported/tested;"
-    section5_page2 = [section5_page2_1, section5_page2_2]
-    section5_page2v2 = [section5_page2_1v2, section5_page2_2]
-    section5_page2v3 = [section5_page2_1v3, section5_page2_2 + ARC.get_atbnoteper_priority_pathogen(sec5_pat)]
-    section5_page2v4 = [section5_page2_1, section5_page2_2+ ARC.get_atbnoteper_priority_pathogen(sec5_pat)]
+        section5_page2_2 = "CI=confidence interval; NA=not available/reported/tested"
+    section5_page2 = [section5_page2_1 + " " + section5_page2_2]
+    s = ARC.get_atbnoteper_priority_pathogen(sec5_pat)
+    section5_page2v2 = [section5_page2_1v2 + " " + section5_page2_2]
+    section5_page2v3 = [section5_page2_1v3 + " " + section5_page2_2 + ("; " if len(s) > 0 else " ") + s]
+    section5_page2v4 = [section5_page2_1 + " " +  section5_page2_2+ ("; " if len(s) > 0 else " ") + s]
     ######### SECTION5: PAGE1 #########
-    ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section5_page1_1, 1.0*inch, 8.0*inch, 460, 100, font_size=11)
@@ -938,7 +946,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     ARC.report_context(c,section5_page1_4, 1.0*inch, 1.0*inch, 460, 50, font_size=11)
     canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE2 #########
-    ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Pathogens" + "</b>"]
     line_1_2 = ["<b>" + "Community-origin" + "</b>"]
@@ -956,7 +964,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     ARC.report_context(c,section5_page2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
     canvas_printpage(c, startpage+1, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE3 #########
-    ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Pathogens" + "</b>"]
     line_1_2 = ["<b>" + "Hospital-origin" + "</b>"]
@@ -973,9 +981,11 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     ARC.report_context(c,section5_page2v2, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
     canvas_printpage(c, startpage+2, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE4 #########
-    ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Non-susceptible pathogens" + "</b>"]
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        line_1_1 = ["<b>" + "Blood: " + " Resistant pathogens" + "</b>"]
     line_1_2 = ["<b>" + "Community-origin" + "</b>"]
     line_1_3 = [bold_blue_ital_op + " ( No. of patients = " + str(pat_num_w2day) + " )" + bold_blue_ital_ed]
     ARC.report_context(c,line_1_1, 1.0*inch, 9.0*inch, 300, 50, font_size=12, font_align=TA_LEFT)
@@ -989,9 +999,11 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     ARC.report_context(c,section5_page2v4, 1.0*inch, 0.4*inch, 460, 130, font_size=9,line_space=14)
     canvas_printpage(c, startpage+3, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION5: PAGE5 #########
-    ARC.report_title(c,'Section [5]: Sample−based surveillance report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Section [5]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'with stratification by infection origin',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
     line_1_1 = ["<b>" + "Blood: " + " Non-susceptible pathogens" + "</b>"]
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        line_1_1 = ["<b>" + "Blood: " + " Resistant pathogens" + "</b>"]
     line_1_2 = ["<b>" + "Hospital-origin" + "</b>"]
     line_1_3 = [bold_blue_ital_op + " ( No. of patients = " + str(pat_num_wo2day) + " )" + bold_blue_ital_ed]
     ARC.report_context(c,line_1_1, 1.0*inch, 9.0*inch, 300, 50, font_size=12, font_align=TA_LEFT)
@@ -1011,18 +1023,11 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
-    #iden3_op = "<para leftindent=\"105\">"
+
     iden_ed = "</para>"
     bold_blue_ital_op = "<b><i><font color=\"#000080\">"
     bold_blue_ital_ed = "</font></i></b>"
-    """
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    green_op = "<font color=darkgreen>"
-    green_ed = "</font>"
-    tab1st = "&nbsp;"
-    tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
-    """
+
     add_blankline = "<br/>"
     ##variables
     spc_date_start = result_table.loc[(result_table["Type_of_data_file"]=="microbiology_data")&(result_table["Parameters"]=="Minimum_date"),"Values"].tolist()[0]
@@ -1094,21 +1099,6 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
                         iden2_op + "<i>" + section6_page1_2_17 + "</i>" + iden_ed, 
                         iden2_op + "<i>" + bold_blue_ital_op + section6_page1_2_18 + bold_blue_ital_ed + "</i>" + iden_ed]
     
-    """
-    section3_page2_org = ["<b>" + "Organism" + "</b>", 
-                        "<b>" + "" + "</b>", 
-                        "<b>" + "" + "</b>", 
-                        "<b>" + "" + "</b>", 
-                        "<b>" + s_aureus + "</b>", 
-                        "<b>" + ent_spp + "</b>", 
-                        "<b>" + s_pneumoniae + "</b>", 
-                        "<b>" + sal_spp + "</b>", 
-                        "<b>" + e_coli + "</b>", 
-                        "<b>" + k_pneumoniae + "</b>", 
-                        "<b>" + p_aeruginosa + "</b>", 
-                        "<b>" + aci_spp + "</b>", 
-                        "<b>" + "Total:" + "</b>"]
-    """
     section6_page2_org = ["<b>" + "Organism" + "</b>", 
                         "<b>" + "" + "</b>", 
                         "<b>" + "" + "</b>", 
@@ -1122,34 +1112,17 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
                         "The de−duplicated data was stratified by infection origin (community−origin infection or hospital−origin infection)."
     section6_page2_1 = [section6_page2_1_1]
     section6_page2_2_1 = "The following figures and tables show the mortality of patients who were blood culture positive for antimicrobial non−susceptible and susceptible isolates."
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        section6_page2_2_1 = "The following figures and tables show the mortality of patients who were blood culture positive for antimicrobial resistant and susceptible isolates."
     section6_page2_2 = [section6_page2_2_1]
     ##Page3
     stemp = "NS=non−susceptible; S=susceptible; CI=confidence interval"
     if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
-        stemp = "R=Resistant;NR=non-resistant (sensitve or intermediate resistant isolate); CI=confidence interval" 
+        stemp = "R=resistant; S=susceptible (including sensitive and intermediate categories); CI=confidence interval" 
     section6_page3_1_1 = "*Mortality is the proportion (%) of in−hospital deaths (all−cause deaths). " + \
                         "This represents the number of in−hospital deaths (numerator) over the total number of patients with blood culture positive for the organism and the type of pathogen (denominator). " + \
                         "The AMASS application de−duplicates the data by included only the first isolate per patient per specimen type per evaluation period. " + \
                         stemp
-                        #"NS=non−susceptible; S=susceptible; CI=confidence interval"
-    """
-    #DL                    
-    section6_page3_1_2 = "Fluoroquinolone−NS=NS to any fluoroquinolone tested"
-    section6_page3_1_3 = "**3GC-NS [for this section]: NS to any 3rd-generation cephalosporin excluding isolates which are non-susceptible to carbapenem. " + \
-                        "***3GC-S [for this section]: S to all 3rd-generation cephalosporin tested excluding isolates which are non-susceptible to carbapenem."
-    #CL
-    # section6_page3_1_2 = "Penicillin−NS=NS to Penicillin G tested; Fluoroquinolone−NS=NS to any fluoroquinolone tested"
-    # section6_page3_1_3 = "**3GC-NS [for this section]: NS to any 3rd-generation cephalosporin and NS to any carbapenem (patients without AST results for 3GC or carbapenem were not counted in the denominator). " + \
-    #                     "***3GC-S [for this section]: S to any 3rd-generation cephalosporin tested."
-
-    section6_page3_1_4 = "Carbapenem-NS=NS to any Carbapenem tested"
-    
-    section6_page3_1 = [section6_page3_1_1]
-    section6_page3_2 = [section6_page3_1_1 + "; " + section6_page3_1_2]
-    section6_page3_3 = [section6_page3_1_1 + "; " + section6_page3_1_3]
-    section6_page3_4 = [section6_page3_1_1 + "; " + section6_page3_1_4]
-    """
-
     ######### SECTION6: PAGE1 #########
     ARC.report_title(c,'Section [6] Mortality involving AMR and',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'antimicrobial−susceptible infections',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
@@ -1260,7 +1233,8 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
             #Print page (note + page no) if needed
             if bPrintPage:
                 #scurenote  =  section6_page3_1_1 + "; " + scurenote 
-                section6_page3 = section6_page3_1_1 + "; " + ARC.get_atbnote_sec6(list_curnote)
+                s = ARC.get_atbnote_sec6(list_curnote)
+                section6_page3 = section6_page3_1_1 + ("; " if len(s) > 0 else " ") + s
                 #ARC.report_context(c,[scurenote] ,1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 ARC.report_context(c,[section6_page3] ,1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)
                 iPage = iPage + 1
@@ -1278,17 +1252,12 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     ##paragraph variables
     iden1_op = "<para leftindent=\"35\">"
     iden2_op = "<para leftindent=\"70\">"
-    #iden3_op = "<para leftindent=\"105\">"
     iden_ed = "</para>"
     bold_blue_ital_op = "<b><i><font color=\"#000080\">"
     bold_blue_ital_ed = "</font></i></b>"
-    #bold_blue_op = "<b><font color=\"#000080\">"
-    #bold_blue_ed = "</font></b>"
     green_op = "<font color=darkgreen>"
     green_ed = "</font>"
     add_blankline = "<br/>"
-    #tab1st = "&nbsp;"
-    #tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
     ##variables
     spc_date_start  = result_table.loc[result_table["Parameters"]=="Minimum_date","Values"].tolist()[0]
     spc_date_end    = result_table.loc[result_table["Parameters"]=="Maximum_date","Values"].tolist()[0]
@@ -1302,7 +1271,7 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     oth_num_pos_plus= result_table.loc[result_table["Parameters"]=="Number_of_others_culture_positive","Values"].tolist()[0]
     
     ##Page1
-    annexA_page1_1_1 = "This supplementary report has two parts; including (A1) isolate-based notifiable bacterial infections and (A2) mortality involving notifiable bacterial infections. The isolate-based notifiable bacterial infections supplementary report is generated by default, even if the hospital_admission_data file is unavailable. This is to enable hospitals with only microbiology data available to utilize the de-duplication and report generation functions of AMASS."
+    annexA_page1_1_1 = "This supplementary report has two parts; including (A1) notifiable bacterial infections and (A2) mortality involving notifiable bacterial infections. The AMR proportion notifiable bacterial infections supplementary report is generated by default, even if the hospital_admission_data file is unavailable. This is to enable hospitals with only microbiology data available to utilize the de-duplication and report generation functions of AMASS."
     annexA_page1_1_2 = "Please note that the completion of this supplementary report is strongly associated with the availability of data (particularly, all bacterial pathogens and all types of specimens) and the completion of the data dictionary files to make sure that the AMASS application understands the notifiable bacteria and each type of specimens."
     annexA_page1_1_3 = "Annex A includes various type of specimens including blood, cerebrospinal fluid (CSF), respiratory tract specimens, urine, genital swab, stool and other or unknown sample types. The microorganisms in this report were initially selected from common notifiable bacterial diseases in Thailand."
     annexA_page1_1 = [annexA_page1_1_1, 
@@ -1347,7 +1316,7 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     ARC.report_context(c,annexA_page1_2, 1.0*inch, 0.5*inch, 460, 100,font_size=11)
     canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### ANNEX A: PAGE2 ##########
-    ARC.report_title(c,'Annex A1: Isolated-based notifiable bacterial infections',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_title(c,'Annex A1: Notifiable bacterial infections',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Results',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,annexA_page2_1, 1.0*inch, 5.9*inch, 460, 250,font_size=11)
     table_draw = ARC.report_table_annexA_page2(pat_table)
@@ -1361,21 +1330,6 @@ def annexA_A1(c,logger,result_table, org_table, pat_table,
     
 def annexA_A2(c,logger,mor_table, startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
-    """
-    iden1_op = "<para leftindent=\"35\">"
-    iden2_op = "<para leftindent=\"70\">"
-    iden3_op = "<para leftindent=\"105\">"
-    iden_ed = "</para>"
-    bold_blue_ital_op = "<b><i><font color=\"#000080\">"
-    bold_blue_ital_ed = "</font></i></b>"
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    green_op = "<font color=darkgreen>"
-    green_ed = "</font>"
-    add_blankline = "<br/>"
-    tab1st = "&nbsp;"
-    tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
-    """
     ##variables
     ##Page3
     annexA_page3_1_1 = "A report on mortality involving notifiable bacterial infections is generated only if data on patient outcomes (i.e. discharge status) are available. The term \"mortality involving notifiable bacterial infections\" was used because the mortality reported was all-cause mortality. This measure of mortality included deaths caused by or related to other underlying and intermediate causes. The AMASS application merged the microbiology data file and hospital admission data file. The merged dataset was then de-duplicated so that only the first isolate per patient per specimen per reporting period was included in the analysis."
@@ -1400,20 +1354,6 @@ def annexA_A2(c,logger,mor_table, startpage,lastpage, today=date.today().strftim
 
 def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
-    """"
-    iden1_op = "<para leftindent=\"35\">"
-    iden2_op = "<para leftindent=\"70\">"
-    iden3_op = "<para leftindent=\"105\">"
-    iden_ed = "</para>"
-    bold_blue_ital_op = "<b><i><font color=\"#000080\">"
-    bold_blue_ital_ed = "</font></i></b>"
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    green_op = "<font color=darkgreen>"
-    green_ed = "</font>"
-    tab1st = "&nbsp;"
-    tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
-    """
     add_blankline = "<br/>"
     ##variables
     ##Page1
@@ -1453,20 +1393,8 @@ def annexB(c,logger,blo_table, blo_table_bymonth, startpage,lastpage, today=date
     ARC.report_context(c,annexB_page1_2, 1.0*inch, 0.8*inch, 460, 130, font_size=9,line_space=14)
     canvas_printpage(c,startpage+1,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
-def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
+def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
-    """
-    iden1_op = "<para leftindent=\"35\">"
-    iden2_op = "<para leftindent=\"70\">"
-    iden3_op = "<para leftindent=\"105\">"
-    iden_ed = "</para>"
-    bold_blue_ital_op = "<b><i><font color=\"#000080\">"
-    bold_blue_ital_ed = "</font></i></b>"
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    tab1st = "&nbsp;"
-    tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
-    """
     green_op = "<font color=darkgreen>"
     green_ed = "</font>"
     add_blankline = "<br/>"
@@ -1510,7 +1438,7 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
                     "Section three would be generated only when data on admission date are available. " + \
                     "This is because these data are required for the stratification by origin of infection. " + \
                     "Section four would be generated only when data of specimens with culture negative (no microbial growth) are available in the microbiology data. " + \
-                    "This is because these data are required for the sample−based approach. " + \
+                    "This is because these data are required for the AMR frequency approach. " + \
                     "Section five would be generated only when both data of specimens with culture negative and admission date are available. " + \
                     "Section six would be generated only when mortality data are available."
     method_page2_2_2 = add_blankline + "Mortality was calculated from the number of in−hospital deaths (numerator) over the total number of patients with blood culture positive for the organism (denominator). " + \
@@ -1546,13 +1474,14 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
     ##Page4
     method_page4_1 = ["<b>" + "Organisms included for the AMR Surveillance Report:" + "</b>"] 
     method_page4_2 = []
-    icountorg = len(lst_org_full)
+    icountorg = len(lst_org_format)
     ihalf = m.ceil(icountorg/2)
     for i in range(icountorg):
         if i < ihalf:
-            method_page4_1.append("− " + lst_org_full[i])
+            method_page4_1.append("− " + lst_org_format[i])
         else:
-            method_page4_2.append("− " + lst_org_full[i])
+            method_page4_2.append("− " + lst_org_format[i])
+
     method_page4_1.append("The eight organisms and antibiotics included in the report were selected based on the global priority list of antibiotic resistant bacteria and Global Antimicrobial Resistance Surveillance System (GLASS) of WHO [1,2].")
     method_page4_5_1 = "<b>" + "Definitions:" + "</b>"
     method_page4_5_2 = "The definitions of infection origin proposed by the WHO GLASS was used [1]. In brief, community−origin bloodstream infection (BSI) was defined for patients in the hospital within the first two calendar days of admission when the first blood culture positive specimens were taken. " + \
@@ -1609,8 +1538,8 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
     ARC.report_context(c,method_page3_4, 1.0*inch, 1.7*inch, 460, 80, font_size=11)
     canvas_printpage(c,startpage+2,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE4 ##########
-    ARC.report_context(c,method_page4_1, 1.0*inch, 9.0*inch, 460, 120, font_size=11)
-    ARC.report_context(c,method_page4_2, 4.0*inch, 8.75*inch, 460, 120, font_size=11)
+    ARC.report_context(c,method_page4_1, 1.0*inch, 9.2*inch, 460, 120, font_size=11)
+    ARC.report_context(c,method_page4_2, 4.0*inch, 8.95*inch, 460, 120, font_size=11)
     ARC.report_context(c,method_page4_5, 1.0*inch, 3.0*inch, 460, 450, font_size=11)
     u = inch/10.0
     c.setLineWidth(2)
@@ -1624,28 +1553,16 @@ def method(c,logger,lst_org_full,startpage,lastpage, today=date.today().strftime
 
 def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
-    """
-    iden1_op = "<para leftindent=\"35\">"
-    iden2_op = "<para leftindent=\"70\">"
-    iden3_op = "<para leftindent=\"105\">"
-    iden_ed = "</para>"
-    bold_blue_ital_op = "<b><i><font color=\"#000080\">"
-    bold_blue_ital_ed = "</font></i></b>"
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    green_op = "<font color=darkgreen>"
-    green_ed = "</font>"
-    tab1st = "&nbsp;"
-    tab4th = "&nbsp;&nbsp;&nbsp;&nbsp;"
-    """
     add_blankline = "<br/>"
     ##variables
     ##Investor
     invest_1_1 = "The AMASS application is being developed by Cherry Lim, Clare Ling, Elizabeth Ashley, Paul Turner, Rahul Batra, Rogier van Doorn, Soawapak Hinjoy, Sopon Iamsirithaworn, Susanna Dunachie, Tri Wangrangsimakul, Viriya Hantrakun, William Schilling, John Stelling, Jonathan Edgeworth, Guy Thwaites, Nicholas PJ Day, Ben Cooper and Direk Limmathurotskul."
-    invest_1_2 = "AMASS version 3.0 is being developed by Chalida Rangsiwutisak, Cherry Lim, Paul Tuner, John Stelling and Direk Limmathurotsakul."
-    invest_1_3 = "AMASS version 1.0 was funded by the Wellcome Trust (grant no. 206736 and 101103). C.L. is funded by a Research Training Fellowship (grant no. 206736) and D.L. is funded by an Intermediate Training Fellowship (grant no. 101103) from the Wellcome Trust."
-    invest_1_4 = "AMASS version 2.0,3.0 was funded by the Wellcome Trust Institutional Translational Partnership Award- MORU"
-    invest_1 = [invest_1_1, add_blankline+invest_1_2, add_blankline+invest_1_3, add_blankline+invest_1_4]
+    invest_1_2 = "The AMASS application version 2.0 and 3.0 was developed by Chalida Rangsiwutisak, Preeyarach Klaytong, Prapass Wannapinij, Paul Tuner, John Stelling, Cherry Lim and Direk Limmathurotsakul."
+    invest_1_3 = "The AMASS application version 1.0 was funded by the Wellcome Trust (grant no. 206736 and 101103). C.L. was funded by a Research Training Fellowship (grant no. 206736) and D.L. was funded by an Intermediate Training Fellowship (grant no. 101103) from the Wellcome Trust."
+    invest_1_4 = "The AMASS application version 2.0 and 3.0 was funded by the Wellcome Trust (grant no. 224681/Z/21/Z and Institutional Translational Partnership Award-MORU) "
+    invest_1 = [invest_1_1, add_blankline+invest_1_2]
+    
+    invest_1_xtra = [invest_1_3, add_blankline+invest_1_4]
     
     invest_2_1 = "If you have any queries about AMASS, please contact:"
     invest_2_2 = "For technical information:"
@@ -1662,15 +1579,38 @@ def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"
                 "<b>"+add_blankline+invest_2_6+"</b>", 
                 invest_2_7]
     ############# INVESTOR ############
-    ARC.report_title(c,'Investigator team',1.07*inch, 9.0*inch,'#3e4444',font_size=16)
-    ARC.report_context(c,invest_1, 1.0*inch, 4.5*inch, 460, 300, font_size=11)
+    ARC.report_title(c,'Investigator team',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
+    ARC.report_context(c,invest_1, 1.0*inch, 6.0*inch, 460, 300, font_size=11)
+    ARC.report_title(c,'Funding',1.07*inch, 7.0*inch,'#3e4444',font_size=16)
+    ARC.report_context(c,invest_1_xtra, 1.0*inch, 2.5*inch, 460, 300, font_size=11)
     ARC.report_context(c,invest_2, 1.0*inch, 1.5*inch, 460, 200, font_size=11)
     canvas_printpage(c,startpage,lastpage,today,True,ipagemode,ssectionanme,isecmaxpage,startpage) 
     
 
 # Main function called by AMR Analysis module -----------------------------------------------------------------------------------------------------------
-def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortality,dict_orgwithatb_incidence,bishosp_ava,logger):
+def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortality,dict_orgwithatb_incidence,df_micro_ward,bishosp_ava,logger):
     AL.printlog("Start AMR Surveillance Report: " + str(datetime.now()),False,logger)
+    sub_printprocmem("Start generate report",logger)
+    AL.printlog("Import optional modules",False,logger)
+    #If do annex C
+    dict_cmdarg  = AL.getcmdargtodict(logger)
+    bIsDoAnnexC = True
+    try:
+        if dict_cmdarg['annex_c'] == "no":
+            bIsDoAnnexC = False
+            AL.printlog("Note : Command line specify not do Annex C",False,logger)
+    except:
+        pass
+    if bIsDoAnnexC == True:
+        try:
+            import AMASS_ANNEX_C_report as REP_ANNEX_C
+            bIsDoAnnexC == True
+            AL.printlog("Impoer Annex C report module",False,logger)
+        except Exception as e:
+            AL.printlog("Error : Import Annex C report module (AMASS_ANNEX_C_report.py) : " + str(e),True,logger)
+            logger.exception(e)
+            bIsDoAnnexC == False
+            pass
     dict_ = df_dict_micro.iloc[:,:2].fillna("")
     dict_.columns = ["amass_name","user_name"]
 
@@ -1746,6 +1686,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     ssecname_sec6 = 'Section 6'
     ssecname_annexA = 'Annex A'
     ssecname_annexB = 'Annex B'
+    ssecname_annexC = 'Annex C'
     ssecname_method = 'Methods'
     ssecname_investor = 'Ackonwledgements'
     #Table is tricky it should be calculated upfront before generate other parts
@@ -1760,6 +1701,12 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     ipage_annexA1 = 2
     ipage_annexA2 = 1
     ipage_annexB = 2
+    ipage_annexC = 0
+    if bIsDoAnnexC == True:
+        try:
+            ipage_annexC = REP_ANNEX_C.get_annexC_roughtotalpage(logger)
+        except:
+            pass
     ipage_method = 4
     ipage_investor = 1
     #Cal page for sec2, 3 and 63 total page using to cal start page in sec 3, 4 and Annex A
@@ -1829,7 +1776,11 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         istartpage_annexA1 = istartpage_sec6 + ipage_sec6
         istartpage_annexA2 = istartpage_annexA1 + ipage_annexA1
         istartpage_annexB = istartpage_annexA2 + ipage_annexA2
-        istartpage_method = istartpage_annexB + ipage_annexB
+        if bIsDoAnnexC == True:
+            istartpage_annexC = istartpage_annexB + ipage_annexB
+            istartpage_method = istartpage_annexC + ipage_annexC
+        else:
+            istartpage_method = istartpage_annexB + ipage_annexB
         istartpage_investor = istartpage_method + ipage_method
         ilastpage = istartpage_investor + ipage_investor
         ilastpage = ilastpage - 1
@@ -1844,6 +1795,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         istartpage_annexA1 = 1
         istartpage_annexA2 = 1
         istartpage_annexB = 1
+        istartpage_annexC = 1
         istartpage_method = 1
         istartpage_investor = 1
         ilastpage = 1
@@ -1861,17 +1813,24 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     #print table of contents
     content_0 = 'Introduction'
     content_1 = 'Section [1]: Data overview'
-    content_2 = 'Section [2]: Isolate−based surveillance report'
-    content_3 = 'Section [3]: Isolate−based surveillance report with stratification by infection origin'
-    content_4 = 'Section [4]: Sample−based surveillance report'
-    content_5 = 'Section [5]: Sample−based surveillance report with stratification by infection origin'
+    content_2 = 'Section [2]: AMR proportion report'
+    content_3 = 'Section [3]: AMR proportion report with stratification by infection origin'
+    content_4 = 'Section [4]: AMR frequency report'
+    content_5 = 'Section [5]: AMR frequency report with stratification by infection origin'
     content_6 = 'Section [6]: Mortality involving AMR and antimicrobial−susceptible infections'
     content_7 = 'Annex A: Supplementary report on notifiable bacterial infections'
     content_8 = 'Annex B: Supplementary report on data indicators'
+    content_opt = []
+    istartpage_opt = []
+    if bIsDoAnnexC == True:
+        content_opt.append(REP_ANNEX_C.ANNEXC_RPT_CONST_TITLE)
+        istartpage_opt.append(str(istartpage_annexC))
     content_9 = 'Methods'
     content_10 = 'Acknowledgements'
-    content = [content_0, content_1, content_2, content_3, content_4, content_5, content_6, content_7, content_8, content_9, content_10]
-    content_page = [str(istartpage_intro), str(istartpage_sec1), str(istartpage_sec2), str(istartpage_sec3), str(istartpage_sec4), str(istartpage_sec5), str(istartpage_sec6), str(istartpage_annexA1), str(istartpage_annexB), str(istartpage_method), str(istartpage_investor)]
+    content = [content_0, content_1, content_2, content_3, content_4, content_5, content_6, content_7, content_8] + content_opt + [content_9, content_10]
+    content_page = [str(istartpage_intro), str(istartpage_sec1), str(istartpage_sec2), str(istartpage_sec3), str(istartpage_sec4), str(istartpage_sec5), str(istartpage_sec6), str(istartpage_annexA1), str(istartpage_annexB)]
+    content_page = content_page + istartpage_opt
+    content_page = content_page + [str(istartpage_method), str(istartpage_investor)]
     ############# CONTENT #############
     ARC.report_title(canvas_rpt,'Content',1.07*inch, 10.5*inch,'#3e4444', font_size=16)
     ARC.report_context(canvas_rpt,content, 1.0*inch, 6.0*inch, 435, 300, font_size=11)
@@ -1888,7 +1847,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         pass 
     ### SECTION 1 -----------------------------------------------------------------------------------------------------
     if ARC.check_config(config, "amr_surveillance_section1"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 1",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 1",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 1",logger)
         if bgotdata_sec1:
             try:
                 df_sec1_T = pd.read_csv(AC.CONST_DIR_RESULTDATA + sec1_num_i)
@@ -1905,7 +1865,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 1",False,logger) 
     ### SECTION 2 -----------------------------------------------------------------------------------------------------
     if ARC.check_config(config, "amr_surveillance_section2"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 2",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 2",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 2",logger)
         if bgotdata_sec2:
             try:
                 sec2_res = pd.read_csv(path_result + sec2_res_i).fillna("NA")
@@ -1913,8 +1874,6 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 sec2_T_org = pd.read_csv(path_result + sec2_org_i)
                 sec2_T_pat = pd.read_csv(path_result + sec2_pat_i)
                 ##Section 2; Page 1
-                #sec2_merge = []
-                #sec2_merge = ARC.prepare_section2_table_for_reportlab_V3(sec2_T_org, sec2_T_pat, lst_org_full, ARC.checkpoint(path_result + sec2_res_i),dict_orgcatwithatb)
                 sec2_merge = ARC.prepare_section2_table_for_reportlab_V3(sec2_T_org, sec2_T_pat, lst_org_full,lst_org_format, ARC.checkpoint(path_result + sec2_res_i),dict_orgcatwithatb)
                 ##Section 2; Page 2-6
                 #Retriving numper of positive patient of each organism
@@ -1932,7 +1891,6 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                     #Generate graph and saved to PNG files
                     iatbrow = ARC.count_atbperorg(sec2_T_amr,lst_org_full[i])
                     ifig_H = 2*ARC.cal_sec2and3_fig_height(iatbrow)
-                    #sec2_G = ARC.create_graph_nons_v3(sec2_T_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H)
                     sec2_G = ARC.create_graph_nons_v3(sec2_T_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic',AC.CONST_MODE_R_OR_AST,ifig_H)
                     list_sec2_org_table.append(ARC.create_table_nons_V3(sec2_T_amr,lst_org_full[i],"",AC.CONST_MODE_R_OR_AST).values.tolist())
                     list_sec2_atbcountperorg.append(iatbrow)
@@ -1951,7 +1909,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 2",False,logger) 
     ### SECTION 3 -----------------------------------------------------------------------------------------------------
     if ARC.check_config(config, "amr_surveillance_section3"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 3",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 3",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 3",logger)
         if bgotdata_sec3:
             try:
                 sec3_res = pd.read_csv(path_result + sec3_res_i).fillna("NA")
@@ -1972,13 +1931,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                                                     "Community_origin":"Community\n-origin**","Hospital_origin":"Hospital\n-origin**","Unknown_origin":"Unknown\n-origin***"})
                 sec3_pat = ARC.prepare_section3_table_for_reportlab_V3(sec3_pat,lst_org_full,lst_org_format)
                 sec3_col = pd.DataFrame(list(sec3_pat.columns),index=sec3_pat.columns).T
-                #sec3_pat_val = sec3_col.append(sec3_pat).drop(columns=["Organism"]).values.tolist()
                 sec3_pat_val = sec3_col.append(sec3_pat).values.tolist()
-                """
-                sec3_pat_tmp = sec3_col.append(sec3_pat).drop(columns=["Organism"])
-                sec3_pat_merge = pd.concat([pd.DataFrame(lst_org_format,columns=["Organism"]),sec3_pat_tmp],axis=1)
-                sec3_pat_val = sec3_pat_merge.values.tolist()
-                """
+
                 ##Section 3; Page 3-12
                 sec3_lst_numpat_CO = []  
                 sec3_lst_numpat_HO = []  
@@ -1994,7 +1948,6 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                     for ori in ['Community_origin','Hospital_origin']:
                         numpat = ARC.create_num_patient(sec3_pat_1.astype(str), lst_org_full[i], 'Organism', ori)
                         palette = ARC.create_graphpalette(sec3_amr,'Total(N)','Organism',lst_org_full[i],float(numpat),cutoff=70.0,origin=ori[:-7])
-                        #sec3_G = ARC.create_graph_nons_v3(sec3_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic','Non-susceptible(%)','upper95CI(%)*','lower95CI(%)*',ifig_H,origin=ori[:-7])
                         sec3_G = ARC.create_graph_nons_v3(sec3_amr,lst_org_full[i], lst_org_short[i],palette,'Antibiotic',AC.CONST_MODE_R_OR_AST,ifig_H,origin=ori[:-7])
                         if ori == 'Community_origin':
                             sec3_lst_numpat_CO.append(numpat)
@@ -2018,7 +1971,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 3",False,logger) 
     ##### section4 #####
     if ARC.check_config(config, "amr_surveillance_section4"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 4",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 4",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 4",logger)
         if bgotdata_sec4:
             try:
                 sec4_res = pd.read_csv(path_result + sec4_res_i).fillna("NA")
@@ -2064,7 +2018,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 4",False,logger) 
     ##### section5 #####
     if ARC.check_config(config, "amr_surveillance_section5"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 5",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 5",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 5",logger)
         if bgotdata_sec5:
             try:
                 sec5_res = pd.read_csv(path_result + sec5_res_i).fillna("NA")
@@ -2126,7 +2081,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 5",False,logger) 
     ##### section6 #####
     if ARC.check_config(config, "amr_surveillance_section6"):
-        AL.printlog("AMR surveillance report - checkpoint SECTION 6",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint SECTION 6",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint SECTION 6",logger)
         if bgotdata_sec6:
             try:
                 sec6_res = pd.read_csv(path_result + sec6_res_i).fillna("NA")
@@ -2167,7 +2123,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled SECTION 6",False,logger)   
     ##### AnnexA #####
     if ARC.check_config(config, "amr_surveillance_annexA"):
-        AL.printlog("AMR surveillance report - checkpoint annex A,A1",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint annex A,A1",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint annex A,A1",logger)
         lst_annexA_org_full = []
         lst_annexA_org_format= []
         for sorgkey in AC.dict_annex_a_listorg:
@@ -2210,7 +2167,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         else:
             annexA_nodata(canvas_rpt,istartpage_annexA1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
             pass
-        AL.printlog("AMR surveillance report - checkpoint annex A2",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint annex A2",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint annex A,A2",logger)
         if bgotdata_annexA2:
             try:
                 ##Creating table for page40 (Parsing)
@@ -2228,8 +2186,11 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 ##Creating table for AnnexB page3
                 secA_mortal3 = ARC.prepare_annexA_mortality_table_for_reportlab(secA_mortal, annexA_org_page3)
                 ##Creating graph for AnnexB page3
+                #sub_printprocmem("Before create graph",logger)
                 ARC.create_annexA_mortality_graph(secA_mortal,lst_page3_graph)
+                #sub_printprocmem("after create graph",logger)
                 annexA_A2(canvas_rpt,logger,secA_mortal3,istartpage_annexA2,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_annexA,ipage_annexA1+ipage_annexA2)
+                #sub_printprocmem("afte put graph on page",logger)
             except Exception as e:
                 AL.printlog("Error at : checkpoint print ANNEX A2 : " + str(e),True,logger)
                 logger.exception(e)
@@ -2241,7 +2202,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         AL.printlog("WARNING : AMR surveillance report - Disabled ANNEX A",False,logger) 
     ##### AnnexB #####
     if ARC.check_config(config, "amr_surveillance_annexB"):
-        AL.printlog("AMR surveillance report - checkpoint annex B",False,logger)
+        #AL.printlog("AMR surveillance report - checkpoint annex B",False,logger)
+        sub_printprocmem("AMR surveillance report - checkpoint annex B",logger)
         secB_blo_1 = []
         secB_blo_bymonth = []
         ##Creating table for AnnexB page1 (Parsing)
@@ -2274,24 +2236,15 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     else:
         AL.printlog("WARNING : AMR surveillance report - Disabled ANNEX B",False,logger) 
     #If do annex C
-    dict_cmdarg  = AL.getcmdargtodict(logger)
-    bIsDoAnnexC = True
-    try:
-        if dict_cmdarg['annex_c'] == "no":
-            bIsDoAnnexC = False
-            AL.printlog("Note : Command line specify not do Annex C",False,logger)
-    except:
-        pass
     if bIsDoAnnexC == True:
         try:
-            import AMASS_ANNEX_C_report as REP_ANNEX_C
-            REP_ANNEX_C.generate_annex_c_report(canvas_rpt, logger,1)
+            REP_ANNEX_C.generate_annex_c_report(canvas_rpt,logger,df_micro_ward,istartpage_annexC,ilastpage,ipage_annexC, strgendate)
         except Exception as e:
             AL.printlog("Error at : checkpoint print ANNEX C (Generate report) : " + str(e),True,logger)
             logger.exception(e)
             pass
     #Last 2 page
-    method(canvas_rpt,logger,lst_org_full,istartpage_method,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_method,ipage_method)
+    method(canvas_rpt,logger,lst_org_format,istartpage_method,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_method,ipage_method)
     investor(canvas_rpt,logger,istartpage_investor,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_investor,ipage_investor)
     #For testing remove when production
     """

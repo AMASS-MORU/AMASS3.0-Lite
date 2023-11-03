@@ -134,16 +134,16 @@ dict_ast = {"organism_staphylococcus_aureus":  [[CONST_NEWVARNAME_ASTMRSA,"1","m
 
 dict_ris = {"resistant":"R","intermediate":"I","susceptible":"S"}
 
-dict_org = {"mrsa"     :["organism_staphylococcus_aureus",  "Methicilin-NS Staphylococcus aureus",  "MRSA"],
-            "vrefa"    :["organism_enterococcus_faecalis",  "Vancomycin-NS Enterococcus faecalis",  "VR<i>E. faecalis</i>"],
-            "vrefm"    :["organism_enterococcus_faecium",   "Vancomycin-NS Enterococcus faecium",   "VR<i>E. faecium</i>"],
-            "crec"     :["organism_escherichia_coli",       "Carbapenem-NS Escherichia coli",       "CREC"],
-            "crkp"     :["organism_klebsiella_pneumoniae",  "Carbapenem-NS Klebsiella pneumoniae",  "CRKP"],
-            "crpa"     :["organism_pseudomonas_aeruginosa", "Carbapenem-NS Pseudomonas aeruginosa", "CRPA"],
-            "crab"     :["organism_acinetobacter_baumannii","Carbapenem-NS Acinetobacter baumannii","CRAB"]}
+dict_org = {"mrsa"     :["organism_staphylococcus_aureus",  "Methicillin-resistant <i>S. aureus</i>",  "MRSA"],
+            "vrefa"    :["organism_enterococcus_faecalis",  "Vancomycin-resistant <i>E. faecalis</i>",  "VREfs"],
+            "vrefm"    :["organism_enterococcus_faecium",   "Vancomycin-resistant <i>E. faecium</i>",   "VREfm"],
+            "crec"     :["organism_escherichia_coli",       "Carbapenem-resistant <i>E. coli</i>",       "CREC"],
+            "crkp"     :["organism_klebsiella_pneumoniae",  "Carbapenem-resistant <i>K. pneumoniae</i>",  "CRKP"],
+            "crpa"     :["organism_pseudomonas_aeruginosa", "Carbapenem-resistant <i>P. aeruginosa</i>", "CRPA"],
+            "crab"     :["organism_acinetobacter_baumannii","Carbapenem-resistant <i>A. baumannii</i>","CRAB"]}
 
-dict_spc = {"all":"All specimens",
-            "blo":"Blood specimen"}
+dict_spc = {"blo":"Blood specimen",
+            "all":"All specimens"}
 
 dict_configuration_prm = {"CaseFile=":"satscan_input_", 
                           "CoordinatesFile=":"satscan_location_", 

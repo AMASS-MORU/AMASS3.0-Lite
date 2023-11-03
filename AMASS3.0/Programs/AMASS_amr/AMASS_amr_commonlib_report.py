@@ -6,9 +6,10 @@
 
 # Created on 20th April 2022 (V2.0)
 import math as m
+import gc
 import pandas as pd #for creating and manipulating dataframe
 import matplotlib.pyplot as plt #for creating graph (pyplot)
-import matplotlib #for importing graph elements
+#import matplotlib #for importing graph elements
 import numpy as np #for creating arrays and calculations
 import seaborn as sns #for creating graph
 from pathlib import Path #for retrieving input's path
@@ -16,12 +17,12 @@ from datetime import date #for generating today date
 from reportlab.platypus.paragraph import Paragraph #for creating text in paragraph
 from reportlab.lib.styles import ParagraphStyle #for setting paragraph style
 from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT #for setting paragraph style
-from reportlab.platypus import * #for plotting graph and tables
-from reportlab.lib.colors import * #for importing color palette
-from reportlab.graphics.shapes import Drawing #for creating shapes
+from reportlab.platypus import Table,Frame #for plotting graph and tables
+#from reportlab.lib.colors import * #for importing color palette
+#from reportlab.graphics.shapes import Drawing #for creating shapes
 from reportlab.lib.units import inch #for importing inch for plotting
 from reportlab.lib import colors #for importing color palette
-from reportlab.platypus.flowables import Flowable #for plotting graph and tables
+#from reportlab.platypus.flowables import Flowable #for plotting graph and tables
 import AMASS_amr_const as AC
 """
 # Core pages
@@ -81,7 +82,9 @@ def get_atbnote(list_curnote):
         sallnote = ""
         for scurnote in list_curnote:
             scurnote = scurnote.strip()
-            sallnote = sallnote + AC.dict_atbnote.get(scurnote, "")
+            s = AC.dict_atbnote.get(scurnote, "")
+            if s != "":
+                sallnote = sallnote + ("" if sallnote == "" else "; ") + s
         return sallnote
     except Exception as e:
         print(e)
@@ -106,7 +109,11 @@ def get_atbnoteper_priority_pathogen(raw_df,origin="",origin_col="Infection_orig
             if sptl in sdfpt:
                 if not (sptl in list_atbnote):
                     list_atbnote = list_atbnote + [sptl]
-                    satbnote = satbnote + " " + AC.dict_atbnote_sec4_5[spt]
+                    #satbnote = satbnote + " " + AC.dict_atbnote_sec4_5[spt]
+                    spt = spt.strip()
+                    s = AC.dict_atbnote_sec4_5.get(spt, "")
+                    if s != "":
+                        satbnote = satbnote + ("" if satbnote == "" else "; ") + s
     return satbnote
 def get_atbnoteper_priority_pathogen_sec6(raw_df,origin="",origin_col="Infection_origin",pathogen_col="Antibiotic"):
     list_atbnote = []
@@ -125,7 +132,11 @@ def get_atbnote_sec6(list_atbnote):
     snote = ""
     for scurnote in list_atbnote:
         if scurnote not in snote:
-            snote = snote + AC.dict_atbnote_sec6[scurnote]
+            scurnote = scurnote.strip()
+            s = AC.dict_atbnote_sec6.get(scurnote, "")
+            if s != "":
+                snote = snote + ("" if snote == "" else "; ") + s
+            #snote = snote + AC.dict_atbnote_sec6[scurnote]
     return snote   
 def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_AST):
     #Selecting rows by organism and parsing table for PDF
@@ -138,6 +149,8 @@ def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_
     org_col ="Organism"
     drug_col = 'Antibiotic'
     ns_col = "Non-susceptible(N)"
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        ns_col = "Resistant(N)"
     total_col="Total(N)"
     upper_col = 'upper95CI(%)*'
     lower_col = 'lower95CI(%)*'
@@ -147,7 +160,11 @@ def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_
         total_col="Total(N)"
         upper_col = 'Resistant-upper95CI(%)*'
         lower_col = 'Resistant-lower95CI(%)*'
-        plabel = '"Proportion of\n resistant isolates (n)'
+        #plabel = 'Proportion of\n resistant isolates (n)'
+        plabel = 'Proportion of R'
+    raw_df[drug_col] = raw_df[drug_col].str.strip()
+    #for ind in raw_df.index:
+    #    print("'" + raw_df['Antibiotic'][ind] + "'")
     if origin == "": #section2
         sel_df = raw_df.loc[raw_df[org_col]==org_full].set_index(drug_col).fillna(0)
     else: #section3
@@ -155,10 +172,12 @@ def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_
     sel_df["%"] = round(sel_df[ns_col]/sel_df[total_col]*100,1).fillna(0)
     #sel_df_1 = correct_digit(df=sel_df,df_col=["lower95CI(%)*","upper95CI(%)*","%"])
     sel_df_1 = correct_digit(df=sel_df,df_col=[lower_col,upper_col,"%"])
+    
     sel_df_1["% NS (n)"] = sel_df_1["%"].astype(str) + "% (" + sel_df_1[ns_col].astype(str) + "/" + sel_df_1[total_col].astype(str) + ")"
     sel_df_1["95% CI"]  = sel_df_1[lower_col].astype(str) + "% - " + sel_df_1[upper_col].astype(str) + "%"
     sel_df_1 = sel_df_1.loc[:,["% NS (n)", "95% CI"]].reset_index().rename(columns={drug_col:'Antibiotic agent',"% NS (n)":plabel})
     sel_df_1 = sel_df_1.replace("0% (0/0)","NA").replace("0% - 0%","-")
+    
     col = pd.DataFrame(list(sel_df_1.columns)).T
     col.columns = list(sel_df_1.columns)
     #return col.append(sel_df_1)
@@ -174,7 +193,10 @@ def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,i
     #upper_col : column name of upperCI
     #lower_col : column name of lowerCT
     #print("FOR ORG " + org_full)
+   
     perc_col = 'Non-susceptible(%)'
+    if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+        perc_col = 'Resistant(%)'
     upper_col = 'upper95CI(%)*'
     lower_col = 'lower95CI(%)*'
     xlabel = '*Proportion of NS isolates(%)'
@@ -182,7 +204,7 @@ def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,i
         perc_col = 'Resistant(%)'
         upper_col = 'Resistant-upper95CI(%)*'
         lower_col = 'Resistant-lower95CI(%)*'
-        xlabel = '*Proportion of resistant isolates(%)'
+        xlabel = '*Proportion of R(%)'
     raw_df[drug_col] = raw_df[drug_col].str.rjust(AC.CONST_MAXNUMCHAR_ATBNAME," ")
     if origin == "": #section2
         sel_df = raw_df.loc[raw_df['Organism']==org_full].set_index(drug_col).fillna(0)
@@ -210,7 +232,8 @@ def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,i
         plt.savefig('./ResultData/Report2_AMR_' + org_short + '.png', format='png',dpi=180,transparent=True)
     else:
         plt.savefig('./ResultData/Report3_AMR_' + org_short + '_' + origin + '.png', format='png',dpi=180,transparent=True)
-
+    plt.close()
+    plt.clf
 def prepare_section2_table_for_reportlab_V3(df_org, df_pat, lst_org,lst_org_format, checkpoint_sec2,dict_orgcatwithatb):
     ##Preparing section2_table for ploting in pdf
     #df: raw section2_table
@@ -327,10 +350,12 @@ def create_graph_surveillance_V3(df_raw, lst_org, prefix, text_work_drug="N", fr
     # plt.yticks("",fontname='sans-serif',style='normal',fontsize=20)
     plt.tight_layout()
     plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+    plt.close()
+    plt.clf
 def create_graph_mortal_V3(df, organism, origin, prefix, org_col="Organism", ori_col="Infection_origin", drug_col="Antibiotic", perc_col="Mortality (n)", lower_col="Mortality_lower_95ci", upper_col="Mortality_upper_95ci"):
     ##Creating graph of mortality
     df_1 = df.loc[df[org_col]==organism,:]
-    df_1 = df_1.loc[df[ori_col]==origin,:].replace(regex=["3GC-NS"],value="3GC-NS**").replace(regex=["3GC-S"], value="3GC-S***").set_index(drug_col)
+    df_1 = df_1.loc[df[ori_col]==origin,:].replace(regex=["3GC-NS"],value="3GC-NS**").replace(regex=["3GC-S"], value="3GC-S***").replace(regex=["3GC-R"], value="3GC-R**").set_index(drug_col)
     ifig_H =2*cal_sec6_fig_height(len(df_1))
     plt.figure(figsize=(7,ifig_H))
     sns.barplot(data=df_1.loc[:,perc_col].to_frame().astype(int).T, palette=['darkorange','darkorange'],orient='h',capsize=.2)
@@ -350,6 +375,8 @@ def create_graph_mortal_V3(df, organism, origin, prefix, org_col="Organism", ori
     plt.tick_params(top=False, bottom=True, left=False, right=False,labelleft=True, labelbottom=True)
     plt.tight_layout()
     plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+    plt.close()
+    plt.clf
 #---------------------------------------------------------------------------------
 
 def check_config(df_config, str_process_name):
@@ -479,7 +506,10 @@ def create_table_surveillance_1(df_raw, lst_org, text_work_drug="N", freq_col="f
     if text_work_drug == "N":
         df_merge_1 = df_merge_1.rename(columns={"Organism":"Pathogens","*Frequency (95% CI)":"*Frequency of infection\n(per 100,000 tested patients;\n95% CI)"})
     else:
-        df_merge_1 = df_merge_1.rename(columns={"Organism":"Non-susceptible\n(NS) pathogens","*Frequency (95% CI)":"*Frequency of infection\n(per 100,000 tested patients;\n95% CI)"})
+        if AC.CONST_MODE_R_OR_AST  != AC.CONST_VALUE_MODE_AST:
+            df_merge_1 = df_merge_1.rename(columns={"Organism":"Resistant\n(NS) pathogens","*Frequency (95% CI)":"*Frequency of infection\n(per 100,000 tested patients;\n95% CI)"})
+        else:
+            df_merge_1 = df_merge_1.rename(columns={"Organism":"Non-susceptible\n(NS) pathogens","*Frequency (95% CI)":"*Frequency of infection\n(per 100,000 tested patients;\n95% CI)"})
     lst_col = [list(df_merge_1.columns)]
     lst_df = df_merge_1.values.tolist()
     lst_df = lst_col + lst_df
@@ -500,7 +530,7 @@ def prepare_section6_mortality_table(df_amr, death_col="Number_of_deaths", total
     #             pass
     df_amr_1["Mortality (n)"] = (df_amr_1["Mortality (n)"]+"% ("+df_amr_1[death_col].astype(str)+"/"+df_amr_1[total_col].astype(str)+")").replace(regex=["0% (0/0)"],value="NA")
     df_amr_1["95% CI"] = (df_amr_1[lower_col].astype(str)+'% - '+df_amr_1[upper_col].astype(str)+"%").replace(regex=["0.0% - 0.0%"],value="-")
-    df_amr_1["Antibiotic"] = df_amr_1["Antibiotic"].replace(regex=["3GC-NS"], value="3GC-NS**").replace(regex=["3GC-S"], value="3GC-S***")
+    df_amr_1["Antibiotic"] = df_amr_1["Antibiotic"].replace(regex=["3GC-NS"], value="3GC-NS**").replace(regex=["3GC-S"], value="3GC-S***").replace(regex=["3GC-R"], value="3GC-R**")
     return df_amr_1.loc[:,["Organism","Antibiotic","Infection_origin","Mortality (n)", "95% CI"]].rename(columns={'Antibiotic':'Type of pathogen'})
 
 def create_table_mortal(df, organism, origin, ori_col="Infection_origin", org_col="Organism"):
@@ -563,6 +593,9 @@ def create_annexA_mortality_graph(df_mor, lst_org, death_col="Number_of_deaths",
     plt.tick_params(top=False, bottom=True, left=True, right=False,labelleft=True, labelbottom=True)
     plt.tight_layout()
     plt.savefig('./ResultData/AnnexA_mortality.png', format='png',dpi=300,transparent=True)
+    plt.close()
+    plt.clf
+    #gc.collect()
 
 def prepare_annexB_summary_table_for_reportlab(df,indi_col="Indicators",total_col="Total(%)",cri_col="Critical_priority(%)",high_col="High_priority(%)",med_col="Medium_priority(%)"):
     df = df.fillna("NA").loc[:,[indi_col,total_col, cri_col,high_col,med_col]]
@@ -601,6 +634,14 @@ def assign_na_toinfo(str_info, coverpage=False):
     else:
         str_info = str(str_info)
     return str_info
+def report_title2(c,title_name,pos_x,pos_y,font_color,font_size=20):
+    style = ParagraphStyle('normal',fontName='Helvetica',fontSize=font_size)
+    p = Paragraph("<b>" + title_name + "</b>", style)
+    #c.setFont("Helvetica-Bold", font_size) # define a large bold Helvetica
+    #c.setFillColor(font_color) #define font color
+    #c.drawString(pos_x,pos_y,title_name)
+    p.wrapOn(c, 500, 20)
+    p.drawOn(c, pos_x, pos_y)
 
 def report_title(c,title_name,pos_x,pos_y,font_color,font_size=20):
     c.setFont("Helvetica-Bold", font_size) # define a large bold Helvetica
@@ -716,4 +757,31 @@ def report_table_annexB_page1(df):
                            ('VALIGN',(0,0),(-1,-1),'MIDDLE'), 
                            ('SPAN',(0,0),(0,1)), 
                            ('SPAN',(1,0),(-1,0))])
-
+def canvas_printpage_nototalpage(c,curpage,today=date.today().strftime("%d %b %Y"),bisrotate90=False,ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme=""):
+    report_todaypage(c,55,30,"Created on: "+today)
+    imode = ipagemode
+    if imode == 2:
+        report_todaypage(c,250,30,ssectionanme + " Page " + str(curpage))
+    else:
+        report_todaypage(c,270,30,"Page " + str(curpage))
+    if bisrotate90 == True:
+        c.rotate(90)
+    c.showPage()
+def canvas_printpage(c,curpage,lastpage,today=date.today().strftime("%d %b %Y"),bisrotate90=False,ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1,istartpage=1):
+    report_todaypage(c,55,30,"Created on: "+today)
+    imode = ipagemode
+    if imode == 1:
+        report_todaypage(c,270,30,"Page " + str(curpage) + " of " + str(lastpage))
+    elif imode == 2:
+        report_todaypage(c,250,30,ssectionanme + " Page " + str(curpage) + " of " + str(isecmaxpage))
+    else:
+        iseccurpage = curpage - istartpage + 1
+        if iseccurpage <= isecmaxpage:
+            report_todaypage(c,270,30,"Page " + str(curpage) + " of " + str(lastpage))
+        else:
+            iasc = 65 + iseccurpage - isecmaxpage - 1
+            curpage = istartpage + isecmaxpage -1
+            report_todaypage(c,270,30,"Page " + str(curpage) + "-" + str(chr(iasc)) +" of " + str(lastpage))
+    if bisrotate90 == True:
+        c.rotate(90)
+    c.showPage()

@@ -95,7 +95,7 @@ def readxlsxorcsv(spath,sfilename,logger) :
             try:
                 df= pd.read_excel(spath + sfilename + ".xlsx").fillna("")
             except Exception as e:
-                printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+                #printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
                 Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
                 df = pd.read_csv(spath + sfilename + "_temp.csv").fillna("")
     return df
@@ -110,9 +110,21 @@ def readxlsorcsv_noheader(spath,sfilename,columnheader,logger) :
             try:
                 df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader).fillna("")
             except Exception as e:
-                printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+                #printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
                 Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
                 df = pd.read_csv(spath + sfilename + "_temp.csv",header=None,names=columnheader).fillna("")
+    return df
+# Read csv or xlsx file and specify header in columnheader list, csv first, if no file convert xlsx to csv beflor load
+def readxlsorcsv_noheader_forceencode(spath,sfilename,columnheader,sencoding,logger) :
+    try:
+        df = pd.read_csv(spath + sfilename + ".csv",header=None,names=columnheader,encoding=sencoding).fillna("")
+    except:
+        try:
+            df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader).fillna("")
+        except Exception as e:
+            #printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
+            Xlsx2csv(spath + sfilename + ".xlsx", outputencoding=sencoding).convert(spath + sfilename + "_temp.csv")
+            df = pd.read_csv(spath + sfilename + "_temp.csv",header=None,names=columnheader,encoding=sencoding).fillna("")
     return df
 # Save to csv
 def fn_savecsv(df,fname,iquotemode,logger) :
@@ -157,6 +169,17 @@ def fn_keeponlycol(df,list_col) :
         return df[list_colexist]
     else:
         return df
+# Get dict value with default
+def fn_getdict(dict_p,skey,sdefault):
+    sval = sdefault
+    try:
+        if skey in dict_p:
+            sval = dict_p[skey]
+        else:
+            sval = sdefault
+    except:
+        sval = sdefault
+    return sval
 # Add antibiotic group base of antibiotic in group configure read from amr_const
 def fn_addatbgroupbyconfig(df,dict_atbgroup,dict_ast,logger) :
     for satbg in dict_atbgroup:
@@ -255,7 +278,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
                 iMDY = len(df[(df[cft_2]>12) & (df[cft_2]<32)])
                 df = df.drop(columns=[cft_1])  
                 df = df.drop(columns=[cft_2]) 
-                print('Count date format DMY:' + str(iDMY) + ', MDY:' + str(iMDY) + ', YMD:' + str(iYMD))
+                #print('Count date format DMY:' + str(iDMY) + ', MDY:' + str(iMDY) + ', YMD:' + str(iYMD))
             except Exception as e:
                 printlog("Warning date format of " + oldfield + " may be not in convert format defined or in other format", False, logger)
                 #logger.exception(e)
@@ -265,7 +288,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
             df[cleanfieldtemp] = df[cleanfield]
             bfirstformat = True
             for index, row in df_format.iterrows():
-                print('Convert data format: ' + row['fname'] )
+                #print('Convert data format: ' + row['fname'] )
                 for sf in row['cformat']:
                     if bfirstformat:
                         df[cleanfield] = pd.to_datetime(df[cleanfield], format=sf, errors="coerce")
