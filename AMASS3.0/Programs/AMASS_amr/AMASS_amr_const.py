@@ -5,10 +5,10 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_VERSION ="3.0 (BETA) Build 3012 on 2 Nov 2023"
+CONST_SOFTWARE_VERSION ="3.0 (BETA) Build 3014 on 6 Nov 2023"
 
-CONST_DIR_INPUT = "./"
-CONST_DIR_RESULTDATA = "./ResultData/" #Using in report module
+#CONST_DIR_INPUT = "./"
+#CONST_DIR_RESULTDATA = "./ResultData/" #Using in report module
 CONST_SPECIFY_CODE_AS_NOTUSEDORG = 99
 CONST_DICTCOL_AMASS = "amassvar"
 CONST_DICTCOL_DATAVAL = "dataval"
@@ -39,8 +39,10 @@ CONST_PERPOP = 100000
 CONST_PATH_RESULT = "./ResultData/"
 CONST_PATH_VAR = "./Variables/"
 CONST_PATH_REPORTWITH_PID = "./Report_with_patient_identifiers/"
+CONST_PATH_TEMPWITH_PID= "./temporary_folder_with_patient_identifiers/"
 CONST_PATH_ROOT = "./"
 CONST_ANNEXA_NON_ORG = "non-organism-annex-A"
+#CONST_ANNEXC_TITLE = 'Annex C: Cluster signals'
 # COnst for ANNEX B using data after map with dict or original microbiology data file.
 CONST_ANNEXB_USING_MAPPEDDATA = False
 #ATB name

@@ -37,14 +37,6 @@ echo Start AMR analysis
 echo Start generating "Data verificator logfile report"
 .\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS_logfile_version_2.py
 .\Programs\Python-Portable\Portable_Python-3.8.9\App\Python\python.exe -W ignore .\Programs\AMASS_amr\AMASS_logfile_err_version_2.py
-del ".\ResultData\logfile_age.xlsx"
-del ".\ResultData\logfile_ast.xlsx"
-del ".\ResultData\logfile_discharge.xlsx"
-del ".\ResultData\logfile_gender.xlsx"
-del ".\ResultData\logfile_organism.xlsx"
-del ".\ResultData\logfile_specimen.xlsx"
-del /q ".\Temporary_folder_with_patient_identifiers\*.*"
-rmdir ".\Temporary_folder_with_patient_identifiers\"
 del ".\error_analysis*.txt"
 del ".\error_report*.txt"
 del ".\error_logfile_amass.txt"

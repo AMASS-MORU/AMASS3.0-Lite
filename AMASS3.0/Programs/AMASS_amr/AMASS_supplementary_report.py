@@ -22,7 +22,7 @@ from reportlab.lib import colors #for importing color palette
 from reportlab.platypus.flowables import Flowable #for plotting graph and tables
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
-from AMASS_commonlib_supplementary_report import * #for importing data indicators functions
+from AMASS_supplementary_report_commonlib import * #for importing data indicators functions
 
 def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
     AL.printlog("Start Supplementary data indicators report: " + str(datetime.datetime.now()),False,logger)

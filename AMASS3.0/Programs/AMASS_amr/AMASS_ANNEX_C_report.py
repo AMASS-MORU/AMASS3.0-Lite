@@ -18,65 +18,60 @@ import numpy as np
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 import AMASS_amr_commonlib_report as REP_AL
-import AMASS_ANNEX_C_const as ACC
-import AMASS_ANNEX_C_commonlib as ALC
+import AMASS_annex_c_const as ACC
+#import AMASS_ANNEX_C_commonlib as ALC
+#ANXC_CONST_COL_PROFILE_COLOR = "assign_color"
+#ANXC_CONST_COL_WARDPROFILE = "ward_and_profile"
+#ANXC_CONST_BASLINE_FILENAME_PREFIX = "AnnexC_graph_baseline_"
+#ANXC_CONST_PATH_ANNEXC_PIDEN = "./Report_with_patient_identifiers/"
 
-#ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE = 20
-ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE = 9
-ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON = 28
+#General const
 ANNEXC_RPT_CONST_TITLE = 'Annex C: Cluster signals'
 ANNEXC_RPT_CONST_PVALUELIMIT = 0.05
+ANXC_CONST_SP_ALL ='all'
+ANXC_CONST_FOOT_REPNAME = "Supplementary Annex C"
+ANXC_CONST_NUM_TOPWARD_TODISPLAY = 3
+ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH = "Display_graph"
+ANXC_CONST_BLANK_PROFILE_TO_PREFIX = "Profile_"
+ANXC_CONST_BLANK_PROFILE_TO_SUFFIX = "_00"
 
-ANNEXC_CONST_MAX_BASELINEGRAPH = 500
-ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE = 3
-ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE = 27
-ANNEXC_CONST_MAX_BASELINECOLTBL_PERPAGE =3
-ANNEXC_CONST_BASLINE_FILENAME_PREFIX = "AnnexC_graph_baseline_"
+#Cut new page
+#Annex C profile
+ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE = 9
+ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON = 28
+#Supplementary profile
+ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE = 16
+ANXC_CONST_PROFILE_MAXROW_NEXTPAGE = 22
+#Supplementary ward, ward graph
+ANXC_CONST_MAX_BASELINEGRAPH = 500
+ANXC_CONST_MAX_BASELINEGRAPH_PERPAGE = 3
+ANXC_CONST_MAX_BASELINETBLROW_PERPAGE = 27
+ANXC_CONST_MAX_BASELINECOLTBL_PERPAGE =3
 
-ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITER = ";"
-ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITID_FOR_WARD = 0
-ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITID_FOR_PROFILE = 1
-ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE = "num_case"
-
-
-ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD = "ward"
-
-#ANNEXC_CONST_CONST_COL_YEARWEEK = "year_week"
-ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE = "test_group"
-ANNEXC_CONST_BASELINEFILE_VARNAME_SPECDATE = "DateSpc"
-ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE = "spcdate2"
-ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK = "spcweek"
-ANNEXC_CONST_COL_PROFILE_COLOR = "assign_color"
-ANNEXC_CONST_COL_WARDPROFILE = "ward_and_profile"
-ANNEXC_CONST_COL_DAYTOBASELINEDATE = "daysbaseline"
-ANNEXC_CONST_COL_DAYTOSTARTC = "daysstartcluster"
-ANNEXC_CONST_COL_DAYTOENDC = "daysendcluster"
-ANNEXC_CONST_COL_STARTCDATE = "startclusterdate"
-ANNEXC_CONST_COL_ENDCDATE = "endclusterdate"
-ANNEXC_CONST_COL_DAYTOSTARTC = "daysstartcluster"
-ANNEXC_CONST_COL_DAYTOENDC= "daysendcluster"
-ANNEXC_CONST_COL_PROFILE_WITHCLUSTER = "cluster_profile_id"
-ANNEXC_CONST_PROFILENAME_FORNOCLUSTER = "Other profiles"
-ANNEXC_CONST_NOCLUSTER_COLOR = "#EEEEEE"
-ANNEXC_CONST_COL_GOTCLUSTER = "is_cluster"
-ANNEXC_CONST_CLUSTER_GRAPH_FNAME = 'annexc_graph_cluster'
-ANNEXC_CONST_BASELINE_GRAPH_FNAME = 'annexc_graph_baseline'
-ANNEXC_CONST_COL_PROFILESUMCASE = "total_profile_cases"
-ANNEXC_CONST_COL_WARDSUMCASE = "total_ward_cases"
-ANNEXC_CONST_SP_ALL ='all'
-ANNEXC_CONST_PATH_ANNEXC_RESULT = "./temporary_folder_with_patient_identifiers/"
-ANNEXC_CONST_PATH_ANNEXC_PIDEN = "./Report_with_patient_identifiers/"
-ANNEXC_CONST_PROFILE_INFO_FNAME = "profile_information"
-ANNEXC_CONST_FOOT_REPNAME = "Supplementary Annex C"
-ANNEXC_CONST_NUM_TOPWARD_TODISPLAY = 3
-ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH = "Display_graph"
-ANNEXC_CONST_BLANK_PROFILE_TO_PREFIX = "Profile_"
-ANNEXC_CONST_BLANK_PROFILE_TO_SUFFIX = "_00"
-
-ANNEXC_CONST_PROFILE_MAXROW_FIRSTPAGE = 19
-ANNEXC_CONST_PROFILE_MAXROW_NEXTPAGE = 24
-#ANNEXC_CONST_CLUSTER_COLLIST = [ACC.CONST_COL_WARDID,"profile_ID",ACC.CONST_COL_NEWSDATE,ACC.CONST_COL_NEWEDATE,ACC.CONST_COL_NEWOBS,ANNEXC_CONST_COL_WARDSUMCASE,ACC.CONST_COL_NEWPVAL]
-
+#Split ward/profile in baseline (SaTSCcan input)
+ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITER = ";"
+ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITID_FOR_WARD = 0
+ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITID_FOR_PROFILE = 1
+#Transform specimen date in Baseline file (SaTScan input file)
+ANXC_CONST_BASELINE_NEWVAR_SPECDATE = "spcdate2"
+ANXC_CONST_BASELINE_NEWVAR_WEEK = "spcweek"
+ANXC_CONST_COL_DAYTOBASELINEDATE = "daysbaseline"
+#Transform sdate in  Cluster result file (AnnexC_listofpassedclusters_xxx_xxx.xlsx)
+ANXC_CONST_COL_STARTCDATE = "startclusterdate"
+ANXC_CONST_COL_ENDCDATE = "endclusterdate"
+ANXC_CONST_COL_DAYTOSTARTC = "daysstartcluster"
+ANXC_CONST_COL_DAYTOENDC= "daysendcluster"
+#Merge baseline and cluster
+ANXC_CONST_COL_PROFILE_WITHCLUSTER = "cluster_profile_id"
+ANXC_CONST_PROFILENAME_FORNOCLUSTER = "Other profiles"
+ANXC_CONST_NOCLUSTER_COLOR = "#EEEEEE"
+ANXC_CONST_COL_GOTCLUSTER = "is_cluster"
+#Grpah file name
+ANXC_CONST_CLUSTER_GRAPH_FNAME = 'annexc_graph_cluster'
+ANXC_CONST_BASELINE_GRAPH_FNAME = 'annexc_graph_baseline'
+#New column for sum total case
+ANXC_CONST_COL_PROFILESUMCASE = "total_profile_cases"
+ANXC_CONST_COL_WARDSUMCASE = "total_ward_cases"
 #----------------------------------------------------------------------------------------------------------
 #supplementary function
 class ROTATETEXT(Flowable): #TableTextRotate
@@ -89,383 +84,10 @@ class ROTATETEXT(Flowable): #TableTextRotate
         canvas = self.canv
         canvas.rotate(90)
         canvas.drawString( 0, -1, self.text)
-def cover(c,logger,strgendate):
-    sec1_res_i = "Report1_page3_results.csv"
-    sec1_file = AC.CONST_DIR_RESULTDATA + sec1_res_i
-    section1_result = pd.DataFrame()
-    try:
-        section1_result = pd.read_csv(sec1_file).fillna("NA")
-    except Exception as e:
-        AL.printlog("Error read file : " + sec1_file + " : " + str(e),True,logger)
-        return 
-    if len(section1_result) <= 0:
-        AL.printlog("Error no record in file : " + sec1_file ,True,logger)
-        return
-    if len(section1_result) > 0:
-        hospital_name   = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Hospital_name","Values"].tolist()[0]), coverpage=True)
-        country_name    = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Country","Values"].tolist()[0]), coverpage=True)
-        spc_date_start  = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=True)
-        spc_date_end    = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=True)
-    else:
-        hospital_name    = "NA"
-        country_name    = "NA"
-        spc_date_start  = "NA"
-        spc_date_end    = "NA"
-    ##paragraph variable
-    bold_blue_op = "<b><font color=\"#000080\">"
-    bold_blue_ed = "</font></b>"
-    add_blankline = "<br/>"
-    ##content
-    cover_1_1 = "<b>Hospital name:</b>  " + bold_blue_op + hospital_name + bold_blue_ed
-    cover_1_2 = "<b>Country name:</b>  " + bold_blue_op + country_name + bold_blue_ed
-    cover_1_3 = "<b>Data from:</b>"
-    cover_1_4 = bold_blue_op + str(spc_date_start) + " to " + str(spc_date_end) + bold_blue_ed
-    cover_1 = [cover_1_1,cover_1_2,add_blankline+cover_1_3, cover_1_4]
-    cover_2_1 = "This is a detailed report for records with cluster signals identified by the AMASS-SatScan. This report, together with the full list in Excel format, is for users to check and validate the cluster and the patients in each cluster identified by the SatScan. The information available in this PDF file include ward names used in the dictionary files. The identifiers in the Excel files for the Annex C include hospital number and specimen collection date. Users should not share or transfer this report and the excel files for the Annex C to any party outside of the hospital without data security management and confidential agreement."
-    cover_2_2 = "<br/><b>Generated on:</b>  " + bold_blue_op + strgendate + bold_blue_ed
-    cover_2 = [cover_2_1,cover_2_2]
-    ##reportlab
-    c.setFillColor('#FCBB42')
-    c.rect(0,590,800,20, fill=True, stroke=False)
-    c.setFillColor(colors.royalblue)
-    c.rect(0,420,800,150, fill=True, stroke=False)
-    REP_AL.report_title(c,'Supplementary report Annex C:',0.7*inch, 515,'white',font_size=28)
-    REP_AL.report_title(c,'Cluster signals identify by AMASS-SatScan',0.7*inch, 455,'white',font_size=20)
-    REP_AL.report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
-    REP_AL.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
-    c.showPage()
-def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):
-    #noclustertext = "There is no cluster with p-value < " +str(pvaluelimit) + "."
-    #shaveclustertext = "Table of clusters with p-value < " +str(pvaluelimit) + "."
-    style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=9,alignment=TA_CENTER)
-    sspecname = ACC.dict_spc[spec]
-    sorgname = ACC.dict_org[sh_org][2]
-    dict_dis_specname= {"blo":"blood",
-                        "all":"clinical specimens"}
-    sdis_spec = dict_dis_specname[spec]
-    sheader_wardgrap = f'Display of patients with {sdis_spec} culture positive for {sorgname} in each ward over time'
-    sfootnote = "* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
-    sfootnote = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
-    sfootnote = sfootnote + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
-    sfootnote = sfootnote + "Only wards with a cluster signal identified or having the top three highest number of patients were displayed. "
-    lst_footnote = [sfootnote]
-    lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
-    
-    stotal_patient = "NA"
-    stotal_ward = "NA"
-    stotal_profile = "NA"
-    scluster_patient = "NA"
-    scluster_ward = "NA"
-    scluster_profile = "NA"
-    """
-    try:
-        stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
-        stotal_ward = str(len(df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
-        stotal_profile = str(len(df_baseline.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
-    except:
-        pass
-    try:
-        scluster_patient = str(df[ACC.CONST_COL_NEWOBS].sum())
-        scluster_ward = str(len(df.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
-        scluster_profile = str(len(df.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
-    except:
-        pass
-    """
-    try:
-        stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
-        df_ward_sum = df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
-        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANNEXC_CONST_COL_WARDSUMCASE}, inplace=True)
-        stotal_ward = str(len(df_ward_sum))
-        #stotal_ward = str(len(df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
-        stotal_profile = str(len(df_baseline.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
-    except Exception as e:
-        AL.printlog("Warning : Baseline data not available for total sum : " + str(spec) + " of " + str(sh_org) ,False,logger) 
-    #Keep may be useful if add more info to baseline like in Annex C
-    """
-    try:
-        scluster_patient = str(df[ACC.CONST_COL_NEWOBS].sum())
-        scluster_ward = str(len(df.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
-        scluster_profile = str(len(df.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
-    except Exception as e:
-       AL.printlog("Warning : Cluster signal data not available for total sum : " + str(spec) + " of " + str(sh_org) ,False,logger) 
-    
-    try:
-        spercent_patient = 0 if int(stotal_patient) == 0 else math.ceil(100*int(scluster_patient)/int(stotal_patient))
-    except Exception as e:
-        AL.printlog("Warning : either baseline or cluster signal data not available for calculate percentage (Patient) : " + str(spec) + " of " + str(sh_org) ,False,logger) 
-    try:
-        spercent_ward = 0 if int(stotal_ward) == 0 else math.ceil(100*int(scluster_ward)/int(stotal_ward))
-    except Exception as e:
-        AL.printlog("Warning : either baseline or cluster signal data not available for calculate percentage (Ward) : " + str(spec) + " of " + str(sh_org),False,logger) 
-    try:
-        spercent_profile = 0 if int(stotal_profile) == 0 else math.ceil(100*int(scluster_profile)/int(stotal_profile))
-    except Exception as e:
-        AL.printlog("Warning : either baseline or cluster signal data not available for calculate percentage (Profile) : " + str(spec) + " of " + str(sh_org),False,logger) 
-    """
-    
-    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-    
-    #General info ---------------------------------------
-    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "Baseline information" + "</b>"],                                       
-                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of patients = {stotal_patient}' + "</i>"],
-                   1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of wards = {stotal_ward}' + "</i>"],
-                   1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile}' + "</i>"],
-                   1.5*inch, 8.8*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-    #--------------------------------------------------------------------------------------------------------------
-    #Profile
-    try:
-        if len(df_profile) > 0:
-            df_profile.sort_values(by = [ANNEXC_CONST_COL_PROFILESUMCASE], ascending = [False], na_position = "last")
-            try:
-                dict_total= {}
-                for scol in list_profile_atb_column:
-                    dict_total[scol] ="-"
-                    #The following code will be useful for cal sum of each atb in the future don't delete
-                    """
-                    dict_total[scol] =0
-                    try:
-                        scol_count = scol+"_count"
-                        df_profile[scol_count] =  df_profile[ANNEXC_CONST_COL_PROFILESUMCASE]
-                        df_profile.loc[(df_profile[scol] == '-') | (df_profile[scol] == 'ND'), scol_count] = 0
-                        dict_total[scol] = df_profile[scol_count].sum()
-                    except:
-                        pass
-                    try:
-                        df_profile.drop(scol_count, axis=1, inplace=True)
-                    except:
-                        pass
-                    """
-                dict_total[ANNEXC_CONST_COL_PROFILESUMCASE] = df_profile[ANNEXC_CONST_COL_PROFILESUMCASE].sum()
-                dict_total[ANNEXC_CONST_COL_PROFILESUMCASE] = Paragraph("<b>" + str(df_profile[ANNEXC_CONST_COL_PROFILESUMCASE].sum()) + "</b>",style_summary)
-                dict_total[ACC.CONST_COL_PROFILEID] = Paragraph("<b>" + "Total"+ "</b>",style_summary)
-                new_total_row = pd.DataFrame([dict_total])
-                df_profile = pd.concat([df_profile, new_total_row], ignore_index=True)
-            except Exception as e:
-                AL.printlog("Warning : unable to generate total sum: " + str(spec) + " of " + str(sh_org) ,False,logger) 
-            #rename column
-            try:
-                df_profile.rename(columns={ACC.CONST_COL_PROFILEID:"Profile ID",ANNEXC_CONST_COL_PROFILESUMCASE:"No. of\npatients"}, inplace=True)
-            except Exception as e:
-                pass
-            #prepare rotate column header
-            lst_column_head = []
-            atbname_c = 0
-            for scol in df_profile.columns.tolist():
-                if len(scol) > atbname_c:
-                    atbname_c = len(scol)
-                if scol in list_profile_atb_column:
-                    lst_column_head = lst_column_head + [ROTATETEXT(scol)]
-                else:
-                    lst_column_head = lst_column_head + [scol]
-            #print table
-            iheader_h = 0.068*atbname_c
-            #Print report
-            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles" + "</b>"],                                       
-                           1.0*inch, 8.2*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-            df1 = df_profile[:ANNEXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
-            ioffset = 0.25*(len(df1)) + iheader_h
-            lst_df = [lst_column_head] + df1.values.tolist()
-            rh = [iheader_h*inch]
-            for i in range(len(df1)):
-                rh = rh + [0.25*inch]
-            table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
-            table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-            table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (8.2-ioffset)*inch)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-            df_profile = df_profile[ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE:]
-            page = page + 1
-            if len(df_profile)>0:
-                imorepage = math.ceil(len(df_profile)/ANNEXC_CONST_PROFILE_MAXROW_NEXTPAGE)
-                for i in range(imorepage):
-                    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-                    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles (Continue)" + "</b>"],                                       
-                                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-                    df1 = df_profile[:ANNEXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
-                    ioffset = 0.25*(len(df1)) + iheader_h
-                    lst_df = [lst_column_head] + df1.values.tolist()
-                    rh = [iheader_h*inch]
-                    for i in range(len(df1)):
-                        rh = rh + [0.25*inch]
-                    table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
-                    #table_draw._awgH[0] = iheader_h*inch
-                    table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-                    table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (9.5-ioffset)*inch)
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-                    df_profile = df_profile[ANNEXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
-                    page = page + 1
-        else:
-            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of profiles" + "</b>"], 
-                   1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            REP_AL.report_context(canvas_sup_rpt, ["None"],
-                           1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-            page = page + 1
-    except:
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-        page = page + 1
-    #--------------------------------------------------------------------------------------------------------------
-    #ward
-    #Generate report page (Loop for table)
-    df = df_ward.copy(deep=True)
-    if len(df) > 0:
-        try:
-            dict_total = {}
-            dict_total[ANNEXC_CONST_COL_WARDSUMCASE] = Paragraph("<b>" + str(df[ANNEXC_CONST_COL_WARDSUMCASE].sum()) + "</b>",style_summary)
-            dict_total[ACC.CONST_COL_WARDID] = Paragraph("<b>" + "Total"+ "</b>",style_summary)
-            new_total_row = pd.DataFrame([dict_total])
-            df = pd.concat([df, new_total_row], ignore_index=True)
-        except Exception as e:
-            AL.printlog("Warning : checkpoint Annex C generate report (ward summary) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),False,logger) 
-            logger.exception(e)
-        try:
-            df = df[[ACC.CONST_COL_WARDID,ANNEXC_CONST_COL_WARDSUMCASE]]
-            df.rename(columns={ACC.CONST_COL_WARDID:"Ward ID",ANNEXC_CONST_COL_WARDSUMCASE:"No. of\npatients"}, inplace=True)
-        except Exception as e:
-            pass
-        icurcol = 1
-        icoloffset = 2.5
-        balreadyprintpage = False
-        bisfirstpage = True
-        while len(df) > 0:
-            if icurcol == 1:
-                #print header
-                balreadyprintpage = False
-                REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-                scon = " (Continue)" if bisfirstpage == False else ""
-                REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of ward" + scon + "</b>"],                                       
-                               1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-            df1 = df[:ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE]
-            ioffset = 0.25*(len(df1) + 1)
-            try:
-                lst_df = [df1.columns.tolist()] + df1.values.tolist()
-                table_draw = annexc_table_sup_ward(lst_df,[1*inch,1*inch])
-                table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-                table_draw.drawOn(canvas_sup_rpt, (1+((icurcol-1)*icoloffset))*inch, (9.3-ioffset)*inch)
-            except Exception as e:
-                AL.printlog("Error : checkpoint Annex C generate report (table) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
-                logger.exception(e)
-            df = df[ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
-            if icurcol >= ANNEXC_CONST_MAX_BASELINECOLTBL_PERPAGE-1:
-                if balreadyprintpage == False:
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-                    bisfirstpage = False
-                    page = page + 1
-                    icurcol = 1
-                    balreadyprintpage = True   
-            else:
-                icurcol = icurcol + 1
-        if balreadyprintpage == False:
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-            bisfirstpage = False
-            page = page + 1
-            icurcol = 1
-            balreadyprintpage = True
-    else:
-        REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-        REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of wards" + "</b>"],                                       
-                       1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt, ["None"],
-                       1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-        page = page + 1
-    #--------------------------------------------------------------------------------------------------------------
-    #ward graph
-    #generate report page
-    if len(df_ward) > 0:
-        ifigoffset_inch = 2.50
-        ifirstpos_inch = 9.3
-        igc = 0
-        icurpos = 1
-        balreadyprintpage = False
-        #print(df_table)
-        #generate report page (Loop for graphs)
-        for idx in df_ward.index:
-            #if igc < ANNEXC_CONST_MAX_BASELINEGRAPH:
-            #df_ward.loc[idx,ACC.CONST_COL_WARDID]
-            if df_ward.loc[idx,ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH]> 0:
-                swardid = str(df_ward.loc[idx,ACC.CONST_COL_WARDID])
-                icurpos = (igc % ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE) + 1
-                if icurpos == 1:
-                    balreadyprintpage = False
-                    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-                    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ sheader_wardgrap +"</b>"],                                           
-                                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-                REP_AL.report_context(canvas_sup_rpt, ["<b><i><font color=\"#000080\">"+"Ward : " + swardid +"</font></i></b>"],              
-                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.3)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                try:
-                    canvas_sup_rpt.drawImage(ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_BASELINE_GRAPH_FNAME + "_" + str(sh_org) + "_" + str(spec) + "_" + str(swardid) + ".png", 
-                                         (0-1)*inch, (ifirstpos_inch-(icurpos*ifigoffset_inch)+0.4) *inch, preserveAspectRatio=True, width=10*inch, height=2*inch,showBoundary=False) 
-                except Exception as e:
-                    AL.printlog("Error : checkpoint Annex C generate report (graph) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
-                    logger.exception(e)
-                if (icurpos >= ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE):
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-                    page = page + 1
-                    balreadyprintpage = True
-                igc = igc+1
-        if balreadyprintpage == False:
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-            page = page + 1
-            balreadyprintpage = True
-    else:
-        REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
-        REP_AL.report_context(canvas_sup_rpt, ["<b>"+ sheader_wardgrap +"</b>"],                                      
-                       1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt, ["None"],
-                       1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
-        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
-        page = page + 1        
-    return page
+
     
 #----------------------------------------------------------------------------------------------------------
 #Get rough total page
-def get_annexC_roughtotalpage_baseline(logger,df_org_baseline):
-    itotalpage = 2*(len(ACC.dict_spc)*len(ACC.dict_org))
-    try:
-        icaltotalpage = 0
-        for sh_org in ACC.dict_org.keys():
-            #for sp in ["_all","_blo"]:
-            for sp in ACC.dict_spc:
-                #Base Line page
-                try:
-                    #print(sh_org + " : " + sp)
-                    temp_df = df_org_baseline[sh_org][sp]
-                    inumprofile = len(temp_df.groupby([ACC.CONST_COL_PROFILEID])[ACC.CONST_COL_PROFILEID].count())+1 #got another total row
-                    inumward = len(temp_df.groupby([ACC.CONST_COL_WARDID])[ACC.CONST_COL_WARDID].count())+1 #got another total row
-                    #print(inumprofile)
-                    #print(inumward)
-                    if inumprofile <= ANNEXC_CONST_PROFILE_MAXROW_FIRSTPAGE:
-                        icaltotalpage= icaltotalpage + 1
-                    else:
-                        icaltotalpage= icaltotalpage + 1
-                        inumprofile = inumprofile -  ANNEXC_CONST_PROFILE_MAXROW_FIRSTPAGE
-                        icaltotalpage= icaltotalpage +math.ceil(inumprofile/ANNEXC_CONST_PROFILE_MAXROW_NEXTPAGE)
-                    icaltotalpage= icaltotalpage +math.ceil(inumward/(ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE*ANNEXC_CONST_MAX_BASELINECOLTBL_PERPAGE))
-                    if inumward > ANNEXC_CONST_MAX_BASELINEGRAPH:
-                        inumward = ANNEXC_CONST_MAX_BASELINEGRAPH
-                    icaltotalpage= icaltotalpage + math.ceil((inumward-1)/ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE)
-                except:
-                    AL.printlog("Warning : error calculate supplementary ANNEX C page  for " + str(sh_org)+" : "+str(sp),False,logger)
-                    icaltotalpage= icaltotalpage + 3
-                #print(icaltotalpage)
-        itotalpage = icaltotalpage
-    except:
-        pass
-    print("Total supplementary annex C page : " + str(itotalpage))
-    return itotalpage
 def get_annexC_roughtotalpage(logger):
     itotalpage = 1 + (len(ACC.dict_spc)*len(ACC.dict_org))
     try:
@@ -475,8 +97,8 @@ def get_annexC_roughtotalpage(logger):
             for sp in ACC.dict_spc:
                 #Cluster pages
                 try:
-                    df = pd.read_excel(ANNEXC_CONST_PATH_ANNEXC_RESULT+ACC.CONST_FILENAME_PCLUSTER+"_"+str(sh_org)+"_"+str(sp)+".xlsx")
-                    x = math.ceil((len(df) - ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE)/ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON) + 1
+                    df = pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PCLUSTER+"_"+str(sh_org)+"_"+str(sp)+".xlsx")
+                    x = math.ceil((len(df) - ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE)/ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON) + 1
                     if x <= 0:
                         x = 1
                     if x>1:
@@ -490,8 +112,6 @@ def get_annexC_roughtotalpage(logger):
         pass
     return itotalpage 
 #Prepare data functions 
-
-
 def annexc_table_main(df):
     #BACGROUD, (FIRSTCOL,FIRSTROW), (LASTCOL,LASTROW), color - This can set to overlap, last one will be on top of previous one
     return Table(df,style=[('FONT',(0,0),(-1,-1),'Helvetica-Bold'),
@@ -675,8 +295,6 @@ def template_page2_footer():
             "annexc_footer_2"  + " "  + "annexc_footer_3"  + " "  + "annexc_footer_4"  + " " +
             "annexc_footer_ci" + "; " + "annexc_footer_ns" + "; " + "annexc_footer_na" + " " +
             "annexc_footer_ast" + "</font>"]
-def Obsoleted2_footnote_annexC(sp):
-    return ["* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. Bar graphs show patients with blood culture positive with organism profiles which were identified in at least one cluster signal. Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals.asdf asf asdfsad fsadfa fasdfsad fasfda asdf asdf asdfd df sadfas fasfd asf asf sfas asfasf asdfa s"]
 def footnote_annexC(sp):
     dict_note = {"blo":
                  ['* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. ' +
@@ -694,26 +312,7 @@ def footnote_annexC(sp):
 def footnote_baseline(sp):
     return footnote_annexC(sp)
 
-def OBSOLETED_prepare_tabletoplot(logger,Pvaluecol="",Pvaluelimit=0.05,filename="",lst_col=[],lst_tosort=[], list_ascending=[],dict_displaycol={}):
-    #lst_df = []
-    df = pd.DataFrame()
-    #scolpvaladjust = "Pvalue_tofloat"
-    try:
-        df = pd.read_excel(filename)
-        #df[scolpvaladjust]
-        #df = df[df[Pvaluecol]<=Pvaluelimit]
-        df = df.sort_values(by = lst_tosort, ascending = list_ascending, na_position = "last")
-        #df1 = df[lst_col]
-        df = df[lst_col]
-        if len(dict_displaycol) > 0:
-            #df1.rename(columns=dict_displaycol, inplace=True)
-            df.rename(columns=dict_displaycol, inplace=True)
-        #lst_df = [df1.columns.tolist()] + df1.values.tolist()
-    except Exception as e:                #has no cluster >>> ignore
-        AL.printlog("Error : checkpoint Annex C generate report unable to read/prepare result data file " + str(filename) + " : " +str(e),True,logger) 
-        logger.exception(e)
-    #return lst_df
-    return df
+
 # Function to replace non-integers with 0
 def replace_non_integer(value):
     try:
@@ -723,126 +322,6 @@ def replace_non_integer(value):
     except (ValueError, TypeError):
         # If it's not an integer or can't be converted, replace with 0
         return 0
-"""
-def prepare_baselinesummary_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sorg,sp,df_week):
-    df_table = pd.DataFrame()
-    df_graph = pd.DataFrame()
-    try:
-        #reformat data
-        temp_df = AL.readxlsxorcsv(ANNEXC_CONST_PATH_ANNEXC_RESULT, ACC.CONST_FILENAME_INPUT+"_" + str(sorg) + "_" + str(sp),logger)
-        #temp_df = pd.read_excel(ANNEXC_CONST_PATH_ANNEXC_RESULT+ACC.CONST_FILENAME_INPUT+"_" + str(sorg) + "_" + str(sp) + ".csv",index_col=0)
-        temp_df = AL.fn_clean_date(temp_df,ANNEXC_CONST_BASELINEFILE_VARNAME_SPECDATE,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE,"",logger)
-        temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE] = temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE].apply(replace_non_integer)
-        temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD] = temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE].str.split(ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITER).str[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITID_FOR_WARD]
-        #temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK] = temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE].dt.strftime("%W").astype(int)
-        temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK] = temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE]
-        temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK] = temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK].apply(getyearweek) 
-        #table
-        df_table = temp_df.groupby([ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD])[ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE].sum().reset_index(name=ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE)
-        df_table = df_table.sort_values(by=ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE,ascending=False)   
-        
-        #Graph loop generate 5 graph
-        igc = 0
-        for idx in df_table.index:
-            if igc < ANNEXC_CONST_MAX_BASELINEGRAPH:
-                swardid = df_table.loc[idx,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD]
-                temp_df2 = temp_df[temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD]== swardid]
-                temp_df2 = temp_df2[[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE]]
-                temp_df2 = temp_df2.groupby([ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK])[ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE].sum().reset_index(name=ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE)
-                df_graph = df_week.copy(deep=True)
-                df_graph = df_graph.merge(temp_df2, how="left", left_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK, right_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,suffixes=("", "_DUP"))
-                df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE]]
-                
-                create_graph_baseline(df_graph,swardid,ACC.CONST_COL_SWEEKDAY,ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE,
-                                      ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_BASLINE_FILENAME_PREFIX + str(sorg) + "_" + str(sp) + "_" +  str(igc) + ".png",
-                                      logger)
-            igc = igc+1
-        #generate report page
-        ifigoffset_inch = 2.55
-        ifirstpos_inch = 9.3
-        igc = 0
-        icurpos = 1
-        balreadyprintpage = False
-        #print(df_table)
-        #generate report page (Loop for graphs)
-        for idx in df_table.index:
-            if igc < ANNEXC_CONST_MAX_BASELINEGRAPH:
-                icurpos = (igc % ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE) + 1
-                if icurpos == 1:
-                    balreadyprintpage = False
-                    REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
-                    REP_AL.report_context(canvas_rpt, ["<b>"+ ACC.dict_spc[sp] + " : "+ACC.dict_org[sorg][2]+"</b>"],                                           
-                                   1.0*inch, 9.5*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                    REP_AL.report_context(canvas_rpt, ["<b><i><font color=\"#000080\">"+"Top " + str(ANNEXC_CONST_MAX_BASELINEGRAPH) + " wards with most patients" +"</font></i></b>"],              
-                                   1.0*inch, 9.3*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                REP_AL.report_context(canvas_rpt, ["<b><i><font color=\"#000080\">"+"Ward : " + str(df_table.loc[idx,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WARD]) +"</font></i></b>"],              
-                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.3)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                REP_AL.report_context(canvas_rpt, ["<b><i><font color=\"#000080\">"+"No of patients with HO "+ACC.dict_org[sorg][2] +" : " + str(df_table.loc[idx,ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE]) +"</font></i></b>"],              
-                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.5)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                try:
-                    canvas_rpt.drawImage(ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_BASLINE_FILENAME_PREFIX + str(sorg) + "_" + str(sp) + "_" +  str(igc) + ".png", 
-                                         (0-1)*inch, (ifirstpos_inch-(icurpos*ifigoffset_inch)+0.4) *inch, preserveAspectRatio=True, width=10*inch, height=2*inch,showBoundary=False) 
-                except Exception as e:
-                    AL.printlog("Error : checkpoint Annex C generate report (graph) " + str(sp) + ") of " + str(sorg) + " : " +str(e),True,logger) 
-                    logger.exception(e)
-            if (icurpos >= ANNEXC_CONST_MAX_BASELINEGRAPH_PERPAGE):
-                REP_AL.report_context(canvas_rpt,footnote_baseline(), 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-                REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-                page = page + 1
-                balreadyprintpage = True
-            igc = igc+1
-        if balreadyprintpage == False:
-            REP_AL.report_context(canvas_rpt,footnote_baseline(), 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-            REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-            page = page + 1
-            balreadyprintpage = True
-        #Generate report page (Loop for table)
-        df = df_table.copy()
-        icurcol = 1
-        icoloffset = 2
-        balreadyprintpage = False
-        while len(df) > 0:
-            if icurcol == 1:
-                #print header
-                balreadyprintpage = False
-                REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
-                REP_AL.report_context(canvas_rpt, ["<b>"+ ACC.dict_spc[sp] + " : "+ACC.dict_org[sorg][2]+"</b>"],                                           
-                               1.0*inch, 9.5*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                REP_AL.report_context(canvas_rpt, ["<b><i><font color=\"#000080\">"+"Number of patients with " +ACC.dict_org[sorg][2]+" per ward." + "</font></i></b>"],              
-                               1.0*inch, 9.3*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            df1 = df[:ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE]
-            ioffset = 0.25*(len(df1) + 1)
-            try:
-                lst_df = [df1.columns.tolist()] + df1.values.tolist()
-                #table_draw = annexc_table_main(df[:ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE])
-                table_draw = annexc_table_main(lst_df)
-                table_draw.wrapOn(canvas_rpt, 480+ioffset, 300)
-                table_draw.drawOn(canvas_rpt, (1+((icurcol-1)*icoloffset))*inch, (9.3-ioffset)*inch)
-            except Exception as e:
-                AL.printlog("Error : checkpoint Annex C generate report (table) " + str(sp) + ") of " + str(sorg) + " : " +str(e),True,logger) 
-                logger.exception(e)
-            df = df[ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
-            if icurcol >= ANNEXC_CONST_MAX_BASELINECOLTBL_PERPAGE-1:
-                if balreadyprintpage == False:
-                    REP_AL.report_context(canvas_rpt,footnote_baseline(), 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-                    REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-                    page = page + 1
-                    icurcol = 1
-                    balreadyprintpage = True
-                balreadyprintpage = True            
-            icurcol = icurcol + 1
-        if balreadyprintpage == False:
-            REP_AL.report_context(canvas_rpt,footnote_baseline(), 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-            REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-            page = page + 1
-            icurcol = 1
-            balreadyprintpage = True
-    except Exception as e:
-        AL.printlog("Error : checkpoint Annex C prepare baseline summary for " + str(sorg) + " : specimen : "+str(sp) + " : " +str(e),True,logger) 
-        logger.exception(e)
-    return page
-    #return [df_table,df_graph]
-"""
 def prapare_mainAnnexC_mainpage(canvas_rpt,logger,page,startpage,lastpage,totalpage,strgendate):
     #c = canvas.Canvas(filename_pdf+"_"+str(1)+".pdf")
     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
@@ -865,6 +344,379 @@ def save_generalinfo(df,sh_org,spec,p,v):
     df = pd.concat([df, new_row], ignore_index=True)
     return df
     
+
+def getyearweek(ddate):
+    return str(ddate.strftime("%Y")) + "_" + str(ddate.strftime("%W"))
+def create_df_weekday(s_studydate="2021/01/01", e_studydate="2021/12/31", fmt_studydate="%Y/%m/%d",
+                              col_sweekday="startweekday",col_yearweek="year_week"):
+    
+    ds = datetime.strptime(s_studydate,fmt_studydate)
+    ds_monday = (ds - timedelta(days=ds.weekday()))
+    de = datetime.strptime(e_studydate,fmt_studydate)
+    de_monday = (de - timedelta(days=de.weekday()))
+    numweek = math.ceil((de_monday - ds_monday).days / 7)
+    df = pd.DataFrame("",
+                        index=range(0,numweek), 
+                        columns=[col_yearweek,col_sweekday])
+    for idx in df.index:
+        dtmp_monday = ds_monday + timedelta(days=7*idx)
+        df.at[idx,col_sweekday] = str(idx) +" (" + dtmp_monday.strftime("%Y-%m-%d") + ")" 
+        df.at[idx,col_yearweek] = getyearweek(dtmp_monday) 
+    return df
+def caldays(df,coldate,dbaselinedate) :
+    return (df[coldate] - dbaselinedate).dt.days
+def prepare_tabletoplot(logger,df,lst_col=[],lst_tosort=[], list_ascending=[],dict_displaycol={}):
+    try:
+        #df = df.merge(df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
+        #df[ANXC_CONST_COL_PROFILESUMCASE] = df[ANXC_CONST_COL_PROFILESUMCASE].fillna(0)
+        #print(df)
+        df = df.sort_values(by = lst_tosort, ascending = list_ascending, na_position = "last")
+        df = df[lst_col]
+        if len(dict_displaycol) > 0:
+            df.rename(columns=dict_displaycol, inplace=True)
+    except Exception as e:                #has no cluster >>> ignore
+        AL.printlog("Error : checkpoint Annex C generate report (prepare cluster table) : " +str(e),True,logger) 
+        logger.exception(e)
+    return df
+def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol="",zcol="",list_privotcol=[], dict_profile_color={}, filename="",
+         xlabel="Number of week (Start of weekday)",ylabel="Number of patients(n)*",figsizex=20,figsizey=10):
+    #df_forsave=pd.DataFrame()
+    df_sum = df.groupby([xcol_display])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
+    axislength = get_axixlength(b_graph=len(df.columns)>1, real_max_yaxis=df_sum[ACC.CONST_COL_CASE].max())
+    plt.figure()
+    xcol = xcol_display
+    if xcol_sort.strip() != "":
+        xcol = [xcol_display,xcol_sort]
+    else:
+        xcol_sort = xcol_display
+    df_org = df.pivot_table(index=xcol, columns=zcol, values=ycol, aggfunc='sum', fill_value=0)
+    temp_list = [x for x in list_privotcol if x in df_org.columns.to_list()]
+    temp_list2 = [x for x in df_org.columns.to_list() if x not in temp_list]
+    col_list = temp_list + temp_list2
+    df_org = df_org.sort_values(by=[xcol_sort], ascending=[True])
+    df_org.reset_index(inplace=True)
+    df_org.set_index(xcol_display, inplace=True)
+    df_org = df_org[col_list]
+    palette = [dict_profile_color.get(item, item) for item in df_org.columns.tolist()]
+    df_org.plot(kind='bar', 
+            stacked =True, 
+            figsize =(figsizex, figsizey), 
+            color =palette, 
+            fontsize=16)
+    plt.legend(prop={'size': 14},ncol=4)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.xlabel(xlabel, fontsize=16)
+    plt.yticks(np.arange(0,axislength[0]+1,step=axislength[1]), fontsize=16)
+    plt.savefig(filename, format='png',dpi=180,transparent=True, bbox_inches="tight")
+    plt.close()
+    plt.clf
+    #sub_printprocmem(filename,logger)
+    #return(df_org)
+#-----------------------------------------------------------------------------------------------------------
+#Generate part of the report
+def cover(c,logger,strgendate):
+    sec1_res_i = "Report1_page3_results.csv"
+    sec1_file = AC.CONST_PATH_RESULT + sec1_res_i
+    section1_result = pd.DataFrame()
+    try:
+        section1_result = pd.read_csv(sec1_file).fillna("NA")
+    except Exception as e:
+        AL.printlog("Error read file : " + sec1_file + " : " + str(e),True,logger)
+        return 
+    if len(section1_result) <= 0:
+        AL.printlog("Error no record in file : " + sec1_file ,True,logger)
+        return
+    if len(section1_result) > 0:
+        hospital_name   = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Hospital_name","Values"].tolist()[0]), coverpage=True)
+        country_name    = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[section1_result["Parameters"]=="Country","Values"].tolist()[0]), coverpage=True)
+        spc_date_start  = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Minimum_date"),"Values"].tolist()[0]), coverpage=True)
+        spc_date_end    = REP_AL.assign_na_toinfo(str_info=str(section1_result.loc[(section1_result["Type_of_data_file"]=="overall_data")&(section1_result["Parameters"]=="Maximum_date"),"Values"].tolist()[0]), coverpage=True)
+    else:
+        hospital_name    = "NA"
+        country_name    = "NA"
+        spc_date_start  = "NA"
+        spc_date_end    = "NA"
+    ##paragraph variable
+    bold_blue_op = "<b><font color=\"#000080\">"
+    bold_blue_ed = "</font></b>"
+    add_blankline = "<br/>"
+    ##content
+    cover_1_1 = "<b>Hospital name:</b>  " + bold_blue_op + hospital_name + bold_blue_ed
+    cover_1_2 = "<b>Country name:</b>  " + bold_blue_op + country_name + bold_blue_ed
+    cover_1_3 = "<b>Data from:</b>"
+    cover_1_4 = bold_blue_op + str(spc_date_start) + " to " + str(spc_date_end) + bold_blue_ed
+    cover_1 = [cover_1_1,cover_1_2,add_blankline+cover_1_3, cover_1_4]
+    cover_2_1 = "This is a detailed report for records with cluster signals identified by the AMASS-SatScan. This report, together with the full list in Excel format, is for users to check and validate the cluster and the patients in each cluster identified by the SatScan. The information available in this PDF file include ward names used in the dictionary files. The identifiers in the Excel files for the Annex C include hospital number and specimen collection date. Users should not share or transfer this report and the excel files for the Annex C to any party outside of the hospital without data security management and confidential agreement."
+    cover_2_2 = "<br/><b>Generated on:</b>  " + bold_blue_op + strgendate + bold_blue_ed
+    cover_2 = [cover_2_1,cover_2_2]
+    ##reportlab
+    c.setFillColor('#FCBB42')
+    c.rect(0,590,800,20, fill=True, stroke=False)
+    c.setFillColor(colors.royalblue)
+    c.rect(0,420,800,150, fill=True, stroke=False)
+    REP_AL.report_title(c,'Supplementary report Annex C:',0.7*inch, 515,'white',font_size=28)
+    REP_AL.report_title(c,'Cluster signals identify by AMASS-SatScan',0.7*inch, 455,'white',font_size=20)
+    REP_AL.report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
+    REP_AL.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
+    c.showPage()
+def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):
+    #noclustertext = "There is no cluster with p-value < " +str(pvaluelimit) + "."
+    #shaveclustertext = "Table of clusters with p-value < " +str(pvaluelimit) + "."
+    style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=9,alignment=TA_CENTER)
+    sspecname = ACC.dict_spc[spec]
+    sorgname = ACC.dict_org[sh_org][2]
+    dict_dis_specname= {"blo":"blood",
+                        "all":"clinical specimens"}
+    sdis_spec = dict_dis_specname[spec]
+    sheader_wardgrap = f'Display of patients with {sdis_spec} culture positive for {sorgname} in each ward over time'
+    sfootnote = "* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
+    sfootnote = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
+    sfootnote = sfootnote + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
+    sfootnote = sfootnote + "Only wards with a cluster signal identified or having the top three highest number of patients were displayed. "
+    lst_footnote = [sfootnote]
+    lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
+    
+    stotal_patient = "NA"
+    stotal_ward = "NA"
+    stotal_profile = "NA"
+    scluster_patient = "NA"
+    scluster_ward = "NA"
+    scluster_profile = "NA"
+    try:
+        stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
+        df_ward_sum = df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
+        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANXC_CONST_COL_WARDSUMCASE}, inplace=True)
+        stotal_ward = str(len(df_ward_sum))
+        #stotal_ward = str(len(df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
+        stotal_profile = str(len(df_baseline.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
+    except Exception as e:
+        AL.printlog("Warning : Baseline data not available for total sum : " + str(spec) + " of " + str(sh_org) ,False,logger) 
+    #Keep may be useful if add more info to baseline like in Annex C
+    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+    #General info ---------------------------------------
+    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "Baseline information" + "</b>"],                                       
+                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of patients = {stotal_patient}' + "</i>"],
+                   1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of wards = {stotal_ward}' + "</i>"],
+                   1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+    REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile}' + "</i>"],
+                   1.5*inch, 8.8*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+    #--------------------------------------------------------------------------------------------------------------
+    #Profile
+    try:
+        if len(df_profile) > 0:
+            df_profile.sort_values(by = [ANXC_CONST_COL_PROFILESUMCASE], ascending = [False], na_position = "last")
+            try:
+                dict_total= {}
+                for scol in list_profile_atb_column:
+                    dict_total[scol] ="-"
+                    #The following code will be useful for cal sum of each atb in the future don't delete
+                    """
+                    dict_total[scol] =0
+                    try:
+                        scol_count = scol+"_count"
+                        df_profile[scol_count] =  df_profile[ANXC_CONST_COL_PROFILESUMCASE]
+                        df_profile.loc[(df_profile[scol] == '-') | (df_profile[scol] == 'ND'), scol_count] = 0
+                        dict_total[scol] = df_profile[scol_count].sum()
+                    except:
+                        pass
+                    try:
+                        df_profile.drop(scol_count, axis=1, inplace=True)
+                    except:
+                        pass
+                    """
+                dict_total[ANXC_CONST_COL_PROFILESUMCASE] = df_profile[ANXC_CONST_COL_PROFILESUMCASE].sum()
+                dict_total[ANXC_CONST_COL_PROFILESUMCASE] = Paragraph("<b>" + str(df_profile[ANXC_CONST_COL_PROFILESUMCASE].sum()) + "</b>",style_summary)
+                dict_total[ACC.CONST_COL_PROFILEID] = Paragraph("<b>" + "Total"+ "</b>",style_summary)
+                new_total_row = pd.DataFrame([dict_total])
+                df_profile = pd.concat([df_profile, new_total_row], ignore_index=True)
+            except Exception as e:
+                AL.printlog("Warning : unable to generate total sum: " + str(spec) + " of " + str(sh_org) ,False,logger) 
+            #rename column
+            try:
+                df_profile.rename(columns={ACC.CONST_COL_PROFILEID:"Profile ID",ANXC_CONST_COL_PROFILESUMCASE:"No. of\npatients"}, inplace=True)
+            except Exception as e:
+                pass
+            #prepare rotate column header
+            lst_column_head = []
+            atbname_c = 0
+            for scol in df_profile.columns.tolist():
+                if len(scol) > atbname_c:
+                    atbname_c = len(scol)
+                if scol in list_profile_atb_column:
+                    lst_column_head = lst_column_head + [ROTATETEXT(scol)]
+                else:
+                    lst_column_head = lst_column_head + [scol]
+            #print table
+            iheader_h = 0.068*atbname_c
+            #Print report
+            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles" + "</b>"],                                       
+                           1.0*inch, 8.2*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+            df1 = df_profile[:ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
+            ioffset = 0.25*(len(df1)) + iheader_h
+            lst_df = [lst_column_head] + df1.values.tolist()
+            rh = [iheader_h*inch]
+            for i in range(len(df1)):
+                rh = rh + [0.25*inch]
+            table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
+            table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
+            table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (8.2-ioffset)*inch)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
+            page = page + 1
+            if len(df_profile)>0:
+                imorepage = math.ceil(len(df_profile)/ANXC_CONST_PROFILE_MAXROW_NEXTPAGE)
+                for i in range(imorepage):
+                    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+                    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles (Continue)" + "</b>"],                                       
+                                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                    df1 = df_profile[:ANXC_CONST_PROFILE_MAXROW_NEXTPAGE]
+                    ioffset = 0.25*(len(df1)) + iheader_h
+                    lst_df = [lst_column_head] + df1.values.tolist()
+                    rh = [iheader_h*inch]
+                    for i in range(len(df1)):
+                        rh = rh + [0.25*inch]
+                    table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
+                    #table_draw._awgH[0] = iheader_h*inch
+                    table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
+                    table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (9.5-ioffset)*inch)
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+                    df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
+                    page = page + 1
+        else:
+            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of profiles" + "</b>"], 
+                   1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+            REP_AL.report_context(canvas_sup_rpt, ["None"],
+                           1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            page = page + 1
+    except:
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+        page = page + 1
+    #--------------------------------------------------------------------------------------------------------------
+    #ward
+    #Generate report page (Loop for table)
+    df = df_ward.copy(deep=True)
+    if len(df) > 0:
+        try:
+            dict_total = {}
+            dict_total[ANXC_CONST_COL_WARDSUMCASE] = Paragraph("<b>" + str(df[ANXC_CONST_COL_WARDSUMCASE].sum()) + "</b>",style_summary)
+            dict_total[ACC.CONST_COL_WARDID] = Paragraph("<b>" + "Total"+ "</b>",style_summary)
+            new_total_row = pd.DataFrame([dict_total])
+            df = pd.concat([df, new_total_row], ignore_index=True)
+        except Exception as e:
+            AL.printlog("Warning : checkpoint Annex C generate report (ward summary) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),False,logger) 
+            logger.exception(e)
+        try:
+            df = df[[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE]]
+            df.rename(columns={ACC.CONST_COL_WARDID:"Ward ID",ANXC_CONST_COL_WARDSUMCASE:"No. of\npatients"}, inplace=True)
+        except Exception as e:
+            pass
+        icurcol = 1
+        icoloffset = 2.5
+        balreadyprintpage = False
+        bisfirstpage = True
+        while len(df) > 0:
+            if icurcol == 1:
+                #print header
+                balreadyprintpage = False
+                REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+                scon = " (Continue)" if bisfirstpage == False else ""
+                REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of ward" + scon + "</b>"],                                       
+                               1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+            df1 = df[:ANXC_CONST_MAX_BASELINETBLROW_PERPAGE]
+            ioffset = 0.25*(len(df1) + 1)
+            try:
+                lst_df = [df1.columns.tolist()] + df1.values.tolist()
+                table_draw = annexc_table_sup_ward(lst_df,[1*inch,1*inch])
+                table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
+                table_draw.drawOn(canvas_sup_rpt, (1+((icurcol-1)*icoloffset))*inch, (9.3-ioffset)*inch)
+            except Exception as e:
+                AL.printlog("Error : checkpoint Annex C generate report (table) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
+                logger.exception(e)
+            df = df[ANXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
+            if icurcol >= ANXC_CONST_MAX_BASELINECOLTBL_PERPAGE-1:
+                if balreadyprintpage == False:
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+                    bisfirstpage = False
+                    page = page + 1
+                    icurcol = 1
+                    balreadyprintpage = True   
+            else:
+                icurcol = icurcol + 1
+        if balreadyprintpage == False:
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            bisfirstpage = False
+            page = page + 1
+            icurcol = 1
+            balreadyprintpage = True
+    else:
+        REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+        REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of wards" + "</b>"],                                       
+                       1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+        REP_AL.report_context(canvas_sup_rpt, ["None"],
+                       1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+        page = page + 1
+    #--------------------------------------------------------------------------------------------------------------
+    #ward graph
+    #generate report page
+    if len(df_ward) > 0:
+        ifigoffset_inch = 2.50
+        ifirstpos_inch = 9.3
+        igc = 0
+        icurpos = 1
+        balreadyprintpage = False
+        #print(df_table)
+        #generate report page (Loop for graphs)
+        for idx in df_ward.index:
+            #if igc < ANXC_CONST_MAX_BASELINEGRAPH:
+            #df_ward.loc[idx,ACC.CONST_COL_WARDID]
+            if df_ward.loc[idx,ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH]> 0:
+                swardid = str(df_ward.loc[idx,ACC.CONST_COL_WARDID])
+                icurpos = (igc % ANXC_CONST_MAX_BASELINEGRAPH_PERPAGE) + 1
+                if icurpos == 1:
+                    balreadyprintpage = False
+                    REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+                    REP_AL.report_context(canvas_sup_rpt, ["<b>"+ sheader_wardgrap +"</b>"],                                           
+                                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                REP_AL.report_context(canvas_sup_rpt, ["<b><i><font color=\"#000080\">"+"Ward : " + swardid +"</font></i></b>"],              
+                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.3)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                try:
+                    canvas_sup_rpt.drawImage(AC.CONST_PATH_TEMPWITH_PID + ANXC_CONST_BASELINE_GRAPH_FNAME + "_" + str(sh_org) + "_" + str(spec) + "_" + str(swardid) + ".png", 
+                                         (0-1)*inch, (ifirstpos_inch-(icurpos*ifigoffset_inch)+0.4) *inch, preserveAspectRatio=True, width=10*inch, height=2*inch,showBoundary=False) 
+                except Exception as e:
+                    AL.printlog("Error : checkpoint Annex C generate report (graph) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
+                    logger.exception(e)
+                if (icurpos >= ANXC_CONST_MAX_BASELINEGRAPH_PERPAGE):
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+                    page = page + 1
+                    balreadyprintpage = True
+                igc = igc+1
+        if balreadyprintpage == False:
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            page = page + 1
+            balreadyprintpage = True
+    else:
+        REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+        REP_AL.report_context(canvas_sup_rpt, ["<b>"+ sheader_wardgrap +"</b>"],                                      
+                       1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+        REP_AL.report_context(canvas_sup_rpt, ["None"],
+                       1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+        page = page + 1        
+    return page
 def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpage,strgendate,pvaluelimit=0.05,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile_sum=pd.DataFrame(), filename_graph=""):
     snoclustertext = "There is no cluster signal with p-value < " +str(pvaluelimit) + "."
     shaveclustertext = "Wards with cluster signals with p value < " +str(pvaluelimit) + "."
@@ -879,12 +731,12 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     spercent_patient = "NA"
     spercent_ward = "NA"
     spercent_profile = "NA"
-    df_ward_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANNEXC_CONST_COL_WARDSUMCASE])
+    df_ward_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE])
     df_resultdata_forsave = pd.DataFrame()
     try:
         stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
         df_ward_sum = df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
-        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANNEXC_CONST_COL_WARDSUMCASE}, inplace=True)
+        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANXC_CONST_COL_WARDSUMCASE}, inplace=True)
         stotal_ward = str(len(df_ward_sum))
         #stotal_ward = str(len(df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
         stotal_profile = str(len(df_baseline.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
@@ -945,14 +797,14 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
         #print(len(df))
         try:
             df = df.merge(df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
-            df[ANNEXC_CONST_COL_PROFILESUMCASE] = df[ANNEXC_CONST_COL_PROFILESUMCASE].fillna(0)
+            df[ANXC_CONST_COL_PROFILESUMCASE] = df[ANXC_CONST_COL_PROFILESUMCASE].fillna(0)
             df = df.merge(df_ward_sum, how="left", left_on=ACC.CONST_COL_WARDID, right_on=ACC.CONST_COL_WARDID,suffixes=("","_SUMW"))
-            df[ANNEXC_CONST_COL_WARDSUMCASE] = df[ANNEXC_CONST_COL_WARDSUMCASE].fillna(0)
-            dict_col_display = {ACC.CONST_COL_WARDID:"Ward ID",ANNEXC_CONST_COL_WARDSUMCASE:"Observed cases by ward","profile_ID":"AMR Profile",
+            df[ANXC_CONST_COL_WARDSUMCASE] = df[ANXC_CONST_COL_WARDSUMCASE].fillna(0)
+            dict_col_display = {ACC.CONST_COL_WARDID:"Ward ID",ANXC_CONST_COL_WARDSUMCASE:"Observed cases by ward","profile_ID":"AMR Profile",
                                                    ACC.CONST_COL_NEWSDATE:"Start date",ACC.CONST_COL_NEWEDATE:"End date",
                                                    ACC.CONST_COL_NEWOBS:"Observed cases",ACC.CONST_COL_NEWPVAL:"P-value"}
             lst_col_display = list(dict_col_display.keys())
-            df = prepare_tabletoplot(logger,df,lst_col=lst_col_display,lst_tosort=[ANNEXC_CONST_COL_WARDSUMCASE,ANNEXC_CONST_COL_DAYTOSTARTC,ACC.CONST_COL_NEWOBS], list_ascending=[False,True,False],dict_displaycol=dict_col_display)
+            df = prepare_tabletoplot(logger,df,lst_col=lst_col_display,lst_tosort=[ANXC_CONST_COL_WARDSUMCASE,ANXC_CONST_COL_DAYTOSTARTC,ACC.CONST_COL_NEWOBS], list_ascending=[False,True,False],dict_displaycol=dict_col_display)
             lst_col_tosave = df.columns.tolist()
             df_resultdata_forsave = df.copy(deep=True)
             df_resultdata_forsave['Pathogen'] = sh_org
@@ -961,26 +813,25 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
             REP_AL.report_context(canvas_rpt, [shaveclustertext], 
                1.0*inch, 4.15*inch, 460, 50, font_size=11, font_align=TA_LEFT)
             #First up-to 20 clusters
-            ioffset = 0.25*(len(df[:ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE]) + 1)
+            ioffset = 0.25*(len(df[:ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE]) + 1)
             try:
-                df1 = df[:ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE]
+                df1 = df[:ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE]
                 lst_df = [df1.columns.tolist()] + df1.values.tolist()
-                #table_draw = annexc_table_main(df[:ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE])
                 table_draw = annexc_table_main(lst_df)
                 table_draw.wrapOn(canvas_rpt, 480+ioffset, 300)
                 table_draw.drawOn(canvas_rpt, 1.1*inch, (4.3-ioffset)*inch)
             except Exception as e:
                 AL.printlog("Warning : generate first page for " + str(spec) + " of " + str(sh_org),False,logger) 
                 logger.exception(e)
-            #drop first 20 (ANNEXC_MAX_CLUSTERLIST_FISTPAGE)
+            #drop first 20 (ANXC_CONST_CLUSTERLIST_MAXROW_FISTPAGE)
             REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.0*inch, 0.30*inch, 460, 100, font_size=9,line_space=12)
             REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-            df = df[ANNEXC_MAX_CLUSTERLIST_FIRSTPAGE:]
+            df = df[ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE:]
             page = page + 1
             if len(df)>0:
                 #print(len(df))
                 #cluster 21 - N
-                imorepage = math.ceil(len(df)/ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON)
+                imorepage = math.ceil(len(df)/ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON)
                 for i in range(imorepage):
                     #ipage = i + 1
                     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
@@ -988,9 +839,9 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                                    1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
                     REP_AL.report_context(canvas_rpt, [shaveclustertext], 
                                           1.0*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-                    ioffset = 0.25*(len(df[:ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON]) + 1)
+                    ioffset = 0.25*(len(df[:ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON]) + 1)
                     try:
-                        df1 = df[:ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON]
+                        df1 = df[:ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON]
                         lst_df = [df1.columns.tolist()] + df1.values.tolist()
                         table_draw = annexc_table_main(lst_df)
                         table_draw.wrapOn(canvas_rpt, 480+ioffset, 300)
@@ -998,10 +849,10 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                     except Exception as e:
                         AL.printlog("Warning : generate continue page for " + str(spec) + " of " + str(sh_org),False,logger) 
                         logger.exception(e)
-                    #drop another 40 (ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON)
+                    #drop another 40 (ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON)
                     REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.1*inch, 0.30*inch, 460, 100, font_size=9,line_space=12)
                     REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
-                    df = df[ANNEXC_MAX_CLUSTERLIST_SECONDPAGEON:]
+                    df = df[ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON:]
                     page = page + 1
         except Exception as e:
             #print (e)
@@ -1014,80 +865,30 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
         REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
         page = page + 1
     return [page,df_general_info_forsave,df_resultdata_forsave]
-def getyearweek(ddate):
-    return str(ddate.strftime("%Y")) + "_" + str(ddate.strftime("%W"))
-def create_df_weekday(s_studydate="2021/01/01", e_studydate="2021/12/31", fmt_studydate="%Y/%m/%d",
-                              col_sweekday="startweekday",col_yearweek="year_week"):
-    
-    ds = datetime.strptime(s_studydate,fmt_studydate)
-    ds_monday = (ds - timedelta(days=ds.weekday()))
-    de = datetime.strptime(e_studydate,fmt_studydate)
-    de_monday = (de - timedelta(days=de.weekday()))
-    numweek = math.ceil((de_monday - ds_monday).days / 7)
-    df = pd.DataFrame("",
-                        index=range(0,numweek), 
-                        columns=[col_yearweek,col_sweekday])
-    for idx in df.index:
-        dtmp_monday = ds_monday + timedelta(days=7*idx)
-        df.at[idx,col_sweekday] = str(idx) +" (" + dtmp_monday.strftime("%Y-%m-%d") + ")" 
-        df.at[idx,col_yearweek] = getyearweek(dtmp_monday) 
-    return df
-def caldays(df,coldate,dbaselinedate) :
-    return (df[coldate] - dbaselinedate).dt.days
-def prepare_tabletoplot(logger,df,lst_col=[],lst_tosort=[], list_ascending=[],dict_displaycol={}):
-    try:
-        #df = df.merge(df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
-        #df[ANNEXC_CONST_COL_PROFILESUMCASE] = df[ANNEXC_CONST_COL_PROFILESUMCASE].fillna(0)
-        #print(df)
-        df = df.sort_values(by = lst_tosort, ascending = list_ascending, na_position = "last")
-        df = df[lst_col]
-        if len(dict_displaycol) > 0:
-            df.rename(columns=dict_displaycol, inplace=True)
-    except Exception as e:                #has no cluster >>> ignore
-        AL.printlog("Error : checkpoint Annex C generate report (prepare cluster table) : " +str(e),True,logger) 
-        logger.exception(e)
-    return df
-def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol="",zcol="",list_privotcol=[], dict_profile_color={}, filename="",
-         xlabel="Number of week (Start of weekday)",ylabel="Number of patients(n)*",figsizex=20,figsizey=10):
-    #df_forsave=pd.DataFrame()
-    df_sum = df.groupby([xcol_display])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
-    axislength = get_axixlength(b_graph=len(df.columns)>1, real_max_yaxis=df_sum[ACC.CONST_COL_CASE].max())
-    plt.figure()
-    xcol = xcol_display
-    if xcol_sort.strip() != "":
-        xcol = [xcol_display,xcol_sort]
-    else:
-        xcol_sort = xcol_display
-    df_org = df.pivot_table(index=xcol, columns=zcol, values=ycol, aggfunc='sum', fill_value=0)
-    temp_list = [x for x in list_privotcol if x in df_org.columns.to_list()]
-    temp_list2 = [x for x in df_org.columns.to_list() if x not in temp_list]
-    col_list = temp_list + temp_list2
-    df_org = df_org.sort_values(by=[xcol_sort], ascending=[True])
-    df_org.reset_index(inplace=True)
-    df_org.set_index(xcol_display, inplace=True)
-    df_org = df_org[col_list]
-    palette = [dict_profile_color.get(item, item) for item in df_org.columns.tolist()]
-    df_org.plot(kind='bar', 
-            stacked =True, 
-            figsize =(figsizex, figsizey), 
-            color =palette, 
-            fontsize=16)
-    plt.legend(prop={'size': 14},ncol=4)
-    plt.ylabel(ylabel, fontsize=16)
-    plt.xlabel(xlabel, fontsize=16)
-    plt.yticks(np.arange(0,axislength[0]+1,step=axislength[1]), fontsize=16)
-    plt.savefig(filename, format='png',dpi=180,transparent=True, bbox_inches="tight")
-    plt.close()
-    plt.clf
-    #sub_printprocmem(filename,logger)
-    #return(df_org)
+#Preparing date from 01 Dec 2022 to 2022/12/01
+def get_dateforprm(ldate=""):
+    fmt_date = ""
+    month = {"Jan":"01","Feb":"02","Mar":"03","Apr":"04","May":"05","Jun":"06",
+             "Jul":"07","Aug":"08","Sep":"09","Oct":"10","Nov":"11","Dec":"12"}
+    for keys,values in month.items():
+        if keys in ldate:
+            map_date = ldate.replace(keys,values).split(" ")
+            fmt_date = str(map_date[2])+"/"+str(map_date[1])+"/"+str(map_date[0])
+            break
+    return fmt_date
+#Retrieve date from Report1.csv
+def retrieve_startEndDate(filename="",col_datafile=ACC.CONST_COL_DATAFILE,col_param=ACC.CONST_COL_PARAM,val_datafile=ACC.CONST_VALUE_DATAFILE,val_sdate=ACC.CONST_VALUE_SDATE,val_edate=ACC.CONST_VALUE_EDATE,col_date=ACC.CONST_COL_DATE):
+    df = pd.read_csv(filename)
+    start_date = get_dateforprm(df.loc[(df[col_datafile]==val_datafile)&(df[col_param]==val_sdate),col_date].tolist()[0])
+    end_date   = get_dateforprm(df.loc[(df[col_datafile]==val_datafile)&(df[col_param]==val_edate),col_date].tolist()[0])
+    return start_date, end_date
 def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpage,strgendate):
     sec1_res_i = "Report1_page3_results.csv"
     bOK = False
     sub_printprocmem("Appendix C load and reformat result",logger)
     #Getting evaluation study
     fmt_studydate= "%Y/%m/%d"
-    evaluation_study = ALC.retrieve_startEndDate(filename    =AC.CONST_DIR_RESULTDATA + sec1_res_i,
+    evaluation_study = retrieve_startEndDate(filename    =AC.CONST_PATH_RESULT+ sec1_res_i,
                                                  col_datafile="Type_of_data_file",
                                                  col_param   ="Parameters",
                                                  val_datafile="overall_data",
@@ -1101,13 +902,13 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     df_week = create_df_weekday(s_studydate  =s_studydate, 
                                              e_studydate  =e_studydate, 
                                              fmt_studydate=fmt_studydate, 
-                                             col_yearweek =ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,
+                                             col_yearweek =ANXC_CONST_BASELINE_NEWVAR_WEEK,
                                              col_sweekday =ACC.CONST_COL_SWEEKDAY)
     #load dictionary ward
     df_dict_ward = pd.DataFrame()
-    if AL.checkxlsorcsv(AC.CONST_DIR_INPUT,"dictionary_for_wards"):
+    if AL.checkxlsorcsv(AC.CONST_PATH_ROOT,"dictionary_for_wards"):
         try:
-            df_dict_ward = AL.readxlsorcsv_noheader_forceencode(AC.CONST_DIR_INPUT,"dictionary_for_wards", [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],"utf-8",logger)
+            df_dict_ward = AL.readxlsorcsv_noheader_forceencode(AC.CONST_PATH_ROOT,"dictionary_for_wards", [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],"utf-8",logger)
             df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip() != ""]
             df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
             df_dict_ward = df_dict_ward[[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL]]
@@ -1135,9 +936,9 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     for sh_org in ACC.dict_org.keys():
         df_pc= pd.DataFrame()
         try:
-            df_pc= pd.read_excel(ANNEXC_CONST_PATH_ANNEXC_RESULT+ANNEXC_CONST_PROFILE_INFO_FNAME+"_"+ str.upper(sh_org) +".xlsx")
+            df_pc= pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PROFILE+"_"+ str.upper(sh_org) +".xlsx")
         except Exception as e:
-            AL.printlog("Warning : Unable to profile information at: "+ ANNEXC_CONST_PATH_ANNEXC_RESULT+ANNEXC_CONST_PROFILE_INFO_FNAME+"_"+ str.upper(sh_org) +".xlsx" + " for " + str(sh_org),True,logger)
+            AL.printlog("Warning : Unable to profile information at: "+ AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PROFILE+"_"+ str.upper(sh_org) +".xlsx" + " for " + str(sh_org),True,logger)
             logger.exception(e)
         dict_df_org_profile_config[sh_org] = df_pc
         #loop for load data to df and prepare dict color for all profile matching p-value condition
@@ -1163,83 +964,83 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             temp_df_profile_sum = pd.DataFrame()
             list_profile_sortbycases = []
             #CLuster (AnnexC_listofpassedclusters_xxx_xxx.csv)
-            sreplaceblankprofile = ANNEXC_CONST_BLANK_PROFILE_TO_PREFIX + str.upper(sh_org) + ANNEXC_CONST_BLANK_PROFILE_TO_SUFFIX
-            sclusterfile = ANNEXC_CONST_PATH_ANNEXC_RESULT+ACC.CONST_FILENAME_PCLUSTER+"_"+ str.upper(sh_org)+"_"+ str(sp) +".xlsx"
+            sreplaceblankprofile = ANXC_CONST_BLANK_PROFILE_TO_PREFIX + str.upper(sh_org) + ANXC_CONST_BLANK_PROFILE_TO_SUFFIX
+            sclusterfile = AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PCLUSTER+"_"+ str.upper(sh_org)+"_"+ str(sp) +".xlsx"
             try:
-                #df= pd.read_excel(ANNEXC_CONST_PATH_ANNEXC_RESULT+ACC.CONST_FILENAME_PCLUSTER+"_"+ str.upper(sh_org)+"_"+ str(sp) +".xlsx")
+                #df= pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PCLUSTER+"_"+ str.upper(sh_org)+"_"+ str(sp) +".xlsx")
                 df= pd.read_excel(sclusterfile)
                 #Assign blank profile ID to profile such as profile_xxx_00
                 df.loc[df[ACC.CONST_COL_PROFILEID] == "",ACC.CONST_COL_PROFILEID] = sreplaceblankprofile
                 list_cluster_profile=list_cluster_profile + df[ACC.CONST_COL_PROFILEID].to_list()
                 df[ACC.CONST_COL_WARDPROFILE] = df[ACC.CONST_COL_WARDID].str.strip() + ";" + df[ACC.CONST_COL_PROFILEID].str.strip()
-                df[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = df[ACC.CONST_COL_PROFILEID]
-                df= AL.fn_clean_date(df,ACC.CONST_COL_NEWSDATE,ANNEXC_CONST_COL_STARTCDATE,"",logger)
-                df= AL.fn_clean_date(df,ACC.CONST_COL_NEWEDATE,ANNEXC_CONST_COL_ENDCDATE,"",logger)
-                df[ANNEXC_CONST_COL_DAYTOSTARTC] = 0
-                df[ANNEXC_CONST_COL_DAYTOENDC] = 0
+                df[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = df[ACC.CONST_COL_PROFILEID]
+                df= AL.fn_clean_date(df,ACC.CONST_COL_NEWSDATE,ANXC_CONST_COL_STARTCDATE,"",logger)
+                df= AL.fn_clean_date(df,ACC.CONST_COL_NEWEDATE,ANXC_CONST_COL_ENDCDATE,"",logger)
+                df[ANXC_CONST_COL_DAYTOSTARTC] = 0
+                df[ANXC_CONST_COL_DAYTOENDC] = 0
                 try:
-                    df[ANNEXC_CONST_COL_DAYTOSTARTC] =caldays(df, ANNEXC_CONST_COL_STARTCDATE, AC.CONST_ORIGIN_DATE)
-                    df[ANNEXC_CONST_COL_DAYTOENDC] =caldays(df, ANNEXC_CONST_COL_ENDCDATE, AC.CONST_ORIGIN_DATE)
+                    df[ANXC_CONST_COL_DAYTOSTARTC] =caldays(df, ANXC_CONST_COL_STARTCDATE, AC.CONST_ORIGIN_DATE)
+                    df[ANXC_CONST_COL_DAYTOENDC] =caldays(df, ANXC_CONST_COL_ENDCDATE, AC.CONST_ORIGIN_DATE)
                 except Exception as e:
                     AL.printlog("Warning : Unable to convert cluster signal start/end date: "+ str.upper(sh_org) + ":" + str(sp),True,logger)
                     #AL.printlog("Error : checkpoint Annex C generate report (load cluster data (Date convert) :  " + str(sp) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
                     logger.exception(e)
                 #c_df_profile_sum = df.groupby([ACC.CONST_COL_PROFILEID])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
-                #c_df_profile_sum.rename(columns={ACC.CONST_COL_CASE:ANNEXC_CONST_COL_PROFILESUMCASE}, inplace=True)
-                #c_df_profile_sum = c_df_profile_sum.sort_values(by=ANNEXC_CONST_COL_PROFILESUMCASE,ascending=False)
+                #c_df_profile_sum.rename(columns={ACC.CONST_COL_CASE:ANXC_CONST_COL_PROFILESUMCASE}, inplace=True)
+                #c_df_profile_sum = c_df_profile_sum.sort_values(by=ANXC_CONST_COL_PROFILESUMCASE,ascending=False)
             except Exception as e:
                 AL.printlog("Warning : Unable to load/reformat cluster signal at: "+ sclusterfile + " for " + str(sh_org) + ":" + str(sp) ,True,logger)
                 logger.exception(e)
             dict_df_sp[sp] = df
             #Baseline (SatSCAN input file)
-            #sbaselinefile = ANNEXC_CONST_PATH_ANNEXC_RESULT, ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp),logger
-            sbaselinefile =ANNEXC_CONST_PATH_ANNEXC_RESULT+ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp) +".xlsx"
+            #sbaselinefile = AC.CONST_PATH_TEMPWITH_PID, ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp),logger
+            sbaselinefile =AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp) +".xlsx"
             
             try:
-                temp_df = AL.readxlsxorcsv(ANNEXC_CONST_PATH_ANNEXC_RESULT, ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp),logger)
+                temp_df = AL.readxlsxorcsv(AC.CONST_PATH_TEMPWITH_PID, ACC.CONST_FILENAME_INPUT+"_" + str(sh_org) + "_" + str(sp),logger)
                 #temp_df = pd.read_excel(sbaselinefile)
-                temp_df = AL.fn_clean_date(temp_df,ANNEXC_CONST_BASELINEFILE_VARNAME_SPECDATE,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE,"",logger)
-                temp_df[ANNEXC_CONST_COL_DAYTOBASELINEDATE] = 0
+                temp_df = AL.fn_clean_date(temp_df,AC.CONST_NEWVARNAME_CLEANSPECDATE,ANXC_CONST_BASELINE_NEWVAR_SPECDATE,"",logger)
+                temp_df[ANXC_CONST_COL_DAYTOBASELINEDATE] = 0
                 try:
-                    temp_df[ANNEXC_CONST_COL_DAYTOBASELINEDATE] =caldays(temp_df,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE, AC.CONST_ORIGIN_DATE)
+                    temp_df[ANXC_CONST_COL_DAYTOBASELINEDATE] =caldays(temp_df,ANXC_CONST_BASELINE_NEWVAR_SPECDATE, AC.CONST_ORIGIN_DATE)
                 except Exception as e:
                     AL.printlog("Warning : Unable to convert specimen date: "+ str(sh_org) + ":" + str(sp),True,logger)
                     #AL.printlog("Error : checkpoint Annex C generate report (load baseline data (date convert):  " + str(sp) + " of " + str(sh_org) + " : " +str(e),True,logger) 
                     logger.exception(e)
-                temp_df[ACC.CONST_COL_CASE] = temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_NUMCASE].apply(replace_non_integer)
-                temp_df[ACC.CONST_COL_WARDID] = temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE].str.split(ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITER).str[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITID_FOR_WARD].str.strip()
-                temp_df[ACC.CONST_COL_PROFILEID] = temp_df[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE].str.split(ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITER).str[ANNEXC_CONST_BASELINEFILE_VARNAME_WARDPROFILE_SPLITID_FOR_PROFILE].str.strip()
+                temp_df[ACC.CONST_COL_CASE] = temp_df[ACC.CONST_COL_CASE].apply(replace_non_integer)
+                temp_df[ACC.CONST_COL_WARDID] = temp_df[ACC.CONST_COL_TESTGROUP].str.split(ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITER).str[ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITID_FOR_WARD].str.strip()
+                temp_df[ACC.CONST_COL_PROFILEID] = temp_df[ACC.CONST_COL_TESTGROUP].str.split(ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITER).str[ANXC_CONST_BASELINE_VAR_WARDPROFILE_SPLITID_FOR_PROFILE].str.strip()
                 #Assign blank profile ID to profile such as profile_xxx_00
                 temp_df.loc[temp_df[ACC.CONST_COL_PROFILEID] == "",ACC.CONST_COL_PROFILEID] = sreplaceblankprofile
                 
-                temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK] = temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE]
-                temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK] = temp_df[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK].apply(getyearweek)   
+                temp_df[ANXC_CONST_BASELINE_NEWVAR_WEEK] = temp_df[ANXC_CONST_BASELINE_NEWVAR_SPECDATE]
+                temp_df[ANXC_CONST_BASELINE_NEWVAR_WEEK] = temp_df[ANXC_CONST_BASELINE_NEWVAR_WEEK].apply(getyearweek)   
                 temp_df[ACC.CONST_COL_WARDPROFILE] = temp_df[ACC.CONST_COL_WARDID] + ";" + temp_df[ACC.CONST_COL_PROFILEID] 
                 lst_col_before_merge = temp_df.columns.to_list()
                 #Merge with cluter data to mark baseline -> is cluster
                 if len(df) > 0:
                     temp_df2 = temp_df.merge(df, how="left", left_on=ACC.CONST_COL_WARDPROFILE, right_on=ACC.CONST_COL_WARDPROFILE,suffixes=("","_CLUSTER"))
-                    temp_df2 = temp_df2[(temp_df2[ANNEXC_CONST_COL_DAYTOBASELINEDATE]>=temp_df2[ANNEXC_CONST_COL_DAYTOSTARTC]) & (temp_df2[ANNEXC_CONST_COL_DAYTOBASELINEDATE]<=temp_df2[ANNEXC_CONST_COL_DAYTOENDC])]
+                    temp_df2 = temp_df2[(temp_df2[ANXC_CONST_COL_DAYTOBASELINEDATE]>=temp_df2[ANXC_CONST_COL_DAYTOSTARTC]) & (temp_df2[ANXC_CONST_COL_DAYTOBASELINEDATE]<=temp_df2[ANXC_CONST_COL_DAYTOENDC])]
                     temp_df2 = temp_df2[lst_col_before_merge]
-                    temp_df2[ANNEXC_CONST_COL_GOTCLUSTER] = 1
-                    temp_df[ANNEXC_CONST_COL_GOTCLUSTER]  = 0
+                    temp_df2[ANXC_CONST_COL_GOTCLUSTER] = 1
+                    temp_df[ANXC_CONST_COL_GOTCLUSTER]  = 0
                     temp_df = pd.concat([temp_df, temp_df2], axis=0, ignore_index=True)
-                    temp_df = temp_df.groupby(lst_col_before_merge)[ANNEXC_CONST_COL_GOTCLUSTER].sum().reset_index(name=ANNEXC_CONST_COL_GOTCLUSTER)
-                    temp_df[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = temp_df[ACC.CONST_COL_PROFILEID]
-                    temp_df.loc[temp_df[ANNEXC_CONST_COL_GOTCLUSTER] ==0, ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = ANNEXC_CONST_PROFILENAME_FORNOCLUSTER
+                    temp_df = temp_df.groupby(lst_col_before_merge)[ANXC_CONST_COL_GOTCLUSTER].sum().reset_index(name=ANXC_CONST_COL_GOTCLUSTER)
+                    temp_df[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = temp_df[ACC.CONST_COL_PROFILEID]
+                    temp_df.loc[temp_df[ANXC_CONST_COL_GOTCLUSTER] ==0, ANXC_CONST_COL_PROFILE_WITHCLUSTER] = ANXC_CONST_PROFILENAME_FORNOCLUSTER
                 else:
-                    temp_df[ANNEXC_CONST_COL_GOTCLUSTER]  = 0
-                    temp_df[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = ANNEXC_CONST_PROFILENAME_FORNOCLUSTER
+                    temp_df[ANXC_CONST_COL_GOTCLUSTER]  = 0
+                    temp_df[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = ANXC_CONST_PROFILENAME_FORNOCLUSTER
                 #Base line summary
                 temp_df_sum = temp_df.groupby([ACC.CONST_COL_WARDID,ACC.CONST_COL_PROFILEID])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
                 temp_df_sum = temp_df_sum.sort_values(by=ACC.CONST_COL_CASE,ascending=False)
                 temp_df_profile_sum = temp_df_sum.groupby([ACC.CONST_COL_PROFILEID])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
-                temp_df_profile_sum.rename(columns={ACC.CONST_COL_CASE:ANNEXC_CONST_COL_PROFILESUMCASE}, inplace=True)
-                temp_df_profile_sum = temp_df_profile_sum.sort_values(by=ANNEXC_CONST_COL_PROFILESUMCASE,ascending=False)
+                temp_df_profile_sum.rename(columns={ACC.CONST_COL_CASE:ANXC_CONST_COL_PROFILESUMCASE}, inplace=True)
+                temp_df_profile_sum = temp_df_profile_sum.sort_values(by=ANXC_CONST_COL_PROFILESUMCASE,ascending=False)
                 list_profile_sortbycases = temp_df_profile_sum[ACC.CONST_COL_PROFILEID].to_list()
                 list_top_num_case_profile = temp_df_profile_sum.head(3)[ACC.CONST_COL_PROFILEID].to_list()
                 temp_df = temp_df.merge(temp_df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
-                temp_df[ANNEXC_CONST_COL_PROFILESUMCASE] = temp_df[ANNEXC_CONST_COL_PROFILESUMCASE].fillna(0)
+                temp_df[ANXC_CONST_COL_PROFILESUMCASE] = temp_df[ANXC_CONST_COL_PROFILESUMCASE].fillna(0)
             except Exception as e:
                 AL.printlog("Warning : Unable to load/reformat baseline data at: "+ sbaselinefile + " for " + str(sh_org) + ":" + str(sp),True,logger)
                 logger.exception(e)
@@ -1253,8 +1054,8 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         dict_profilecolor = get_dict_profile_color(list_profile_withcolor, list_color)
         dict_profilecolor_onlycluster = {key: value for key, value in dict_profilecolor .items() if key in list_cluster_profile}
         #add no cluster color
-        dict_profilecolor[ANNEXC_CONST_PROFILENAME_FORNOCLUSTER] = ANNEXC_CONST_NOCLUSTER_COLOR
-        dict_profilecolor_onlycluster[ANNEXC_CONST_PROFILENAME_FORNOCLUSTER] = ANNEXC_CONST_NOCLUSTER_COLOR
+        dict_profilecolor[ANXC_CONST_PROFILENAME_FORNOCLUSTER] = ANXC_CONST_NOCLUSTER_COLOR
+        dict_profilecolor_onlycluster[ANXC_CONST_PROFILENAME_FORNOCLUSTER] = ANXC_CONST_NOCLUSTER_COLOR
         #put to org variable
         dict_df_org[sh_org] = dict_df_sp
         dict_df_org_baseline[sh_org] = dict_df_sp_baseline
@@ -1282,30 +1083,30 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                 #df_profile_sum = dict_df_org_profile_sum[sh_org][sp]
                 if len(df_baseline) > 0:
                     df_graph = df_week.copy(deep=True)
-                    df_graph = df_graph.merge(df_baseline, how="left", left_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK, right_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,suffixes=("", "_DUP"))
+                    df_graph = df_graph.merge(df_baseline, how="left", left_on=ANXC_CONST_BASELINE_NEWVAR_WEEK, right_on=ANXC_CONST_BASELINE_NEWVAR_WEEK,suffixes=("", "_DUP"))
                     # copy data for further save to result data folder
                     df_graph_tosave = df_graph.copy(deep=True)
-                    lst_col_tosave = [ACC.CONST_COL_SWEEKDAY,ACC.CONST_COL_WARDID,ACC.CONST_COL_PROFILEID,ACC.CONST_COL_CASE,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_SPECDATE,
-                                      ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,ANNEXC_CONST_COL_PROFILE_WITHCLUSTER]
+                    lst_col_tosave = [ACC.CONST_COL_SWEEKDAY,ACC.CONST_COL_WARDID,ACC.CONST_COL_PROFILEID,ACC.CONST_COL_CASE,ANXC_CONST_BASELINE_NEWVAR_SPECDATE,
+                                      ANXC_CONST_BASELINE_NEWVAR_WEEK,ANXC_CONST_COL_PROFILE_WITHCLUSTER]
                     df_graph_tosave['Pathogen'] = sh_org
                     df_graph_tosave['Specimen'] = sp
                     df_graph_tosave = df_graph_tosave[['Pathogen','Specimen'] + lst_col_tosave]
-                    df_graph_tosave[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph_tosave[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANNEXC_CONST_PROFILENAME_FORNOCLUSTER)
+                    df_graph_tosave[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph_tosave[ANXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANXC_CONST_PROFILENAME_FORNOCLUSTER)
                     df_graph_tosave[ACC.CONST_COL_CASE] = df_graph_tosave[ACC.CONST_COL_CASE].fillna(0)
-                    df_graph_tosave.sort_values(by=[ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK], ascending=[True])
+                    df_graph_tosave.sort_values(by=[ANXC_CONST_BASELINE_NEWVAR_WEEK], ascending=[True])
                     #-------
-                    df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,ANNEXC_CONST_COL_PROFILE_WITHCLUSTER,ACC.CONST_COL_CASE]]
-                    df_graph[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANNEXC_CONST_PROFILENAME_FORNOCLUSTER)
+                    df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANXC_CONST_BASELINE_NEWVAR_WEEK,ANXC_CONST_COL_PROFILE_WITHCLUSTER,ACC.CONST_COL_CASE]]
+                    df_graph[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph[ANXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANXC_CONST_PROFILENAME_FORNOCLUSTER)
                     df_graph[ACC.CONST_COL_CASE] = df_graph[ACC.CONST_COL_CASE].fillna(0)
                     gen_cluster_graph(logger,df=df_graph,
-                                      xcol_sort=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,
+                                      xcol_sort=ANXC_CONST_BASELINE_NEWVAR_WEEK,
                                       xcol_display=ACC.CONST_COL_SWEEKDAY,
                                       ycol=ACC.CONST_COL_CASE,
-                                      zcol=ANNEXC_CONST_COL_PROFILE_WITHCLUSTER,
-                                      list_privotcol=dict_list_org_profile_sortbycase[sh_org][ANNEXC_CONST_SP_ALL],
+                                      zcol=ANXC_CONST_COL_PROFILE_WITHCLUSTER,
+                                      list_privotcol=dict_list_org_profile_sortbycase[sh_org][ANXC_CONST_SP_ALL],
                                       #zcol_descsort=scol_profilesumvase_onlycluster,
                                       dict_profile_color=dict_org_profilecolor_onlycluster[sh_org], 
-                                      filename=ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_CLUSTER_GRAPH_FNAME+"_" + str(sh_org) + "_" + str(sp) + ".png",
+                                      filename=AC.CONST_PATH_TEMPWITH_PID + ANXC_CONST_CLUSTER_GRAPH_FNAME+"_" + str(sh_org) + "_" + str(sp) + ".png",
                                       figsizex=20,figsizey=10)
                     try:
                         if len(df_graph_tosave) > 0:
@@ -1320,8 +1121,8 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                                            sh_org=sh_org,spec=sp,
                                            df=df_cluster, 
                                            df_baseline = df_baseline,
-                                           df_profile_sum = dict_df_org_profile_sum[sh_org][ANNEXC_CONST_SP_ALL],
-                                           filename_graph=ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_CLUSTER_GRAPH_FNAME+"_" + str(sh_org) + "_" + str(sp) + ".png")
+                                           df_profile_sum = dict_df_org_profile_sum[sh_org][ANXC_CONST_SP_ALL],
+                                           filename_graph=AC.CONST_PATH_TEMPWITH_PID + ANXC_CONST_CLUSTER_GRAPH_FNAME+"_" + str(sh_org) + "_" + str(sp) + ".png")
                 page = resultlist[0]
                 try:
                     df_forsave = resultlist[1]
@@ -1355,8 +1156,8 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     #------------------------------------------------------------------------------------------------
     #Print main supplementary annexC
     sub_printprocmem("Appendix C generate supplementary report",logger)
-    path_input = AC.CONST_DIR_INPUT
-    path_iden = ANNEXC_CONST_PATH_ANNEXC_PIDEN
+    path_input = AC.CONST_PATH_ROOT
+    path_iden = AC.CONST_PATH_REPORTWITH_PID
     
     canvas_sup_rpt = canvas.Canvas(path_iden +"Supplementary_data_Annex_C.pdf")
     try:
@@ -1365,7 +1166,6 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         AL.printlog("Warning : Unable to generate cover page: "+ str(sh_org) + ":" + str(sp),True,logger)
         logger.exception(e)
         pass
-    #totalpage = get_annexC_roughtotalpage_baseline(logger,dict_df_org_baseline)
     totalpage = 999 #Need confirm if not need to display total page in supplementary report that this will be remove (other part in the code too)
     lastpage = totalpage #Need confirm if not need to display total page in supplementary report that this will be remove (other part in the code too)
     startpage = 1
@@ -1388,7 +1188,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                 if len(df_profile_sum) > 0:
                     try:
                         df_profile_sum_det = df_profile_sum.merge(df_pc, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("", "_DUP"))
-                        df_profile_sum_det = df_profile_sum_det[[ACC.CONST_COL_PROFILEID] +list_profile_atb_column + [ANNEXC_CONST_COL_PROFILESUMCASE]]
+                        df_profile_sum_det = df_profile_sum_det[[ACC.CONST_COL_PROFILEID] +list_profile_atb_column + [ANXC_CONST_COL_PROFILESUMCASE]]
                     except Exception as e:
                          AL.printlog("Warning : Unable to calculate summary by profile: "+ str(sh_org) + ":" + str(sp),True,logger)
                          logger.exception(e)   
@@ -1397,17 +1197,17 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                     try:
                         df_ward_sum = df_baseline_sum.groupby([ACC.CONST_COL_WARDID])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
                         #print(df_ward_sum)
-                        df_ward_sum = df_baseline.groupby([ACC.CONST_COL_WARDID])[ACC.CONST_COL_CASE,ANNEXC_CONST_COL_GOTCLUSTER].sum().reset_index()
-                        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANNEXC_CONST_COL_WARDSUMCASE}, inplace=True)
-                        df_ward_sum = df_ward_sum.sort_values(by=ANNEXC_CONST_COL_WARDSUMCASE,ascending=False).reset_index()
-                        df_ward_sum[ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 0
-                        if ANNEXC_CONST_NUM_TOPWARD_TODISPLAY > 0:
-                            if len(df_ward_sum) < ANNEXC_CONST_NUM_TOPWARD_TODISPLAY:
-                                df_ward_sum[ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                        df_ward_sum = df_baseline.groupby([ACC.CONST_COL_WARDID])[ACC.CONST_COL_CASE,ANXC_CONST_COL_GOTCLUSTER].sum().reset_index()
+                        df_ward_sum.rename(columns={ACC.CONST_COL_CASE:ANXC_CONST_COL_WARDSUMCASE}, inplace=True)
+                        df_ward_sum = df_ward_sum.sort_values(by=ANXC_CONST_COL_WARDSUMCASE,ascending=False).reset_index()
+                        df_ward_sum[ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 0
+                        if ANXC_CONST_NUM_TOPWARD_TODISPLAY > 0:
+                            if len(df_ward_sum) < ANXC_CONST_NUM_TOPWARD_TODISPLAY:
+                                df_ward_sum[ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                             else:
-                                df_ward_sum.loc[df.head(ANNEXC_CONST_NUM_TOPWARD_TODISPLAY).index, ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                                df_ward_sum.loc[df.head(ANXC_CONST_NUM_TOPWARD_TODISPLAY).index, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                             #df.loc[df[(df.A % 2 == 0)].head(10).index,'B'] = 100
-                        df_ward_sum.loc[df_ward_sum[ANNEXC_CONST_COL_GOTCLUSTER] >0, ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                        df_ward_sum.loc[df_ward_sum[ANXC_CONST_COL_GOTCLUSTER] >0, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                         #Merge to get ward name
                         try:
                             lst_col_before_merge = df_ward_sum.columns.tolist()
@@ -1426,21 +1226,21 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                         try:
                             swardid = df_ward_sum.iloc[i][ACC.CONST_COL_WARDID]
                             temp_df = df_baseline[df_baseline[ACC.CONST_COL_WARDID] == swardid]
-                            if df_ward_sum.iloc[i][ANNEXC_CONST_COL_SUP_DISPLAYWARDGRAPH] > 0:
+                            if df_ward_sum.iloc[i][ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] > 0:
                                 df_graph = df_week.copy(deep=True)
-                                df_graph = df_graph.merge(temp_df, how="left", left_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK, right_on=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,suffixes=("", "_DUP"))
-                                df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,ANNEXC_CONST_COL_PROFILE_WITHCLUSTER,ACC.CONST_COL_CASE]]
-                                df_graph[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph[ANNEXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANNEXC_CONST_PROFILENAME_FORNOCLUSTER)
+                                df_graph = df_graph.merge(temp_df, how="left", left_on=ANXC_CONST_BASELINE_NEWVAR_WEEK, right_on=ANXC_CONST_BASELINE_NEWVAR_WEEK,suffixes=("", "_DUP"))
+                                df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANXC_CONST_BASELINE_NEWVAR_WEEK,ANXC_CONST_COL_PROFILE_WITHCLUSTER,ACC.CONST_COL_CASE]]
+                                df_graph[ANXC_CONST_COL_PROFILE_WITHCLUSTER] = df_graph[ANXC_CONST_COL_PROFILE_WITHCLUSTER].fillna(ANXC_CONST_PROFILENAME_FORNOCLUSTER)
                                 df_graph[ACC.CONST_COL_CASE] = df_graph[ACC.CONST_COL_CASE].fillna(0)
                                 gen_cluster_graph(logger,df=df_graph,
-                                                  xcol_sort=ANNEXC_CONST_BASELINEFILE_NEWVARNAME_WEEK,
+                                                  xcol_sort=ANXC_CONST_BASELINE_NEWVAR_WEEK,
                                                   xcol_display=ACC.CONST_COL_SWEEKDAY,
                                                   ycol=ACC.CONST_COL_CASE,
-                                                  zcol=ANNEXC_CONST_COL_PROFILE_WITHCLUSTER,
-                                                  list_privotcol=dict_list_org_profile_sortbycase[sh_org][ANNEXC_CONST_SP_ALL],
+                                                  zcol=ANXC_CONST_COL_PROFILE_WITHCLUSTER,
+                                                  list_privotcol=dict_list_org_profile_sortbycase[sh_org][ANXC_CONST_SP_ALL],
                                                   #zcol_descsort=scol_profilesumvase_onlycluster,
                                                   dict_profile_color=dict_org_profilecolor_onlycluster[sh_org], 
-                                                  filename=ANNEXC_CONST_PATH_ANNEXC_RESULT + ANNEXC_CONST_BASELINE_GRAPH_FNAME + "_" + str(sh_org) + "_" + str(sp) + "_" + str(swardid) + ".png",
+                                                  filename=AC.CONST_PATH_TEMPWITH_PID + ANXC_CONST_BASELINE_GRAPH_FNAME + "_" + str(sh_org) + "_" + str(sp) + "_" + str(swardid) + ".png",
                                                   figsizex=25,figsizey=5)
                             #itopdis = itopdis + 1
                         except Exception as e:
@@ -1480,7 +1280,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                 scon = " (Continue)" if bisfirstpage == False else ""
                 REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of ward" + scon + "</b>"],                                       
                                1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
-            df1 = df[:ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE]
+            df1 = df[:ANXC_CONST_MAX_BASELINETBLROW_PERPAGE]
             ioffset = 0.25*(len(df1) + 1)
             try:
                 lst_df = [df1.columns.tolist()] + df1.values.tolist()
@@ -1490,11 +1290,11 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             except Exception as e:
                 AL.printlog("Error : gen micro ward table",True,logger) 
                 logger.exception(e)
-            df = df[ANNEXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
+            df = df[ANXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
             if icurcol >= imaxcol-1:
                 if balreadyprintpage == False:
                     REP_AL.report_context(canvas_sup_rpt,lst_microward_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
+                    REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     bisfirstpage = False
                     page = page + 1
                     icurcol = 1
@@ -1503,7 +1303,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                 icurcol = icurcol + 1
         if balreadyprintpage == False:
             REP_AL.report_context(canvas_sup_rpt,lst_microward_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             bisfirstpage = False
             page = page + 1
             icurcol = 1
@@ -1513,7 +1313,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         REP_AL.report_context(canvas_sup_rpt, ["None"],
                        1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
         REP_AL.report_context(canvas_sup_rpt,lst_microward_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANNEXC_CONST_FOOT_REPNAME)
+        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     canvas_sup_rpt.save()
     bOK = True

@@ -35,8 +35,8 @@ import AMASS_amr_commonlib as AL
 import AMASS_amr_commonlib_report as ARC
 
 #Const
-path_result = "./ResultData/"
-path_input = "./"
+path_result = AC.CONST_PATH_RESULT
+path_input = AC.CONST_PATH_ROOT 
 sec1_res_i = "Report1_page3_results.csv"
 sec1_num_i = "Report1_page4_counts_by_month.csv"
 sec2_res_i = "Report2_page5_results.csv"
@@ -107,7 +107,7 @@ def canvas_printpage(c,curpage,lastpage,today=date.today().strftime("%d %b %Y"),
     
 
 def cover(c,logger,today=date.today().strftime("%d %b %Y")):
-    sec1_file = AC.CONST_DIR_RESULTDATA + sec1_res_i
+    sec1_file = AC.CONST_PATH_RESULT + sec1_res_i
     section1_result = pd.DataFrame()
     try:
         section1_result = pd.read_csv(sec1_file).fillna("NA")
@@ -171,7 +171,7 @@ def cover(c,logger,today=date.today().strftime("%d %b %Y")):
     ARC.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 140, font_size=11)
     c.showPage()
 def generatedby(c,logger):
-    sec1_file = AC.CONST_DIR_RESULTDATA + sec1_res_i
+    sec1_file = AC.CONST_PATH_RESULT + sec1_res_i
     section1_result = pd.DataFrame()
     try:
         section1_result = pd.read_csv(sec1_file).fillna("NA")
@@ -1603,7 +1603,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         pass
     if bIsDoAnnexC == True:
         try:
-            import AMASS_ANNEX_C_report as REP_ANNEX_C
+            import AMASS_annex_c_report as REP_ANNEX_C
             bIsDoAnnexC == True
             AL.printlog("Impoer Annex C report module",False,logger)
         except Exception as e:
@@ -1669,7 +1669,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     ### Cover, genrate by -----------------------------------------------------------------------------------------------
     AL.printlog("AMR surveillance report - checkpoint cover",False,logger)
     try:
-        df_cover_sec1_res = pd.read_csv(AC.CONST_DIR_RESULTDATA + sec1_res_i).fillna("NA")
+        df_cover_sec1_res = pd.read_csv(AC.CONST_PATH_RESULT + sec1_res_i).fillna("NA")
         cover(canvas_rpt,df_cover_sec1_res,strgendate)
         generatedby(canvas_rpt,df_cover_sec1_res)
     except Exception as e:
@@ -1800,16 +1800,16 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         istartpage_investor = 1
         ilastpage = 1
     #End page calculate and setting
-    bgotdata_sec1 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA + sec1_num_i)
-    bgotdata_sec2 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec2_res_i)
-    bgotdata_sec3 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec3_res_i)
-    bgotdata_sec4 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec4_res_i)
-    bgotdata_sec5 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec5_res_i)
-    bgotdata_sec6 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  sec6_res_i)
-    bgotdata_annexA1 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  secA_res_i)
-    bgotdata_annexA2 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  secA_mor_i)
-    bgotdata_annexB_page1 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  secB_blo_i)
-    bgotdata_annexB_page2 = ARC.checkpoint(AC.CONST_DIR_RESULTDATA +  secB_blo_mon_i)
+    bgotdata_sec1 = ARC.checkpoint(AC.CONST_PATH_RESULT + sec1_num_i)
+    bgotdata_sec2 = ARC.checkpoint(AC.CONST_PATH_RESULT +  sec2_res_i)
+    bgotdata_sec3 = ARC.checkpoint(AC.CONST_PATH_RESULT +  sec3_res_i)
+    bgotdata_sec4 = ARC.checkpoint(AC.CONST_PATH_RESULT +  sec4_res_i)
+    bgotdata_sec5 = ARC.checkpoint(AC.CONST_PATH_RESULT +  sec5_res_i)
+    bgotdata_sec6 = ARC.checkpoint(AC.CONST_PATH_RESULT +  sec6_res_i)
+    bgotdata_annexA1 = ARC.checkpoint(AC.CONST_PATH_RESULT +  secA_res_i)
+    bgotdata_annexA2 = ARC.checkpoint(AC.CONST_PATH_RESULT +  secA_mor_i)
+    bgotdata_annexB_page1 = ARC.checkpoint(AC.CONST_PATH_RESULT +  secB_blo_i)
+    bgotdata_annexB_page2 = ARC.checkpoint(AC.CONST_PATH_RESULT +  secB_blo_mon_i)
     #print table of contents
     content_0 = 'Introduction'
     content_1 = 'Section [1]: Data overview'
@@ -1851,7 +1851,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         sub_printprocmem("AMR surveillance report - checkpoint SECTION 1",logger)
         if bgotdata_sec1:
             try:
-                df_sec1_T = pd.read_csv(AC.CONST_DIR_RESULTDATA + sec1_num_i)
+                df_sec1_T = pd.read_csv(AC.CONST_PATH_RESULT + sec1_num_i)
                 df_sec1_T = ARC.prepare_section1_table_for_reportlab(df_sec1_T,checkpoint_hos)
                 section1(canvas_rpt,logger,bishosp_ava,df_cover_sec1_res,df_sec1_T,istartpage_sec1,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_sec1,ipage_sec1)
             except Exception as e:
@@ -2243,6 +2243,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
             AL.printlog("Error at : checkpoint print ANNEX C (Generate report) : " + str(e),True,logger)
             logger.exception(e)
             pass
+    else:
+        pass
     #Last 2 page
     method(canvas_rpt,logger,lst_org_format,istartpage_method,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_method,ipage_method)
     investor(canvas_rpt,logger,istartpage_investor,ilastpage,strgendate,AC.CONST_REPORTPAGENUM_MODE,ssecname_investor,ipage_investor)

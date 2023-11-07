@@ -22,12 +22,11 @@ import calendar as cld
 import psutil,gc
 import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
-import AMASS_amr_analysis_annex_b as ANNEX_B
+import AMASS_annex_b_analysis as ANNEX_B
 import AMASS_amr_report_new as AMR_REPORT_NEW
 import AMASS_supplementary_report as SUP_REPORT
 
-import AMASS_amr_analysis_annex_c as ANNEX_C
-import AMASS_amr_const_annex_c as ACC_MINK
+
 from scipy.stats import norm # -> must moveto common lib
 
 bisdebug = True
@@ -1439,10 +1438,22 @@ def mainloop() :
     sub_printprocmem("finish AMR analysis",logger)
     ANNEX_B.generate_annex_b(df_dict_micro, df_micro_annexb,logger,AC.CONST_ANNEXB_USING_MAPPEDDATA,False)
     sub_printprocmem("finish Analysis ANNEX B",logger)
-    ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
-    ANNEX_C.call_SaTScan(prmfile=ACC_MINK.CONST_TEMPDIRPATH+ACC_MINK.CONST_FILENAME_NEWPARAM)
-    ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
-    sub_printprocmem("finish Analysis ANNEX C",logger)
+    if bIsDoAnnexC == True:
+        if (len(df_hospmicro) > 0) & (len(df_hospmicro_blood) > 0):
+            try:
+                import AMASS_annex_c_analysis as ANNEX_C
+                import AMASS_annex_c_const as ACC
+                ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
+                ANNEX_C.call_SaTScan(prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
+                ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
+                sub_printprocmem("finish Analysis ANNEX C",logger)
+            except Exception as e:
+                AL.printlog("Error : Import/run analysis ANNEX C : " + str(e),True,logger)
+                logger.exception(e)
+        else:
+            sub_printprocmem("No hospmicrodata for analysis ANNEX C",logger)
+    else:
+        sub_printprocmem("Command line specify not do Annex C",logger)
     AMR_REPORT_NEW.generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortality,dict_orgwithatb_incidence,df_micro_ward,bishosp_ava,logger)
     sub_printprocmem("finish generate report",logger)
     SUP_REPORT.generate_supplementary_report(df_dict_micro,logger,AC.CONST_ANNEXB_USING_MAPPEDDATA)
