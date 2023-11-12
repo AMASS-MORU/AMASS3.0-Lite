@@ -508,7 +508,7 @@ def prepare_prmfile(ori_prmfile="",start_date="", end_date="", new_prmfile="", s
         for keys,values in ACC.dict_configuration_prm.items():
             if keys in f:
                 if ("CaseFile=" == keys) or ("CoordinatesFile=" == keys) or ("ResultsFile=" == keys):
-                    f = keys+"./"+values+sh_org+"_"+sh_spc+".csv" + "\n"
+                    f = keys+ AC.CONST_PATH_ROOT+values+sh_org+"_"+sh_spc+".csv" + "\n"
                     break
                 else:
                     f = keys + values + "\n"

@@ -140,7 +140,7 @@ def get_atbnote_sec6(list_atbnote):
     return snote   
 def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_AST):
     #Selecting rows by organism and parsing table for PDF
-    #raw_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #raw_df : raw dataframe is opened from AC.CONST_FILENAME_sec2_amr_i
     #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
     #org_col : column name of organisms
     #drug_col : column name of antibiotics
@@ -184,7 +184,7 @@ def create_table_nons_V3(raw_df, org_full, origin="", iMODE=AC.CONST_VALUE_MODE_
     return pd.concat([col,sel_df_1],ignore_index = True)
 def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,ifig_H, origin=""):
     #Creating graph for PDF
-    #raw_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #raw_df : raw dataframe is opened from AC.CONST_FILENAME_sec2_amr_i
     #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
     #org_short : short name of organisms for using to retrieve rows by names ex.s_aureus
     #org_col : column name of organisms
@@ -229,9 +229,9 @@ def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,i
     plt.tick_params(top=False, bottom=True, left=False, right=False,labelleft=True, labelbottom=True)
     plt.tight_layout()
     if origin == "":
-        plt.savefig('./ResultData/Report2_AMR_' + org_short + '.png', format='png',dpi=180,transparent=True)
+        plt.savefig(AC.CONST_PATH_RESULT + 'Report2_AMR_' + org_short + '.png', format='png',dpi=180,transparent=True)
     else:
-        plt.savefig('./ResultData/Report3_AMR_' + org_short + '_' + origin + '.png', format='png',dpi=180,transparent=True)
+        plt.savefig(AC.CONST_PATH_RESULT + 'Report3_AMR_' + org_short + '_' + origin + '.png', format='png',dpi=180,transparent=True)
     plt.close()
     plt.clf
 def prepare_section2_table_for_reportlab_V3(df_org, df_pat, lst_org,lst_org_format, checkpoint_sec2,dict_orgcatwithatb):
@@ -312,7 +312,7 @@ def create_table_perc_mortal_eachorigin_V3(df,org_col,ori_col,mortal_col,total_c
     return df_amr[[org_col,col_displayval]]
 def create_graph_surveillance_V3(df_raw, lst_org, prefix, text_work_drug="N", freq_col="frequency_per_tested", upper_col="frequency_per_tested_uci", lower_col="frequency_per_tested_lci",ifig_H=12):
     #Creating graph for PDF
-    #raw_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #raw_df : raw dataframe is opened from AC.CONST_FILENAME_sec2_amr_i
     #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
     #upper_col : column name of upperCI
     #lower_col : column name of lowerCT
@@ -349,7 +349,7 @@ def create_graph_surveillance_V3(df_raw, lst_org, prefix, text_work_drug="N", fr
     plt.yticks(np.arange(len(lst_org)),lst_org,fontname='sans-serif',style='normal',fontsize=18)
     # plt.yticks("",fontname='sans-serif',style='normal',fontsize=20)
     plt.tight_layout()
-    plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+    plt.savefig(AC.CONST_PATH_RESULT + prefix + '.png', format='png',dpi=180,transparent=True)
     plt.close()
     plt.clf
 def create_graph_mortal_V3(df, organism, origin, prefix, org_col="Organism", ori_col="Infection_origin", drug_col="Antibiotic", perc_col="Mortality (n)", lower_col="Mortality_lower_95ci", upper_col="Mortality_upper_95ci"):
@@ -374,7 +374,7 @@ def create_graph_mortal_V3(df, organism, origin, prefix, org_col="Organism", ori
     plt.yticks(fontname='sans-serif',style='normal',fontsize=20)
     plt.tick_params(top=False, bottom=True, left=False, right=False,labelleft=True, labelbottom=True)
     plt.tight_layout()
-    plt.savefig("./ResultData/" + prefix + '.png', format='png',dpi=180,transparent=True)
+    plt.savefig(AC.CONST_PATH_RESULT + prefix + '.png', format='png',dpi=180,transparent=True)
     plt.close()
     plt.clf
 #---------------------------------------------------------------------------------
@@ -385,11 +385,14 @@ def check_config(df_config, str_process_name):
     #str_process_name: process name in string fmt
     #return value: Boolean; True when parameter is set "yes", False when parameter is set "no"
     config_lst = df_config.iloc[:,0].tolist()
-    result = ""
-    if df_config.loc[config_lst.index(str_process_name),"Setting parameters"] == "yes":
-        result = True
-    else:
-        result = False
+    result = True
+    try:
+        if df_config.loc[config_lst.index(str_process_name),"Setting parameters"] == "yes":
+            result = True
+        else:
+            result = False
+    except:
+        pass
     return result
 
 def checkpoint(str_filename):
@@ -432,7 +435,7 @@ def correct_digit(df=pd.DataFrame(),df_col=[]):
 
 def create_num_patient(raw_df, org_full, org_col, ori_col=""):
     #Retrieving number of positive patient for each organism
-    #raw_df : raw dataframe is opened from "Report2_page6_patients_under_this_surveillance_by_organism.csv"
+    #raw_df : raw dataframe is opened from AC.CONST_FILENAME_sec2_pat_i
     #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
     #org_col : column name of organisms
     if ori_col == "": #section2
@@ -465,7 +468,7 @@ def create_graphpalette(numer_df, numer_col, org_col, org_full, denom_num, cutof
     #Function for creating color palette of each organism based on 70.0 cutoff ratio (default)
     #Lower than cutoff : color gainsboro (very light grey)
     #Equal or higher than cutoff : color darkorange
-    #numer_df : raw dataframe is opened from "Report2_AMR_proportion_table.csv"
+    #numer_df : raw dataframe is opened from AC.CONST_FILENAME_sec2_amr_i
     #numer_col : column name that will be used as numerator
     #org_col : column name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
     #org_full : full name of organisms for using to retrieve rows by names ex.Staphylococcus aureus
@@ -592,7 +595,7 @@ def create_annexA_mortality_graph(df_mor, lst_org, death_col="Number_of_deaths",
     plt.yticks(np.arange(len(lst_org)),lst_org,fontname='sans-serif',style='normal',fontsize=14)
     plt.tick_params(top=False, bottom=True, left=True, right=False,labelleft=True, labelbottom=True)
     plt.tight_layout()
-    plt.savefig('./ResultData/AnnexA_mortality.png', format='png',dpi=300,transparent=True)
+    plt.savefig(AC.CONST_PATH_RESULT + 'AnnexA_mortality.png', format='png',dpi=300,transparent=True)
     plt.close()
     plt.clf
     #gc.collect()

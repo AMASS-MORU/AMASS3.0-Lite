@@ -25,6 +25,8 @@ import AMASS_amr_commonlib as AL
 import AMASS_annex_b_analysis as ANNEX_B
 import AMASS_amr_report_new as AMR_REPORT_NEW
 import AMASS_supplementary_report as SUP_REPORT
+import AMASS_amr_commonlib_report as ARC
+import AMASS_amr_commonlib_genv2compatible as V2
 
 
 from scipy.stats import norm # -> must moveto common lib
@@ -418,19 +420,26 @@ def mainloop() :
     ## Date format
     fmtdate_text = "%d %b %Y"
     try:
-        dict_cmdarg  = AL.getcmdargtodict(logger)
+        #dict_cmdarg  = AL.getcmdargtodict(logger)
         bIsDoAnnexC = True
+        """
         try:
             if dict_cmdarg['annex_c'] == "no":
                 bIsDoAnnexC = False
                 AL.printlog("Note : Command line specify not do Annex C",False,logger)
         except:
             pass
+        """
+        try:
+            config=AL.readxlsxorcsv(AC.CONST_PATH_ROOT + "Configuration/", "Configuration",logger)
+            bIsDoAnnexC = ARC.check_config(config, "amr_surveillance_annexC")
+        except:
+            pass
         # If folder doesn't exist, then create it.
         if not os.path.isdir(AC.CONST_PATH_RESULT) : os.makedirs(AC.CONST_PATH_RESULT)
         path_repwithPID = AC.CONST_PATH_REPORTWITH_PID
         path_variable = AC.CONST_PATH_VAR
-        path_input = "./"
+        path_input = AC.CONST_PATH_ROOT
         
         sub_printprocmem("Start main loop",logger)
         bishosp_ava = AL.checkxlsorcsv(path_input,"hospital_admission_data")
@@ -1204,8 +1213,8 @@ def mainloop() :
                          ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]]]
         temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
         df_report1_page3 = pd.concat([df_report1_page3,temp_df],ignore_index = True)
-        if not AL.fn_savecsv(df_report1_page3, AC.CONST_PATH_RESULT + "Report1_page3_results.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report1_page3_results.csv")
+        if not AL.fn_savecsv(df_report1_page3, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec1_res_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec1_res_i)
         # SECTION 1 - by month
         df_report1_page4 = pd.DataFrame(data={"Month":fn_allmonthname()},index=fn_allmonthname())
         temp_df2 = df_micro.groupby([AC.CONST_NEWVARNAME_SPECMONTHNAME])[AC.CONST_NEWVARNAME_HN].count().reset_index(name='Number_of_specimen_in_microbiology_data_file')
@@ -1217,26 +1226,73 @@ def mainloop() :
             df_report1_page4 = df_report1_page4.merge(temp_df2, how="left", left_on="Month", right_on=AC.CONST_NEWVARNAME_ADMMONTHNAME,suffixes=("", "_HOSP"))
             df_report1_page4.drop(AC.CONST_NEWVARNAME_ADMMONTHNAME, axis=1, inplace=True)
             df_report1_page4['Number_of_hospital_records_in_hospital_admission_data_file'] = df_report1_page4['Number_of_hospital_records_in_hospital_admission_data_file'].fillna(0)
-        if not AL.fn_savecsv(df_report1_page4, AC.CONST_PATH_RESULT + "Report1_page4_counts_by_month.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report1_page4_counts_by_month.csv")
+        if not AL.fn_savecsv(df_report1_page4, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec1_num_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec1_num_i)
+        #Generate V2 Compatible files in resultdata folder
+        AL.printlog("Start generate section 1 result data file compatible with AMASS V2.0: " ,False,logger)
+        try:
+            if not AL.fn_savecsv(df_report1_page3[df_report1_page3["Type_of_data_file"] !='overall_data'], AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec1_res_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec1_res_i)
+            if not AL.fn_savecsv(df_report1_page4, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec1_num_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec1_num_i)
+        except Exception as e:
+            AL.printlog("Fail generate section 1 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+            logger.exception(e) 
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION 2 - Summary
-        temp_list = [['microbiology_data','Number_of_blood_specimens_collected', dict_progvar["n_blood"]], 
+        temp_list = [['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
+                     ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]],
+                     ['microbiology_data','Number_of_blood_specimens_collected', dict_progvar["n_blood"]], 
                      ['microbiology_data','Number_of_blood_culture_negative', dict_progvar["n_blood_neg"]], 
                      ['microbiology_data','Number_of_blood_culture_positive', dict_progvar["n_blood_pos"]], 
-                     ['microbiology_data','Number_of_blood_culture_positive_for_organism_under_this_survey', dict_progvar["n_bsi_pos"]], 
-                     ['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
-                     ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]]]
+                     ['microbiology_data','Number_of_blood_culture_positive_for_organism_under_this_survey', dict_progvar["n_bsi_pos"]]]
         temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-        if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "Report2_page5_results.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report2_page5_results.csv")
+        if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_res_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_res_i)
         # SECTION 2 - By Org, Org dedup, AMR proportion
-        if not AL.fn_savecsv(df_isoRep_blood, AC.CONST_PATH_RESULT + "Report2_AMR_proportion_table.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report2_AMR_proportion_table.csv")
-        if not AL.fn_savecsv(df_isoRep_blood_byorg, AC.CONST_PATH_RESULT + "Report2_page6_counts_by_organism.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report2_page6_counts_by_organism.csv")
-        if not AL.fn_savecsv(df_isoRep_blood_byorg_dedup, AC.CONST_PATH_RESULT + "Report2_page6_patients_under_this_surveillance_by_organism.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report2_page6_patients_under_this_surveillance_by_organism.csv")
+        if not AL.fn_savecsv(df_isoRep_blood, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_amr_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_amr_i)
+        if not AL.fn_savecsv(df_isoRep_blood_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_org_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_org_i)
+        if not AL.fn_savecsv(df_isoRep_blood_byorg_dedup, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_pat_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec2_pat_i)
+        #Generate V2 Compatible files in resultdata folder
+        AL.printlog("Start generate section 2 result data file compatible with AMASS V2.0: " ,False,logger)
+        try:
+            #table and graph
+            v2_df_isoRep_blood = V2.fn_combine_orgdata(logger,df_isoRep_blood,
+                                                             dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                             lst_groupbycol=['Antibiotic'],
+                                                             lst_sumcol=["Susceptible(N)","Non-susceptible(N)","Total(N)"],
+                                                             col_org="Organism",col_totaln="Total(N)",col_n="Non-susceptible(N)",col_percent="Non-susceptible(%)",col_lower95CI="lower95CI(%)*",col_upper95CI="upper95CI(%)*")
+            v2_df_isoRep_blood = V2.fn_filterorg_atb(v2_df_isoRep_blood ,col_org="Organism",col_atb="Antibiotic", dict_orgatb=V2.CONST_V2_DICT_ORG_ATB)
+            v2_df_isoRep_blood = v2_df_isoRep_blood[["Organism","Antibiotic","Susceptible(N)","Non-susceptible(N)","Total(N)","Non-susceptible(%)","lower95CI(%)*","upper95CI(%)*"]]
+            #All before dedup
+            v2_df_isoRep_blood_byorg = V2.fn_combine_orgdata(logger,df_isoRep_blood_byorg,
+                                                             dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                             lst_groupbycol=[],
+                                                             lst_sumcol=["Number_of_blood_specimens_culture_positive_for_the_organism"],
+                                                             col_org="Organism",col_totaln="",col_n="",col_percent="",col_lower95CI="",col_upper95CI="")
+            v2_df_isoRep_blood_byorg = V2.fn_filterorg(v2_df_isoRep_blood_byorg ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)
+            #Dedup
+            v2_df_isoRep_blood_byorg_dedup = V2.fn_combine_orgdata(logger,df_isoRep_blood_byorg_dedup,
+                                                             dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                             lst_groupbycol=[],
+                                                             lst_sumcol=["Number_of_blood_specimens_culture_positive_deduplicated"],
+                                                             col_org="Organism",col_totaln="",col_n="",col_percent="",col_lower95CI="",col_upper95CI="")
+            v2_df_isoRep_blood_byorg_dedup = V2.fn_filterorg(v2_df_isoRep_blood_byorg_dedup ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)
+            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_res_i, 2, logger):
+               print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_res_i)
+               # SECTION 2 - By Org, Org dedup, AMR proportion
+            if not AL.fn_savecsv(v2_df_isoRep_blood, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_amr_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_amr_i)
+            if not AL.fn_savecsv(v2_df_isoRep_blood_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_org_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_org_i)
+            if not AL.fn_savecsv(v2_df_isoRep_blood_byorg_dedup, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_pat_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec2_pat_i)
+        except Exception as e:
+            AL.printlog("Fail generate section 2 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+            logger.exception(e)  
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION 3 - Summary
         if bishosp_ava:
@@ -1247,13 +1303,45 @@ def mainloop() :
                          ['merged_data','Number_of_patients_with_hospital_origin_BSI', df_COHO_isoRep_blood_byorg["Hospital_origin"].sum()], 
                          ['merged_data','Number_of_patients_with_unknown_origin_BSI', df_COHO_isoRep_blood_byorg["Unknown_origin"].sum()]]
             temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "Report3_page12_results.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report3_page12_results.csv")
+            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_res_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_res_i)
             # SECTION 3 - By Org, Org dedup, AMR proportion
-            if not AL.fn_savecsv(df_COHO_isoRep_blood, AC.CONST_PATH_RESULT + "Report3_table.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report3_table.csv")
-            if not AL.fn_savecsv(df_COHO_isoRep_blood_byorg, AC.CONST_PATH_RESULT + "Report3_page13_counts_by_origin.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report3_page13_counts_by_origin.csv")
+            if not AL.fn_savecsv(df_COHO_isoRep_blood, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_amr_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_amr_i)
+            if not AL.fn_savecsv(df_COHO_isoRep_blood_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_pat_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec3_pat_i)
+        #Generate V2 Compatible files in resultdata folder
+        AL.printlog("Start generate section 3 result data file compatible with AMASS V2.0: " ,False,logger)
+        try:
+            #table and graph
+            v2_df_COHO_isoRep_blood = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood,
+                                                             dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                             lst_groupbycol=['Infection_origin','Antibiotic'],
+                                                             lst_sumcol=["Susceptible(N)","Non-susceptible(N)","Total(N)"],
+                                                             col_org="Organism",col_totaln="Total(N)",col_n="Non-susceptible(N)",col_percent="Non-susceptible(%)",col_lower95CI="lower95CI(%)*",col_upper95CI="upper95CI(%)*")
+            v2_df_COHO_isoRep_blood = V2.fn_filterorg_atb(v2_df_COHO_isoRep_blood,col_org="Organism",col_atb="Antibiotic", dict_orgatb=V2.CONST_V2_DICT_ORG_ATB)
+            v2_df_COHO_isoRep_blood = v2_df_COHO_isoRep_blood[["Organism","Infection_origin","Antibiotic","Susceptible(N)","Non-susceptible(N)","Total(N)","Non-susceptible(%)","lower95CI(%)*","upper95CI(%)*"]]
+            v2_temp_df = v2_df_COHO_isoRep_blood[v2_df_COHO_isoRep_blood["Infection_origin"] != AC.CONST_EXPORT_COHO_CO_DATAVAL]
+            v2_df_COHO_isoRep_blood = v2_df_COHO_isoRep_blood[v2_df_COHO_isoRep_blood["Infection_origin"] == AC.CONST_EXPORT_COHO_CO_DATAVAL]
+            v2_df_COHO_isoRep_blood = pd.concat([v2_df_COHO_isoRep_blood,v2_temp_df],ignore_index = True)
+            #Summary page
+            v2_df_COHO_isoRep_blood_byorg = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_byorg,
+                                                             dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                             lst_groupbycol=[],
+                                                             lst_sumcol=["Number_of_patients_with_blood_culture_positive","Number_of_patients_with_blood_culture_positive_merged_with_hospital_data_file","Community_origin","Hospital_origin","Unknown_origin"],
+                                                             col_org="Organism",col_totaln="",col_n="",col_percent="",col_lower95CI="",col_upper95CI="")
+            v2_df_COHO_isoRep_blood_byorg = V2.fn_filterorg(v2_df_COHO_isoRep_blood_byorg ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)
+            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_res_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_res_i)
+            # SECTION 3 - By Org, Org dedup, AMR proportion
+            if not AL.fn_savecsv(v2_df_COHO_isoRep_blood, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_amr_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_amr_i)
+            if not AL.fn_savecsv(v2_df_COHO_isoRep_blood_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_pat_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec3_pat_i)
+
+        except Exception as e:
+            AL.printlog("Fail generate section 3 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+            logger.exception(e)  
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION 4 - Summary
         if dict_progvar["n_blood_neg"] > 0:
@@ -1262,13 +1350,43 @@ def mainloop() :
                          ['merged_data','Number_of_blood_specimens_collected', dict_progvar["n_blood"]], 
                          ['merged_data','Number_of_patients_sampled_for_blood_culture', dict_progvar["n_blood_patients"]]]
             temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "Report4_page24_results.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report4_page24_results.csv")
+            if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_res_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_res_i)
             # SECTION 4 By Org, Org and atb
-            if not AL.fn_savecsv(df_isoRep_blood_incidence, AC.CONST_PATH_RESULT + "Report4_frequency_blood_samples.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report4_frequency_blood_samples.csv")
-            if not AL.fn_savecsv(df_isoRep_blood_incidence_atb, AC.CONST_PATH_RESULT + "Report4_frequency_priority_pathogen.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report4_frequency_priority_pathogen.csv")
+            if not AL.fn_savecsv(df_isoRep_blood_incidence, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_blo_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_blo_i)
+            if not AL.fn_savecsv(df_isoRep_blood_incidence_atb, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_pri_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec4_pri_i)
+            #Generate V2 Compatible files in resultdata folder
+            AL.printlog("Start generate section 4 result data file compatible with AMASS V2.0: " ,False,logger)
+            try:
+                #table and graph
+                v2_df_isoRep_blood_incidence = V2.fn_combine_orgdata(logger,df_isoRep_blood_incidence,
+                                                                 dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                 lst_groupbycol=[],
+                                                                 lst_sumcol=["Number_of_patients"],
+                                                                 col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",sec4_5_totaln=dict_progvar["n_blood_patients"])
+                v2_df_isoRep_blood_incidence = V2.fn_filterorg(v2_df_isoRep_blood_incidence ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)                
+                #All before dedup
+                v2_df_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_isoRep_blood_incidence_atb[df_isoRep_blood_incidence_atb["IncludeonlyR"]==0],
+                                                                 dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                 lst_groupbycol=["Priority_pathogen"],
+                                                                 lst_sumcol=["Number_of_patients"],
+                                                                 col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",sec4_5_totaln=dict_progvar["n_blood_patients"])
+                v2_df_isoRep_blood_incidence_atb = V2.fn_filterorg(v2_df_isoRep_blood_incidence_atb ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)
+                v2_df_isoRep_blood_incidence_atb = v2_df_isoRep_blood_incidence_atb[["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"]]
+                if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_res_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_res_i)
+                # SECTION 4 By Org, Org and atb
+                if not AL.fn_savecsv(v2_df_isoRep_blood_incidence, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_blo_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_blo_i)
+                if not AL.fn_savecsv(v2_df_isoRep_blood_incidence_atb, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_pri_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec4_pri_i)
+
+            except Exception as e:
+                AL.printlog("Fail generate section 4 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+                logger.exception(e)      
+            
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION 5 - Summary
         if bishosp_ava:
@@ -1284,17 +1402,69 @@ def mainloop() :
                              ['merged_data','Number_of_patients_with_unknown_origin',dict_progvar["n_blood_patients"] - len(df_hospmicro_blood[AC.CONST_NEWVARNAME_HN].unique()) ],
                              ['merged_data','Number_of_patients_had_more_than_one_admission', dict_progvar["n_2adm_firstbothCOHO_patients"]]]
                 temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-                if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "Report5_page27_results.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report5_page27_results.csv")
+                if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_res_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_res_i)
                 # SECTION 5 By Org, Org and atb by CO/HO
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL], AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_community_origin.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_community_origin.csv")
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence_atb[df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL], AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_community_origin_antibiotic.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_community_origin_antibiotic.csv")
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL], AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_hospital_origin.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_hospital_origin.csv")
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence_atb[df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL], AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_hospital_origin_antibiotic.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report5_incidence_blood_samples_hospital_origin_antibiotic.csv")
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL], AC.CONST_PATH_RESULT +AC.CONST_FILENAME_sec5_com_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_com_i)
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence_atb[df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL], AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_com_amr_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_com_amr_i)
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL], AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_hos_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_hos_i)
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_incidence_atb[df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL], AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_hos_amr_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec5_hos_amr_i)
+                #Generate V2 Compatible files in resultdata folder
+                AL.printlog("Start generate section 5 result data file compatible with AMASS V2.0: " ,False,logger)
+                try:
+                    #by org CO
+                    v2_df_CO_isoRep_blood_incidence = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL],
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                     lst_groupbycol=["Infection_origin"],
+                                                                     lst_sumcol=["Number_of_patients"],
+                                                                     col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
+                                                                     sec4_5_totaln=dict_progvar["n_CO_blood_patients"])
+                    v2_df_CO_isoRep_blood_incidence = V2.fn_filterorg(v2_df_CO_isoRep_blood_incidence ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)  
+                    #by org HO
+                    v2_df_HO_isoRep_blood_incidence = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence[df_COHO_isoRep_blood_incidence["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL],
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                     lst_groupbycol=["Infection_origin"],
+                                                                     lst_sumcol=["Number_of_patients"],
+                                                                     col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
+                                                                     sec4_5_totaln=dict_progvar["n_HO_blood_patients"])
+                    v2_df_HO_isoRep_blood_incidence = V2.fn_filterorg(v2_df_HO_isoRep_blood_incidence ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5) 
+                    #by pathogen CO
+                    v2_df_CO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                     lst_groupbycol=["Infection_origin","Priority_pathogen"],
+                                                                     lst_sumcol=["Number_of_patients"],
+                                                                     col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
+                                                                     sec4_5_totaln=dict_progvar["n_CO_blood_patients"])
+                    v2_df_CO_isoRep_blood_incidence_atb = V2.fn_filterorg(v2_df_CO_isoRep_blood_incidence_atb ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)
+                    v2_df_CO_isoRep_blood_incidence_atb = v2_df_CO_isoRep_blood_incidence_atb[["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"]]
+                    #by pathogen HO
+                    v2_df_HO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
+                                                                     lst_groupbycol=["Infection_origin","Priority_pathogen"],
+                                                                     lst_sumcol=["Number_of_patients"],
+                                                                     col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
+                                                                     sec4_5_totaln=dict_progvar["n_HO_blood_patients"])
+                    v2_df_HO_isoRep_blood_incidence_atb = V2.fn_filterorg(v2_df_HO_isoRep_blood_incidence_atb ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)
+                    v2_df_HO_isoRep_blood_incidence_atb =  v2_df_HO_isoRep_blood_incidence_atb[["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"]]
+                    temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
+                    if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_res_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_res_i)
+                    # SECTION 5 By Org, Org and atb by CO/HO
+                    if not AL.fn_savecsv(v2_df_CO_isoRep_blood_incidence, AC.CONST_PATH_RESULT +AC.CONST_FILENAME_V2_sec5_com_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_com_i)
+                    if not AL.fn_savecsv(v2_df_CO_isoRep_blood_incidence_atb, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_com_amr_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_com_amr_i)
+                    if not AL.fn_savecsv(v2_df_HO_isoRep_blood_incidence, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_hos_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_hos_i)
+                    if not AL.fn_savecsv(v2_df_HO_isoRep_blood_incidence_atb, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_hos_amr_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_hos_amr_i)
+                except Exception as e:
+                    AL.printlog("Fail generate section 5 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+                    logger.exception(e)      
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION 6 - Summary
         if bishosp_ava:
@@ -1317,24 +1487,72 @@ def mainloop() :
                              ['merged_data','Mortality', n_died_per_text if bishosp_ava == True else 'NA']
                              ]
                 temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-                if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "Report6_page32_results.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report6_page32_results.csv")
+                if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_res_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_res_i)
                 # SECTION 6 By Org, Org and atb by CO/HO
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_mortality_byorg, AC.CONST_PATH_RESULT + "Report6_mortality_byorganism.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report6_mortality_byorganism.csv")
-                if not AL.fn_savecsv(df_COHO_isoRep_blood_mortality, AC.CONST_PATH_RESULT + "Report6_mortality_table.csv", 2, logger):
-                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "Report6_mortality_table.csv")
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_mortality_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_mor_byorg_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_mor_byorg_i)
+                if not AL.fn_savecsv(df_COHO_isoRep_blood_mortality, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_mor_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_sec6_mor_i)
+                #Generate V2 Compatible files in resultdata folder
+                AL.printlog("Start generate section 6 result data file compatible with AMASS V2.0: ",False,logger)
+                try:
+                    #table and graph
+                    v2_df_COHO_isoRep_blood_mortality_byorg = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_mortality_byorg,
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                                     lst_groupbycol=["Infection_origin"],
+                                                                     lst_sumcol=["Number_of_deaths","Total_number_of_patients"],
+                                                                     col_org="Organism")
+                    v2_df_COHO_isoRep_blood_mortality_byorge = V2.fn_filterorg(v2_df_COHO_isoRep_blood_mortality_byorg ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)                
+                    #All before dedup
+                    v2_df_COHO_isoRep_blood_mortality = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_mortality[df_COHO_isoRep_blood_mortality["IncludeonlyR"]==0],
+                                                                     dict_combineorg=V2.CONST_COMBINE_ORG,
+                                                                     lst_groupbycol=["Infection_origin","Antibiotic"],
+                                                                     lst_sumcol=["Number_of_deaths","Total_number_of_patients"],
+                                                                     col_org="Organism",col_totaln="Total_number_of_patients",col_n="Number_of_deaths",col_percent="Mortality",col_lower95CI="Mortality_lower_95ci",col_upper95CI="Mortality_upper_95ci",
+                                                                     bIsSec6=True)
+                    v2_df_COHO_isoRep_blood_mortality = V2.fn_filterorg(v2_df_COHO_isoRep_blood_mortality,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)
+                    v2_df_COHO_isoRep_blood_mortality = v2_df_COHO_isoRep_blood_mortality[["Organism","Infection_origin","Antibiotic","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients"]]
+                    v2_temp_df = v2_df_COHO_isoRep_blood_mortality[v2_df_COHO_isoRep_blood_mortality["Infection_origin"] != AC.CONST_EXPORT_COHO_MORTALITY_CO_DATAVAL]
+                    v2_df_COHO_isoRep_blood_mortality = v2_df_COHO_isoRep_blood_mortality[v2_df_COHO_isoRep_blood_mortality["Infection_origin"] == AC.CONST_EXPORT_COHO_MORTALITY_CO_DATAVAL]
+                    v2_df_COHO_isoRep_blood_mortality = pd.concat([v2_df_COHO_isoRep_blood_mortality,v2_temp_df],ignore_index = True)
+                    temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
+                    if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_res_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_res_i)
+                    # SECTION 6 By Org, Org and atb by CO/HO
+                    if not AL.fn_savecsv(v2_df_COHO_isoRep_blood_mortality_byorg, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_mor_byorg_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_mor_byorg_i)
+                    if not AL.fn_savecsv(v2_df_COHO_isoRep_blood_mortality, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_mor_i, 2, logger):
+                        print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec6_mor_i)
+                except Exception as e:
+                    AL.printlog("Fail generate section 6 result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+                    logger.exception(e)
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # SECTION ANNEX A - Summary
-        if not AL.fn_savecsv(df_annexA, AC.CONST_PATH_RESULT + "AnnexA_page39_results.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "AnnexA_page39_results.csv")
+        if not AL.fn_savecsv(df_annexA, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_res_i , 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_res_i)
         # A1
-        if not AL.fn_savecsv(df_annexA1, AC.CONST_PATH_RESULT + "AnnexA_patients_with_positive_specimens.csv", 2, logger):
-            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "AnnexA_patients_with_positive_specimens.csv")
+        if not AL.fn_savecsv(df_annexA1, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i, 2, logger):
+            print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i)
         # A2
         if bishosp_ava:
-            if not AL.fn_savecsv(df_annexA2, AC.CONST_PATH_RESULT + "AnnexA_mortlity_table.csv", 2, logger):
-                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + "AnnexA_mortlity_table.csv")
+            if not AL.fn_savecsv(df_annexA2, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_mor_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_mor_i)
+        #Generate V2 Compatible files in resultdata folder
+        AL.printlog("Start generate annex A result data file compatible with AMASS V2.0: ",False,logger)
+        try:
+            if not AL.fn_savecsv(df_annexA, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_secA_res_i , 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_V2_FILENAME_secA_res_i)
+            # A1
+            if not AL.fn_savecsv(df_annexA1, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_secA_pat_i, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_V2_FILENAME_secA_pat_i)
+            # A2
+            if bishosp_ava:
+                if not AL.fn_savecsv(df_annexA2, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_secA_mor_i, 2, logger):
+                    print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_V2_FILENAME_secA_mor_i)
+        except Exception as e:
+            AL.printlog("Fail generate annex A result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+            logger.exception(e)
         # --------------------------------------------------------------------------------------------------------------------------------------------------
         # Data verification log
         #3.0.2
@@ -1458,6 +1676,7 @@ def mainloop() :
     sub_printprocmem("finish generate report",logger)
     SUP_REPORT.generate_supplementary_report(df_dict_micro,logger,AC.CONST_ANNEXB_USING_MAPPEDDATA)
     sub_printprocmem("finish generate suppelmentary report",logger)
+    
 # ------------------------------------------------------------------------------------------------------------------------------------------------------      
 #Main loop
 mainloop()

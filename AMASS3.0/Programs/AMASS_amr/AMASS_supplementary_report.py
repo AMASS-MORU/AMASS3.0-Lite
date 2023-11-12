@@ -26,14 +26,14 @@ from AMASS_supplementary_report_commonlib import * #for importing data indicator
 
 def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
     AL.printlog("Start Supplementary data indicators report: " + str(datetime.datetime.now()),False,logger)
-    path = "./"
-    summary_res_i = path + "ResultData/Supplementary_data_indicators_results.csv"
-    summary_1_i  = path + "ResultData/Supplementary_data_indicators_indicator1.xlsx"
-    summary_2_i = path + "ResultData/Supplementary_data_indicators_indicator2.xlsx"
-    summary_3a_i = path + "ResultData/Supplementary_data_indicators_indicator3a.xlsx"
-    summary_3b_i = path + "ResultData/Supplementary_data_indicators_indicator3b.xlsx"
-    summary_list_B_i = path + "Report_with_patient_identifiers/Report_with_patient_identifiers_annexB_withstatus.xlsx"
-    summary_list_A_i = path + "Report_with_patient_identifiers/Report_with_patient_identifiers_annexA_withstatus.xlsx"
+    path = AC.CONST_PATH_ROOT
+    summary_res_i = AC.CONST_PATH_RESULT +"Supplementary_data_indicators_results.csv"
+    summary_1_i  =AC.CONST_PATH_RESULT +"Supplementary_data_indicators_indicator1.xlsx"
+    summary_2_i = AC.CONST_PATH_RESULT +"Supplementary_data_indicators_indicator2.xlsx"
+    summary_3a_i = AC.CONST_PATH_RESULT +"Supplementary_data_indicators_indicator3a.xlsx"
+    summary_3b_i = AC.CONST_PATH_RESULT +"Supplementary_data_indicators_indicator3b.xlsx"
+    summary_list_B_i = AC.CONST_PATH_REPORTWITH_PID +"Report_with_patient_identifiers_annexB_withstatus.xlsx"
+    summary_list_A_i = AC.CONST_PATH_REPORTWITH_PID +"Report_with_patient_identifiers_annexA_withstatus.xlsx"
     
     today = date.today()
     style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=8,alignment=TA_LEFT)
@@ -535,7 +535,7 @@ def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
     try:
         config = pd.read_excel(path + "Configuration/Configuration.xlsx")
         if check_config(config, "data_indicators_report"):
-            c = canvas.Canvas(path + "Report_with_patient_identifiers/Supplementary_data_indicators_report.pdf")
+            c = canvas.Canvas(AC.CONST_PATH_REPORTWITH_PID +"Supplementary_data_indicators_report.pdf")
             cover()
             try:
                 content()

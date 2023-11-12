@@ -75,7 +75,7 @@ CONST_COL_NUMPROFILE_BLO="No. of patients with blood culture positive"
 #columns for SATSCAN Graphs
 CONST_COL_SWEEKDAY = "startweekday"
 CONST_COL_OTHWARD  = "Other wards"
-#columns for Report1_page3_results.csv
+#columns for Report1 result
 CONST_COL_DATAFILE  = "Type_of_data_file"
 CONST_COL_PARAM     = "Parameters"
 CONST_COL_DATE      = "Values"
@@ -97,13 +97,9 @@ CONST_VALUE_SRATE = "susceptible_rate"
 
 
 #INPUTs-OUTPUTs for AnnexC
-#CONST_CURRENTPATH = "./"
-#CONST_RESULTDATAPATH = "./ResultData/"
-#CONST_PATH_ANNEXC_RESULT = "./ResultData_ANNEX_C/" #Add by prapass
-#CONST_PATIENTIDENPATH= "./Report_with_patient_identifiers/"
-#CONST_TEMPDIRPATH= "./temporary_folder_with_patient_identifiers/"
+
 CONST_FILENAME_WARD    = "dictionary_for_wards"
-CONST_FILENAME_REPORT1 = "Report1_page3_results.csv" #Change from "ResultData\Report1_page3_results.csv" 
+CONST_FILENAME_REPORT1 = AC.CONST_FILENAME_sec1_res_i 
 CONST_FILENAME_HO_DEDUP= "AnnexC_dedup_profile"
 CONST_FILENAME_ORIPARAM= ".\Programs\AMASS_amr\satscan_param.prm"
 CONST_FILENAME_NEWPARAM= "satscan_param"

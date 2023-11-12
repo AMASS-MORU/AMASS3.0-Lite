@@ -16,7 +16,7 @@ import AMASS_amr_commonlib as AL
 
 def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_micro):
     AL.printlog("Start Data Indicator (ANNEX B): " + str(datetime.datetime.now()),False,logger)
-    path = "./"
+    path = AC.CONST_PATH_ROOT
     """
     i_micro  = path + "microbiology_data.xlsx"
     i_dict   = path + "dictionary_for_microbiology_data.xlsx"
@@ -29,10 +29,14 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
     i_dataqc = path + "Configuration/list_of_indicators.xlsx"
     i_druglst= path + "Configuration/list_of_antibiotics.xlsx"
     
-    o_list_withoutstatus = path + "Report_with_patient_identifiers/Report_with_patient_identifiers_annexB.xlsx"
-    o_list_withstatus = path + "Report_with_patient_identifiers/Report_with_patient_identifiers_annexB_withstatus.xlsx"
-    o_tab_blo = path + "ResultData/AnnexB_proportion_table_blood.csv"
-    o_tab_blo_bymonth = path + "ResultData/AnnexB_proportion_table_blood_bymonth.csv"
+    o_list_withoutstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB.xlsx"
+    o_list_withstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB_withstatus.xlsx"
+    
+    o_tab_blo = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secB_blo_i
+    o_tab_blo_bymonth = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secB_blo_mon_i
+    
+    v2_o_tab_blo = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_secB_blo_i
+    v2_o_tab_blo_bymonth = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_secB_blo_mon_i
     
     head_dict_1 = "Variable names used in AMASS"
     head_dict_2 = "Variable names used for \"antibiotics\" in AMASS"
@@ -251,7 +255,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                          ["microbiology_data","Number_of_blood_culture_positive",len(micro_pos.loc[micro_pos["mapped_blood"]=="blood"])], 
                          ["microbiology_data","Number_of_blood_culture_negative",len(micro_1.loc[(micro_1["mapped_culture"]=="negative")&(micro_1["mapped_blood"]=="blood")])]]
             overall = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
-            overall.to_csv(path + "ResultData/Supplementary_data_indicators_results.csv",index=False)
+            overall.to_csv(AC.CONST_PATH_RESULT +"supplementary_data_indicators_results.csv",index=False)
             ##### RULE1 #####
             rule1 = datai_part2_2.copy().loc[datai_part2_2['rule_id']=="1",:] #filtering only rule1
             rule1 = ALB.assign_org_pocon(rule1)
@@ -505,7 +509,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             micro_blood_neg = micro_1.loc[(micro_1["mapped_blood"]=="blood")&
                                         (micro_1["mapped_culture"]=="negative"),:] #nogrowth for blood
             micro_blood_pos_neg = pd.concat([micro_blood_neg,micro_blood], axis=0) #merging nogrowth + positive for blood
-            #Exporting AnnexB_proportion_table_blood.csv
+            #Exporting AC.CONST_FILENAME_secB_blo_i
             try:
                 annex_blood = ALB.create_assign_annex_v2(micro_blood)
                 annex_blood = annex_blood.rename(index={"indicator_1":"blood_contamination", 
@@ -520,10 +524,16 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                                         rule3a = rule3a, 
                                         rule3b = rule3b)
                 annex_csv.to_csv(o_tab_blo,index=False,header=True)
+                AL.printlog("Start generate annex B result data file compatible with AMASS V2.0: ",False,logger)
+                try:
+                    annex_csv.to_csv(v2_o_tab_blo,index=False,header=True)
+                except Exception as e:
+                    AL.printlog("Fail generate annex B result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+                    logger.exception(e)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S1): " + str(e),False,logger)
                 pass
-            #Exporting AnnexB_proportion_table_blood_bymonth.csv
+            #Exporting AC.CONST_FILENAME_secB_blo_mon_i
             try:
                 #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
                 """
@@ -539,6 +549,11 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 #------------------------------------------------------------------------------
                 micro_blo_bymonth = ALB.export_annexB_bymonth(df = micro_blo_bymonth, nogrowth_status = nogrowth_status)
                 micro_blo_bymonth.to_csv(o_tab_blo_bymonth,index=True,header=True)
+                try:
+                    micro_blo_bymonth.to_csv(v2_o_tab_blo_bymonth,index=True,header=True)
+                except Exception as e:
+                    AL.printlog("Fail generate annex B result data file compatible with AMASS V2.0: " +  str(e),True,logger) 
+                    logger.exception(e)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S2): " + str(e),False,logger)
                 pass
@@ -546,7 +561,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             #indicator_1
             try:
                 rule1_export_1 = ALB.create_summary_table_supp_pocon_v2(nogrowth_status,rule1_export,micro_data_append.loc[(micro_data_append["mapped_blood"]=="blood")&(micro_data_append["warning_indicator_1"]!=""),:],int_denominator=len(micro_blood_pos_neg))
-                rule1_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator1.xlsx",index=False,header=True)
+                rule1_export_1.to_excel(AC.CONST_PATH_RESULT+ "Supplementary_data_indicators_indicator1.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S3): " + str(e),False,logger)
                 pass
@@ -566,7 +581,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 #indicator_2: merging
                 rule2_export_3 = pd.concat([rule2_export_2.loc[:3,:], df_car_3gc, rule2_export_2.loc[4:11,:], df_flu_3gc]).reset_index().drop(columns=["index"])
                 rule2_export_3["blood_samples"] = rule2_export_3["blood_samples"].replace("NA (0/0)","NA")
-                rule2_export_3.to_excel(path+"ResultData/Supplementary_data_indicators_indicator2.xlsx",index=False,header=True)
+                rule2_export_3.to_excel(AC.CONST_PATH_RESULT+ "Supplementary_data_indicators_indicator2.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S4): " + str(e),False,logger)
                 pass
@@ -574,14 +589,14 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             try:
                 rule3a_export_1 = ALB.create_summary_table_supp_poerr_v2(df_qc=rule3a_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3a")
                 rule3a_export_1["blood_samples"] = rule3a_export_1["blood_samples"].replace("NA (0/0)","NA")
-                rule3a_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator3a.xlsx",index=False,header=True)
+                rule3a_export_1.to_excel(AC.CONST_PATH_RESULT+ "Supplementary_data_indicators_indicator3a.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S5): " + str(e),False,logger)
                 pass
             try:
                 rule3b_export_1 = ALB.create_summary_table_supp_poerr_v2(df_qc=rule3b_export,df_mi=micro_data_append.loc[micro_data_append["mapped_blood"]=="blood"],int_denominator=len(micro_blood_ast), col_mi_drug="antibiotic_indicator_3b")
                 rule3b_export_1["blood_samples"] = rule3b_export_1["blood_samples"].replace("NA (0/0)","NA")
-                rule3b_export_1.to_excel(path+"ResultData/Supplementary_data_indicators_indicator3b.xlsx",index=False,header=True)
+                rule3b_export_1.to_excel(AC.CONST_PATH_RESULT+ "Supplementary_data_indicators_indicator3b.xlsx",index=False,header=True)
             except Exception as e:
                 AL.printlog("Warning : ANNEX B Exporting (S6): " + str(e),False,logger)
                 pass

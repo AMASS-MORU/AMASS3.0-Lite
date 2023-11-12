@@ -82,22 +82,7 @@ def ts_v3(c,logger,df,title_name,title_sub,itop,bnewpage_after,ispaceleft_after)
         inrec_lastpage = len(df) - istartloc
         ispaceleft = (inrec_lastpage*CONST_DVL_ROW_H_INCH) + CONST_DVL_TBLHEAD_H_INCH + CONST_DVL_TITLE_H_INCH
         #Leave end dicision to next section or end group
-"""
-add_blankline = "<br/>"
-today = date.today()
-path = "./"
-dict_i = path + "dictionary_for_microbiology_data.xlsx"
-dict_hosp_i = path + "dictionary_for_hospital_admission_data.xlsx"
-over_i = path + "ResultData/logfile_results.csv"
-org_i = path + "ResultData/logfile_organism.xlsx"
-spc_i = path + "ResultData/logfile_specimen.xlsx"
-ast_i = path + "ResultData/logfile_ast.xlsx"
-gen_i = path + "ResultData/logfile_gender.xlsx"
-age_i = path + "ResultData/logfile_age.xlsx"
-dis_i = path + "ResultData/logfile_discharge.xlsx"
-var_mi_i = path + "Variables/variables_micro.xlsx"
-var_ho_i = path + "Variables/variables_hosp.xlsx"
-"""
+
 def indent(sstr,ilevel):
     ##paragraph variables
     iden1_op = "<para leftindent=\"25\">"
@@ -357,26 +342,37 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 """
 
-path = "./"
+path = AC.CONST_PATH_ROOT
 dict_i = path + "dictionary_for_microbiology_data.xlsx"
 dict_hosp_i = path + "dictionary_for_hospital_admission_data.xlsx"
-over_i = path + "ResultData/logfile_results.csv"
-org_i = path + "ResultData/logfile_organism.xlsx"
-spc_i = path + "ResultData/logfile_specimen.xlsx"
-ast_i = path + "ResultData/logfile_ast.xlsx"
-gen_i = path + "ResultData/logfile_gender.xlsx"
-age_i = path + "ResultData/logfile_age.xlsx"
-dis_i = path + "ResultData/logfile_discharge.xlsx"
+over_i = AC.CONST_PATH_RESULT + "logfile_results.csv"
+org_i = AC.CONST_PATH_RESULT + "logfile_organism.xlsx"
+spc_i = AC.CONST_PATH_RESULT + "logfile_specimen.xlsx"
+ast_i = AC.CONST_PATH_RESULT + "logfile_ast.xlsx"
+gen_i = AC.CONST_PATH_RESULT + "logfile_gender.xlsx"
+age_i = AC.CONST_PATH_RESULT + "logfile_age.xlsx"
+dis_i = AC.CONST_PATH_RESULT + "logfile_discharge.xlsx"
 var_mi_i = path + "Variables/variables_micro.xlsx"
 var_ho_i = path + "Variables/variables_hosp.xlsx"
 var_mi_icsv = path + "Variables/variables_micro.csv"
 var_ho_icsv = path + "Variables/variables_hosp.csv"
-file_spc_date = "ResultData/logfile_formatspecdate.xlsx"
-file_adm_date = "ResultData/logfile_formatadmdate.xlsx"
-file_dis_date = "ResultData/logfile_formatdisdate.xlsx"
-file_microhn = "ResultData/logfile_microhn.xlsx"
-file_hosphn = "ResultData/logfile_hosphn.xlsx"
-file_dup = "ResultData/logfile_dup.xlsx"
+
+# file_spc_date = "ResultData/logfile_formatspecdate.xlsx"
+# file_adm_date = "ResultData/logfile_formatadmdate.xlsx"
+# file_dis_date = "ResultData/logfile_formatdisdate.xlsx"
+# file_microhn = "ResultData/logfile_microhn.xlsx"
+# file_hosphn = "ResultData/logfile_hosphn.xlsx"
+file_spc_date = AC.CONST_PATH_RESULT + "logfile_formatspecdate.xlsx"
+file_adm_date = AC.CONST_PATH_RESULT + "logfile_formatadmdate.xlsx"
+file_dis_date = AC.CONST_PATH_RESULT + "logfile_formatdisdate.xlsx"
+file_microhn = AC.CONST_PATH_RESULT + "logfile_microhn.xlsx"
+file_hosphn = AC.CONST_PATH_RESULT + "logfile_hosphn.xlsx"
+#file_dup = "ResultData/logfile_dup.xlsx"
+file_dup = AC.CONST_PATH_RESULT + "logfile_dup.xlsx"
+
+
+
+
 scol_df_summary_priority = 'priority'
 scol_df_summary_valgroup = 'amass_valgroup'
 scol_df_summary_count = 'counts'
@@ -711,14 +707,14 @@ try:
             try:
                 ts(c,org_A, [list(org_A.columns)], marked_org_A, "Table S1A", "List of data values of the variable recorded for \"organism\" in your microbiology data file, which are mainly used for the main report")
                 org_A.columns = [w.replace("\n"," ") for w in org_A.columns.tolist()]
-                org_A.to_excel(path + "ResultData/logfile_TS1A_main_organisms.xlsx",encoding="UTF-8",index=False,header=True)
+                org_A.to_excel(AC.CONST_PATH_RESULT + "logfile_TS1A_main_organisms.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
             try:
                 ts(c,org_B, [list(org_B.columns)], marked_org_B, "Table S1B", "List of data values of the variable recorded for \"organism\" in your microbiology data file, which are mainly used for the annex")
                 org_B.columns = [w.replace("\n"," ") for w in org_B.columns.tolist()]
-                org_B.to_excel(path + "ResultData/logfile_TS1B_optional_organisms.xlsx",encoding="UTF-8",index=False,header=True)
+                org_B.to_excel(AC.CONST_PATH_RESULT + "logfile_TS1B_optional_organisms.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
@@ -726,14 +722,14 @@ try:
             try:
                 ts(c,df_spectype_sum, [list(df_spectype_sum.columns)], mark_spectype_sum, "Table S2 (Summary)", "List of number of records per AMASS's \"specimen_type\" in your microbiology data file")
                 df_spectype_sum.columns = [w.replace("\n"," ") for w in df_spectype_sum.columns.tolist()]
-                df_spectype_sum.to_excel(path + "ResultData/logfile_TS2SUM_specimens.xlsx",encoding="UTF-8",index=False,header=True)
+                df_spectype_sum.to_excel(AC.CONST_PATH_RESULT + "logfile_TS2SUM_specimens.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
             try:
                 ts(c,spc_merge, [list(spc_merge.columns)], marked_spc, "Table S2", "List of data values of the variable recorded for \"specimen_type\" in your microbiology data file")
                 spc_merge.columns = [w.replace("\n"," ") for w in spc_merge.columns.tolist()]
-                spc_merge.to_excel(path + "ResultData/logfile_TS2_specimens.xlsx",encoding="UTF-8",index=False,header=True)
+                spc_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS2_specimens.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
@@ -742,7 +738,7 @@ try:
             try:
                 ts(c,ast_merge, [list(ast_merge.columns)], marked_ast, "Table S3", "List of variables recorded for \"antibiotics\" in your microbiology data file")
                 ast_merge.columns = [w.replace("\n"," ") for w in ast_merge.columns.tolist()]
-                ast_merge.to_excel(path + "ResultData/logfile_TS3_antibiotics.xlsx",encoding="UTF-8",index=False,header=True)
+                ast_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS3_antibiotics.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
@@ -751,7 +747,7 @@ try:
             try:
                 ts(c,gen_merge, [list(gen_merge.columns)], marked_gen, "Table S4", "List of data values of variable recorded for \"gender\" in your hospital admission data file")
                 gen_merge.columns = [w.replace("\n"," ") for w in gen_merge.columns.tolist()]
-                gen_merge.to_excel(path + "ResultData/logfile_TS4_gender.xlsx",encoding="UTF-8",index=False,header=True)
+                gen_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS4_gender.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
@@ -759,7 +755,7 @@ try:
             try:
                 ts(c,age_merge, [list(age_merge.columns)], marked_age, "Table S5", "List of data values of variable recorded for \"age\" in your hospital admission data file")
                 age_merge.columns = [w.replace("\n"," ") for w in age_merge.columns.tolist()]
-                age_merge.to_excel(path + "ResultData/logfile_TS5_age.xlsx",encoding="UTF-8",index=False,header=True)
+                age_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS5_age.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass
@@ -767,7 +763,7 @@ try:
             try:
                 ts(c,dis_merge, [list(dis_merge.columns)], marked_dis, "Table S6", "List of data values of variable recorded for \"discharge status\" in your hospital admission data file")
                 dis_merge.columns = [w.replace("\n"," ") for w in dis_merge.columns.tolist()]
-                dis_merge.to_excel(path + "ResultData/logfile_TS6_discharge_status.xlsx",encoding="UTF-8",index=False,header=True)
+                dis_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS6_discharge_status.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
                 logger.exception(e)
                 pass

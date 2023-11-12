@@ -16,6 +16,7 @@
 # Created on 20th April 2022
 import pandas as pd #for creating and manipulating dataframe
 from pathlib import Path #for retrieving input's path
+import AMASS_amr_const as AC
 
 
 #Checking process is either able for running or not
@@ -544,13 +545,13 @@ def export_records_annexA(df, dictionary, col_spcdate, col_organism):
     df_A = df.loc[df[col_organism].isin(lst_dict_org)]
     df_A["mapped_spctype"] = df_A["mapped_spctype"].replace({"blood":"Blood","csf":"CSF","genital swab":"Genital swab","rts":"RTS","stool":"Stool","urine":"Urine","others":"Others"})
     df_A = format_date_forexportation(df = df_A,col_date = col_spcdate)
-    df_A.drop(columns=drop_col).to_excel("./Report_with_patient_identifiers/Report_with_patient_identifiers_annexA_withstatus.xlsx",header=True,index=False)
+    df_A.drop(columns=drop_col).to_excel(AC.CONST_PATH_REPORTWITH_PID +"Report_with_patient_identifiers_annexA_withstatus.xlsx",header=True,index=False)
     if "mapped_specimen_number" in df_A.columns: #drop columns before exportation
         df_A = df_A.drop(columns=["mapped_specimen_number"])
     else:
         pass
     df_A = df_A.drop(columns=drop_col+["mapped_spctype","mapped_blood","mapped_culture","mapped_fam","mapped_sci","mapped_gen"])
-    df_A.to_excel("./Report_with_patient_identifiers/Report_with_patient_identifiers_annexA.xlsx",header=True,index=False)
+    df_A.to_excel(AC.CONST_PATH_REPORTWITH_PID +"Report_with_patient_identifiers_annexA.xlsx",header=True,index=False)
 
 
 #Retrieving available family based on dictionary_for_microbiology_data

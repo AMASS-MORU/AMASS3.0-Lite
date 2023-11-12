@@ -6,8 +6,9 @@
 
 # Created on 20th April 2022
 import os #for getting file size
+import AMASS_amr_const as AC
 from pathlib import Path #for retrieving input's path
-path = "./"
+path = AC.CONST_PATH_ROOT
 try:
     out_ = open(path + "error_log.txt","w")
     out_.write("Start of error_log.txt" + "\n")

@@ -19,11 +19,6 @@ import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 import AMASS_amr_commonlib_report as REP_AL
 import AMASS_annex_c_const as ACC
-#import AMASS_ANNEX_C_commonlib as ALC
-#ANXC_CONST_COL_PROFILE_COLOR = "assign_color"
-#ANXC_CONST_COL_WARDPROFILE = "ward_and_profile"
-#ANXC_CONST_BASLINE_FILENAME_PREFIX = "AnnexC_graph_baseline_"
-#ANXC_CONST_PATH_ANNEXC_PIDEN = "./Report_with_patient_identifiers/"
 
 #General const
 ANNEXC_RPT_CONST_TITLE = 'Annex C: Cluster signals'
@@ -37,8 +32,8 @@ ANXC_CONST_BLANK_PROFILE_TO_SUFFIX = "_00"
 
 #Cut new page
 #Annex C profile
-ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE = 9
-ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON = 28
+ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE = 8
+ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON = 27
 #Supplementary profile
 ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE = 16
 ANXC_CONST_PROFILE_MAXROW_NEXTPAGE = 22
@@ -64,7 +59,7 @@ ANXC_CONST_COL_DAYTOENDC= "daysendcluster"
 #Merge baseline and cluster
 ANXC_CONST_COL_PROFILE_WITHCLUSTER = "cluster_profile_id"
 ANXC_CONST_PROFILENAME_FORNOCLUSTER = "Other profiles"
-ANXC_CONST_NOCLUSTER_COLOR = "#EEEEEE"
+ANXC_CONST_NOCLUSTER_COLOR = "#CCCCCC"
 ANXC_CONST_COL_GOTCLUSTER = "is_cluster"
 #Grpah file name
 ANXC_CONST_CLUSTER_GRAPH_FNAME = 'annexc_graph_cluster'
@@ -331,7 +326,7 @@ def prapare_mainAnnexC_mainpage(canvas_rpt,logger,page,startpage,lastpage,totalp
     REP_AL.report_title(canvas_rpt,'Pathogens under the survey',1.07*inch, 6.2*inch,'#3e4444',font_size=12)
     REP_AL.report_context(canvas_rpt, template_page1_org(),                                           
                    1.0*inch, 4.0*inch, 460, 150, font_size=11, font_align=TA_LEFT)
-    REP_AL.report_title(canvas_rpt,'Results',1.07*inch, 4.1*inch,'#3e4444',font_size=12)
+    REP_AL.report_title(canvas_rpt,'Results',1.07*inch, 3.1*inch,'#3e4444',font_size=12)
     REP_AL.report_context(canvas_rpt, template_page1_result(),                                           
                    1.0*inch, 1.2*inch, 460, 200, font_size=11, font_align=TA_LEFT)
     #REP_AL.report_todaypage(canvas_rpt,270,30,"AnnexC - Page " + str(1))
@@ -365,13 +360,18 @@ def create_df_weekday(s_studydate="2021/01/01", e_studydate="2021/12/31", fmt_st
     return df
 def caldays(df,coldate,dbaselinedate) :
     return (df[coldate] - dbaselinedate).dt.days
-def prepare_tabletoplot(logger,df,lst_col=[],lst_tosort=[], list_ascending=[],dict_displaycol={}):
+def prepare_tabletoplot(logger,df,lst_col=[],lst_tosort=[], list_ascending=[],dict_displaycol={},col_checkgroup="",col_tohidevalue=""):
     try:
         #df = df.merge(df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
         #df[ANXC_CONST_COL_PROFILESUMCASE] = df[ANXC_CONST_COL_PROFILESUMCASE].fillna(0)
         #print(df)
         df = df.sort_values(by = lst_tosort, ascending = list_ascending, na_position = "last")
         df = df[lst_col]
+        if (col_checkgroup!="") & (col_tohidevalue!=""):
+            if (col_checkgroup in lst_col) & (col_tohidevalue in lst_col):
+                #Don't display total per ward if same ward
+                mask = df[col_checkgroup] == df[col_checkgroup].shift()
+                df.loc[mask, col_tohidevalue] = ''
         if len(dict_displaycol) > 0:
             df.rename(columns=dict_displaycol, inplace=True)
     except Exception as e:                #has no cluster >>> ignore
@@ -415,7 +415,7 @@ def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol
 #-----------------------------------------------------------------------------------------------------------
 #Generate part of the report
 def cover(c,logger,strgendate):
-    sec1_res_i = "Report1_page3_results.csv"
+    sec1_res_i = AC.CONST_FILENAME_sec1_res_i
     sec1_file = AC.CONST_PATH_RESULT + sec1_res_i
     section1_result = pd.DataFrame()
     try:
@@ -732,6 +732,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     spercent_ward = "NA"
     spercent_profile = "NA"
     df_ward_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE])
+    df_ward_cluster_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE])
     df_resultdata_forsave = pd.DataFrame()
     try:
         stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
@@ -746,6 +747,8 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
         scluster_patient = str(df[ACC.CONST_COL_NEWOBS].sum())
         scluster_ward = str(len(df.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_WARDID].count()))
         scluster_profile = str(len(df.groupby(by=ACC.CONST_COL_PROFILEID)[ACC.CONST_COL_PROFILEID].count()))
+        df_ward_cluster_sum = df.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_NEWOBS].sum().reset_index(name=ACC.CONST_COL_NEWOBS)
+        df_ward_cluster_sum.rename(columns={ACC.CONST_COL_NEWOBS:ANXC_CONST_COL_WARDSUMCASE}, inplace=True)
     except Exception as e:
        AL.printlog("Warning : Cluster signal data not available for total sum : " + str(spec) + " of " + str(sh_org) ,False,logger) 
     try:
@@ -773,6 +776,8 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     REP_AL.report_context(canvas_rpt, ["<b>"+ sspecname + ": " + sorgname + "</b>"],                                       
                    1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+    REP_AL.report_context(canvas_rpt, ["<b>"+ "Hospital-origin" + "</b>"],                                       
+                   6.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
     #General info ---------------------------------------
     REP_AL.report_context(canvas_rpt, ["<i>"+ f'No. of patients = {stotal_patient} ({scluster_patient} [{spercent_patient}%] were included in cluster signals)' + "</i>"],
                    1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
@@ -798,13 +803,17 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
         try:
             df = df.merge(df_profile_sum, how="left", left_on=ACC.CONST_COL_PROFILEID, right_on=ACC.CONST_COL_PROFILEID,suffixes=("","_SUM"))
             df[ANXC_CONST_COL_PROFILESUMCASE] = df[ANXC_CONST_COL_PROFILESUMCASE].fillna(0)
-            df = df.merge(df_ward_sum, how="left", left_on=ACC.CONST_COL_WARDID, right_on=ACC.CONST_COL_WARDID,suffixes=("","_SUMW"))
+            df = df.merge(df_ward_cluster_sum, how="left", left_on=ACC.CONST_COL_WARDID, right_on=ACC.CONST_COL_WARDID,suffixes=("","_SUMW"))
             df[ANXC_CONST_COL_WARDSUMCASE] = df[ANXC_CONST_COL_WARDSUMCASE].fillna(0)
-            dict_col_display = {ACC.CONST_COL_WARDID:"Ward ID",ANXC_CONST_COL_WARDSUMCASE:"Observed cases by ward","profile_ID":"AMR Profile",
+            
+            dict_col_display = {ACC.CONST_COL_WARDID:"Ward ID",ANXC_CONST_COL_WARDSUMCASE:"Total no. of\nobserved cases\nin any cluster by ward","profile_ID":"AMR Profile",
                                                    ACC.CONST_COL_NEWSDATE:"Start date",ACC.CONST_COL_NEWEDATE:"End date",
-                                                   ACC.CONST_COL_NEWOBS:"Observed cases",ACC.CONST_COL_NEWPVAL:"P-value"}
+                                                   ACC.CONST_COL_NEWOBS:"No. of\nobserved cases\nin each cluster",ACC.CONST_COL_NEWPVAL:"P-value"}
             lst_col_display = list(dict_col_display.keys())
-            df = prepare_tabletoplot(logger,df,lst_col=lst_col_display,lst_tosort=[ANXC_CONST_COL_WARDSUMCASE,ANXC_CONST_COL_DAYTOSTARTC,ACC.CONST_COL_NEWOBS], list_ascending=[False,True,False],dict_displaycol=dict_col_display)
+            
+            df = prepare_tabletoplot(logger,df,lst_col=lst_col_display,lst_tosort=[ANXC_CONST_COL_WARDSUMCASE,ANXC_CONST_COL_DAYTOSTARTC,ACC.CONST_COL_NEWOBS], list_ascending=[False,True,False],dict_displaycol=dict_col_display,
+                                     col_checkgroup=ACC.CONST_COL_WARDID,col_tohidevalue=ANXC_CONST_COL_WARDSUMCASE)
+            
             lst_col_tosave = df.columns.tolist()
             df_resultdata_forsave = df.copy(deep=True)
             df_resultdata_forsave['Pathogen'] = sh_org
@@ -819,7 +828,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                 lst_df = [df1.columns.tolist()] + df1.values.tolist()
                 table_draw = annexc_table_main(lst_df)
                 table_draw.wrapOn(canvas_rpt, 480+ioffset, 300)
-                table_draw.drawOn(canvas_rpt, 1.1*inch, (4.3-ioffset)*inch)
+                table_draw.drawOn(canvas_rpt, 1.1*inch, (4.0-ioffset)*inch)
             except Exception as e:
                 AL.printlog("Warning : generate first page for " + str(spec) + " of " + str(sh_org),False,logger) 
                 logger.exception(e)
@@ -837,6 +846,8 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
                     REP_AL.report_context(canvas_rpt, ["<b>"+ sspecname + ": " + sorgname + " (Continue)</b>"],                                       
                                    1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                    REP_AL.report_context(canvas_rpt, ["<b>"+ "Hospital-origin" + "</b>"],                                       
+                                   6.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
                     REP_AL.report_context(canvas_rpt, [shaveclustertext], 
                                           1.0*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
                     ioffset = 0.25*(len(df[:ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON]) + 1)
@@ -845,7 +856,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                         lst_df = [df1.columns.tolist()] + df1.values.tolist()
                         table_draw = annexc_table_main(lst_df)
                         table_draw.wrapOn(canvas_rpt, 480+ioffset, 300)
-                        table_draw.drawOn(canvas_rpt, 1.0*inch, (9.2-ioffset)*inch)
+                        table_draw.drawOn(canvas_rpt, 1.0*inch, (8.9-ioffset)*inch)
                     except Exception as e:
                         AL.printlog("Warning : generate continue page for " + str(spec) + " of " + str(sh_org),False,logger) 
                         logger.exception(e)
@@ -883,7 +894,7 @@ def retrieve_startEndDate(filename="",col_datafile=ACC.CONST_COL_DATAFILE,col_pa
     end_date   = get_dateforprm(df.loc[(df[col_datafile]==val_datafile)&(df[col_param]==val_edate),col_date].tolist()[0])
     return start_date, end_date
 def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpage,strgendate):
-    sec1_res_i = "Report1_page3_results.csv"
+    sec1_res_i = AC.CONST_FILENAME_sec1_res_i
     bOK = False
     sub_printprocmem("Appendix C load and reformat result",logger)
     #Getting evaluation study
@@ -1147,12 +1158,12 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             except Exception as e:
                 AL.printlog("Warning : Unable to generate report: "+ str(sh_org) + ":" + str(sp),True,logger)
                 logger.exception(e)
-    if not AL.fn_savexlsx(df_generalinfo_all, AC.CONST_PATH_RESULT + "AnnexC_generalinfo.xlsx", logger):
-        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "AnnexC_generalinfo.xlsx",False,logger) 
-    if not AL.fn_savexlsx(df_forsave_all, AC.CONST_PATH_RESULT + "AnnexC_wardprofile_cluster.xlsx", logger):
-        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "AnnexC_wardprofile_cluster.xlsx",False,logger)  
-    if not AL.fn_savexlsx(df_graph_all, AC.CONST_PATH_RESULT + "AnnexC_profilegraph.xlsx", logger):
-        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "AnnexC_profilegraph.xlsx",False,logger)  
+    if not AL.fn_savexlsx(df_generalinfo_all, AC.CONST_PATH_RESULT + "ver3_AnnexC_generalinfo.xlsx", logger):
+        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "ver3_AnnexC_generalinfo.xlsx",False,logger) 
+    if not AL.fn_savexlsx(df_forsave_all, AC.CONST_PATH_RESULT + "ver3_AnnexC_wardprofile_cluster.xlsx", logger):
+        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "ver3_AnnexC_wardprofile_cluster.xlsx",False,logger)  
+    if not AL.fn_savexlsx(df_graph_all, AC.CONST_PATH_RESULT + "ver3_AnnexC_profilegraph.xlsx", logger):
+        AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "ver3_AnnexC_profilegraph.xlsx",False,logger)  
     #------------------------------------------------------------------------------------------------
     #Print main supplementary annexC
     sub_printprocmem("Appendix C generate supplementary report",logger)
