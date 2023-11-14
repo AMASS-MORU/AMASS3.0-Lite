@@ -16,6 +16,7 @@ import pandas as pd #for creating and manipulating dataframe
 # CONST_COL_ORISPCDATE = "DateSpc"
 # CONST_COL_CLEANSPCDATE = "clean_spcdate"
 #CONST_COL_ORIGIN = "InfOri"
+CONST_RUN_ANNEXC_WITH_NOHOSP = False
 CONST_COL_PROFILE = "profile"
 CONST_COL_PROFILEID = "profile_ID"
 CONST_COL_PROFILETEMP = "profile_temp"

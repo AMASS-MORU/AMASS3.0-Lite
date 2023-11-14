@@ -2238,7 +2238,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
     #If do annex C
     if bIsDoAnnexC == True:
         try:
-            REP_ANNEX_C.generate_annex_c_report(canvas_rpt,logger,df_micro_ward,istartpage_annexC,ilastpage,ipage_annexC, strgendate)
+            REP_ANNEX_C.generate_annex_c_report(canvas_rpt,logger,df_micro_ward,istartpage_annexC,ilastpage,ipage_annexC, strgendate,bishosp_ava)
         except Exception as e:
             AL.printlog("Error at : checkpoint print ANNEX C (Generate report) : " + str(e),True,logger)
             logger.exception(e)

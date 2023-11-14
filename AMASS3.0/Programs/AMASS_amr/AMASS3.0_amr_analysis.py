@@ -1661,10 +1661,18 @@ def mainloop() :
             try:
                 import AMASS_annex_c_analysis as ANNEX_C
                 import AMASS_annex_c_const as ACC
-                ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
-                ANNEX_C.call_SaTScan(prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
-                ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
-                sub_printprocmem("finish Analysis ANNEX C",logger)
+                bisrunannexc = True
+                if (ACC.CONST_RUN_ANNEXC_WITH_NOHOSP == True) | (bishosp_ava == True):
+                    bisrunannexc = True
+                else:
+                    bisrunannexc = False
+                if bisrunannexc == True:
+                    ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
+                    ANNEX_C.call_SaTScan(prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
+                    ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
+                    sub_printprocmem("finish Analysis ANNEX C",logger)
+                else:
+                    sub_printprocmem("Not run analysis ANNEX C set to run only with hosp data and no hosp available",logger)
             except Exception as e:
                 AL.printlog("Error : Import/run analysis ANNEX C : " + str(e),True,logger)
                 logger.exception(e)

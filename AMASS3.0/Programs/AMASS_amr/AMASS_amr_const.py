@@ -5,8 +5,8 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "14 Nov 2023"
-CONST_SOFTWARE_BUILD = "3017"
+CONST_SOFTWARE_RELEASE = "15 Nov 2023"
+CONST_SOFTWARE_BUILD = "3018"
 CONST_SOFTWARE_MAJOR_VERSION = "3.0 (BETA)"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " Build " + CONST_SOFTWARE_BUILD + " on " + CONST_SOFTWARE_RELEASE
 CONST_SOFTWARE_VERSION_SHORT = CONST_SOFTWARE_MAJOR_VERSION +"B" + CONST_SOFTWARE_BUILD
@@ -282,18 +282,18 @@ def get_dict_orgcatwithatb(bisabom,bisentspp): #Last line of antibiotic list is 
                                        CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISErtapenem","RISDoripenem","RISColistin","RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
                                       "<i>Klebsiella pneumoniae</i>"],
     "organism_pseudomonas_aeruginosa":[50,1,CONST_ORG_PSEUDOMONAS_AERUGINOSA,
-                                      ["Ceftazidime","Ciprofloxacin","Gentamicin","Amikacin",
+                                      ["Ceftazidime","Ciprofloxacin",CONST_ATBNAME_ASTAMINOGLY,"Gentamicin","Amikacin",
                                        CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin",
                                        "Piperacillin/tazobactam","Cefoperazone/sulbactam"],
-                                      ["RISCeftazidime","RISCiprofloxacin","RISGentamicin","RISAmikacin",
+                                      ["RISCeftazidime","RISCiprofloxacin",CONST_NEWVARNAME_ASTAMINOGLY_RIS,"RISGentamicin","RISAmikacin",
                                        CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin",
                                        "RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
                                       "<i>Pseudomonas aeruginosa</i>"],
     "organism_acinetobacter_baumannii" if bisabom==True else "organism_acinetobacter_spp":[60,1,CONST_ORG_ACINETOBACTER_BAUMANNII if bisabom==True else "Acinetobacter spp.",
-                                      ["Tigecycline","Minocycline","Gentamicin","Amikacin",
+                                      ["Tigecycline","Minocycline",CONST_ATBNAME_ASTAMINOGLY,"Gentamicin","Amikacin",
                                        CONST_ATBNAME_ASTCBPN,"Imipenem","Meropenem","Doripenem","Colistin",
                                        "Piperacillin/tazobactam","Cefoperazone/sulbactam"],
-                                      ["RISTigecycline","RISMinocycline","RISGentamicin","RISAmikacin",
+                                      ["RISTigecycline","RISMinocycline",CONST_NEWVARNAME_ASTAMINOGLY_RIS,"RISGentamicin","RISAmikacin",
                                        CONST_NEWVARNAME_ASTCBPN_RIS,"RISImipenem","RISMeropenem","RISDoripenem","RISColistin",
                                       "RISPiperacillin_and_tazobactam","RISCefoperazone_and_sulbactam"],
                                       "<i>Acinetobacter baumannii</i>" if bisabom==True else "<i>Acinetobacter</i> spp."],
@@ -442,6 +442,7 @@ CONST_REPORTPAGENUM_MODE = 3 #1 = NORMAL,2 = By section (Need section name), 3 =
 list_atbneednote = [CONST_ATBNAME_AST3GC,CONST_ATBNAME_ASTCBPN,CONST_ATBNAME_ASTFRQ]
 dict_atbnote = {CONST_ATBNAME_ASTMRSA:"Methicillin: cefoxitin or oxacillin by MIC",
                 CONST_ATBNAME_AST3GC:"3GC=3rd−generation cephalosporin",
+                CONST_ATBNAME_ASTAMINOGLY:"AMINOGLYCOSIDES: either gentamicin or amikacin",
                 CONST_ATBNAME_ASTCBPN:"CARBAPENEMS: imipenem, meropenem, ertapenem or doripenem",
                 CONST_ATBNAME_ASTFRQ:"FLUOROQUINOLONES: ciprofloxacin or levofloxacin"}
 dict_atbnote_sec4_5 =  {"3GC":"3GC=3rd−generation cephalosporin",
