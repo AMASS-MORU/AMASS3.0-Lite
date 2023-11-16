@@ -234,12 +234,12 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             iallowspecdate_before = 0
             iallowspecdate_after = 0
             try:
-                iallowspecdate_before = int(list_specdate_tolerance[0])
+                iallowspecdate_before = int(list_specdate_tolerance[0]) # value in configuration is negative value such as -1 = 1 day before
                 iallowspecdate_after = int(list_specdate_tolerance[1])
             except Exception as e:
                 AL.printlog("Warning : get number of days allow specimen date to be before and/or after adminission period"  + str(e),True,logger)
                 logger.exception(e)
-            df_merged = df_merged[(df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]>=(df_merged[AC.CONST_NEWVARNAME_DAYTOADMDATE]-iallowspecdate_before)) & (df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]<=(df_merged[AC.CONST_NEWVARNAME_DAYTOENDDATE]+iallowspecdate_after))]
+            df_merged = df_merged[(df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]>=(df_merged[AC.CONST_NEWVARNAME_DAYTOADMDATE]+iallowspecdate_before)) & (df_merged[AC.CONST_NEWVARNAME_DAYTOSPECDATE]<=(df_merged[AC.CONST_NEWVARNAME_DAYTOENDDATE]+iallowspecdate_after))]
             # Translate gender, age year, age cat data
             sErrorat = "(do add columns)"
             # Translate gender, age year, age cat data
@@ -725,7 +725,17 @@ def mainloop() :
     df_datalog_mergedlist = pd.DataFrame()
     try:            
         #Get number of days allow specimen date to be before or after admnission period
-        list_specdate_tolerance =[AL.fn_getdict(dict_amasstodataval,AC.CONST_VARNAME_SPECDATE_BEFORE,"0"),AL.fn_getdict(dict_amasstodataval,AC.CONST_VARNAME_SPECDATE_AFTER,"0")]
+        #list_specdate_tolerance =[AL.fn_getdict(dict_amasstodataval,AC.CONST_VARNAME_SPECDATE_BEFORE,"0"),AL.fn_getdict(dict_amasstodataval,AC.CONST_VARNAME_SPECDATE_AFTER,"0")]
+        list_specdate_tolerance = [0,0]
+        try:
+            config=AL.readxlsxorcsv(AC.CONST_PATH_ROOT + "Configuration/", "Configuration",logger)
+            config_lst = df_config.iloc[:,0].tolist()
+            list_specdate_tolerance[0] = df_config.loc[config_lst.index("flexible_days_before_admission_for_CO"),"Setting parameters"]
+            list_specdate_tolerance[1] =df_config.loc[config_lst.index("flexibile_days_after_discharge_for_HO"),"Setting parameters"]
+        except:
+            pass
+        AL.printlog("Note : flexible days before and after admission period: " + str(list_specdate_tolerance) ,False,logger)   
+        #Get from configuration instead
         df_hospmicro = fn_mergededup_hospmicro(df_micro, df_hosp_formerge, bishosp_ava,df_dict,dict_datavaltoamass,dict_inforg_datavaltoamass,dict_gender_datavaltoamass,dict_died_datavaltoamass,logger,df_datalog_mergedlist,list_specdate_tolerance)
         sub_printprocmem("finish merge micro and hosp data",logger)
         #Change to filter from df_hospmicro instead of call merge again
@@ -1267,6 +1277,9 @@ def mainloop() :
                                                              col_org="Organism",col_totaln="Total(N)",col_n="Non-susceptible(N)",col_percent="Non-susceptible(%)",col_lower95CI="lower95CI(%)*",col_upper95CI="upper95CI(%)*")
             v2_df_isoRep_blood = V2.fn_filterorg_atb(v2_df_isoRep_blood ,col_org="Organism",col_atb="Antibiotic", dict_orgatb=V2.CONST_V2_DICT_ORG_ATB)
             v2_df_isoRep_blood = v2_df_isoRep_blood[["Organism","Antibiotic","Susceptible(N)","Non-susceptible(N)","Total(N)","Non-susceptible(%)","lower95CI(%)*","upper95CI(%)*"]]
+            #change atbname
+            for satb in V2.CONST_V2_LIST_RENAME_ATB:
+                v2_df_isoRep_blood.loc[v2_df_isoRep_blood["Antibiotic"] == satb,"Antibiotic"] = V2.CONST_V2_LIST_RENAME_ATB[satb]
             #All before dedup
             v2_df_isoRep_blood_byorg = V2.fn_combine_orgdata(logger,df_isoRep_blood_byorg,
                                                              dict_combineorg=V2.CONST_COMBINE_ORG,
@@ -1324,6 +1337,9 @@ def mainloop() :
             v2_temp_df = v2_df_COHO_isoRep_blood[v2_df_COHO_isoRep_blood["Infection_origin"] != AC.CONST_EXPORT_COHO_CO_DATAVAL]
             v2_df_COHO_isoRep_blood = v2_df_COHO_isoRep_blood[v2_df_COHO_isoRep_blood["Infection_origin"] == AC.CONST_EXPORT_COHO_CO_DATAVAL]
             v2_df_COHO_isoRep_blood = pd.concat([v2_df_COHO_isoRep_blood,v2_temp_df],ignore_index = True)
+            #change atbname
+            for satb in V2.CONST_V2_LIST_RENAME_ATB:
+                v2_df_COHO_isoRep_blood.loc[v2_df_COHO_isoRep_blood["Antibiotic"] == satb,"Antibiotic"] = V2.CONST_V2_LIST_RENAME_ATB[satb]
             #Summary page
             v2_df_COHO_isoRep_blood_byorg = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_byorg,
                                                              dict_combineorg=V2.CONST_COMBINE_ORG,

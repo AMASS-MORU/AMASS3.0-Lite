@@ -5,8 +5,8 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "15 Nov 2023"
-CONST_SOFTWARE_BUILD = "3018"
+CONST_SOFTWARE_RELEASE = "16 Nov 2023"
+CONST_SOFTWARE_BUILD = "3019"
 CONST_SOFTWARE_MAJOR_VERSION = "3.0 (BETA)"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " Build " + CONST_SOFTWARE_BUILD + " on " + CONST_SOFTWARE_RELEASE
 CONST_SOFTWARE_VERSION_SHORT = CONST_SOFTWARE_MAJOR_VERSION +"B" + CONST_SOFTWARE_BUILD
@@ -52,8 +52,8 @@ CONST_ANNEXB_USING_MAPPEDDATA = False
 #Org Name
 CONST_ORG_STAPHYLOCOCCUS_AUREUS = 'Staphylococcus aureus'
 CONST_ORG_ENTEROCOCCUS_SPP = 'Enterococcus spp.'
-CONST_ORG_ENTEROCOCCUS_FAECALIS = 'Enterococcus Faecalis'
-CONST_ORG_ENTEROCOCCUS_FAECIUM = 'Enterococcus Faecium'
+CONST_ORG_ENTEROCOCCUS_FAECALIS = 'Enterococcus faecalis'
+CONST_ORG_ENTEROCOCCUS_FAECIUM = 'Enterococcus faecium'
 CONST_ORG_STREPTOCOCCUS_PNEUMONIAE = 'Streptococcus pneumoniae'
 CONST_ORG_SALMONELLA_SPP = 'Salmonella spp.'
 CONST_ORG_ESCHERICHIA_COLI = 'Escherichia coli'
@@ -252,11 +252,11 @@ def get_dict_orgcatwithatb(bisabom,bisentspp): #Last line of antibiotic list is 
     "organism_enterococcus_faecalis":[21,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,CONST_ORG_ENTEROCOCCUS_FAECALIS,
                                  ["Penicillin G","Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
                                  ["RISPenicillin_G","RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus Faecalis</i>"],
+                                 "<i>Enterococcus faecalis</i>"],
     "organism_enterococcus_faecium":[22,CONST_SPECIFY_CODE_AS_NOTUSEDORG if bisentspp==True else 1,CONST_ORG_ENTEROCOCCUS_FAECIUM,
                                  ["Penicillin G","Ampicillin","Vancomycin","Teicoplanin","Linezolid","Daptomycin"],
                                  ["RISPenicillin_G","RISAmpicillin","RISVancomycin","RISTeicoplanin","RISLinezolid","RISDaptomycin"],
-                                 "<i>Enterococcus Faecium</i>"],
+                                 "<i>Enterococcus faecium</i>"],
     "organism_streptococcus_pneumoniae":[70,1,CONST_ORG_STREPTOCOCCUS_PNEUMONIAE,
                                          ["Penicillin G","Oxacillin","Co-trimoxazole",CONST_ATBNAME_AST3GC,"Ceftriaxone","Cefotaxime","Erythromycin","Clindamycin","Levofloxacin"],
                                          ["RISPenicillin_G","RISOxacillin","RISSulfamethoxazole_and_trimethoprim",CONST_NEWVARNAME_AST3GC_RIS,"RISCeftriaxone","RISCefotaxime","RISErythromycin","RISClindamycin","RISLevofloxacin"],
@@ -361,12 +361,12 @@ def get_dict_orgwithatb_incidence(bisabom):
                                                                               ["1","R"],
                                                                               [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
                                                                               "<i>Enterococcus</i> spp."],
-                             "organism_enterococcus_faecalis":[CONST_ORG_ENTEROCOCCUS_FAECALIS,["Vancomycin-NS\n<i>E. faecalis</i>","Vancomycin-R\n<i>E. faecalis</i>"],
+                             "organism_enterococcus_faecalis":["E. faecalis",["Vancomycin-NS\n<i>E. faecalis</i>","Vancomycin-R\n<i>E. faecalis</i>"],
                                                                                        ["NS_Vancomycin","RISVancomycin"],
                                                                                        ["1","R"],
                                                                                        [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],
                                                                                        "<i>E. faecalis</i>"],
-                             "organism_enterococcus_faecium":[CONST_ORG_ENTEROCOCCUS_FAECIUM,["Vancomycin-NS\n<i>E. faecium</i>","Vancomycin-R\n<i>E. faecium</i>"],
+                             "organism_enterococcus_faecium":["E. faecium",["Vancomycin-NS\n<i>E. faecium</i>","Vancomycin-R\n<i>E. faecium</i>"],
                                                                                       ["NS_Vancomycin","RISVancomycin"],
                                                                                       ["1","R"],
                                                                                       [CONST_VALUE_MODE_AST,CONST_VALUE_MODE_ONLYR],

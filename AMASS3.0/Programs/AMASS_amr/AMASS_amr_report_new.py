@@ -545,6 +545,9 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
     iPos_head_y = 0
     iPos_fig_y = 0
     iPos_tbl_y = 0
+    list_head_y =[9.3,5.2]
+    list_fig_y =[6.18,2.08]
+    list_tbl_y =[9.98,5.90]
     for i in range(len(lst_org_format)):
         try:
             """
@@ -561,17 +564,23 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
             bPrintPage = False
             if list_sec2_atbcountperorg[i] > AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
                 #Fullpage
-                iPos_head_y = 9.4
-                iPos_fig_y = 6.3+ifig_dis_offset
-                iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                #iPos_head_y = 9.4
+                #iPos_fig_y = 6.3+ifig_dis_offset
+                #iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                iPos_head_y = list_head_y[0]
+                iPos_fig_y = list_fig_y[0]+ifig_dis_offset
+                iPos_tbl_y =((list_tbl_y[0])-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_sec2_atbnote[i]
                 bPrintPage = True
                 bIsStartofnewpage = True
             elif bIsStartofnewpage: 
                 #Half top page
-                iPos_head_y = 9.4
-                iPos_fig_y = 6.3+ifig_dis_offset
-                iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                #iPos_head_y = 9.4
+                #iPos_fig_y = 6.3+ifig_dis_offset
+                #iPos_tbl_y =((6.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                iPos_head_y = list_head_y[0]
+                iPos_fig_y = list_fig_y[0]+ifig_dis_offset
+                iPos_tbl_y =((list_tbl_y[0])-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_sec2_atbnote[i]
                 #Check if next require fullpage then print page (note + page no)
                 ii = i+1
@@ -585,9 +594,12 @@ def section2(c,logger,result_table, summary_table, lst_org_format,lst_numpat, ls
                 bIsStartofnewpage = False
             else:
                 #Half bottom page  
-                iPos_head_y = 5.4
-                iPos_fig_y = 2.25+ifig_dis_offset
-                iPos_tbl_y =((2.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                #iPos_head_y = 5.4
+                #iPos_fig_y = 2.25+ifig_dis_offset
+                #iPos_tbl_y =((2.45+3.5)-((len(list_sec2_org_table[i])*0.25)+0.5))
+                iPos_head_y = list_head_y[1]
+                iPos_fig_y = list_fig_y[1]+ifig_dis_offset
+                iPos_tbl_y =((list_tbl_y[1])-((len(list_sec2_org_table[i])*0.25)+0.5))
                 list_curnote = list_curnote+list_sec2_atbnote[i]
                 list_curnote = list(set(list_curnote))
                 bPrintPage = True
@@ -713,9 +725,12 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             ifig_dis_H = ARC.cal_sec2and3_fig_height(list_sec3_atbcountperorg[i]) 
             sOrgI = "_" + str(i)
             #print y position [y is bIsOrgfitonepage,y is not bIsOrgfitonepage]
-            list_head_y =[9.4,5.4]
-            list_fig_y =[6.3,2.25]
-            list_tbl_y =[6.45,2.45]
+            #list_head_y =[9.4,5.4]
+            #list_fig_y =[6.3,2.25]
+            #list_tbl_y =[6.45,2.45]
+            list_head_y =[9.3,5.2]
+            list_fig_y =[6.18,2.08]
+            list_tbl_y =[9.98,5.90]
             """
             Layout for pic
             0.3*inch is left margin
@@ -737,7 +752,8 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             #print(list_sec3_org_table_CO[i])
             table_draw = ARC.report2_table_nons(list_sec3_org_table_CO[i])
             table_draw.wrapOn(c, 500, 300)
-            table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[0]+3.5)-((len(list_sec3_org_table_CO[i])*0.25)+0.5))*inch)
+            #table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[0]+3.5)-((len(list_sec3_org_table_CO[i])*0.25)+0.5))*inch)
+            table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[0])-((len(list_sec3_org_table_CO[i])*0.25)+0.5))*inch)
             if bIsOrgfitonepage == True:
                 s = ARC.get_atbnote(list_sec3_atbnote_CO[i])
                 snote = [section3_note_1 + section3_note_2_1 + ("; " if len(s)>0 else " ") + s]
@@ -760,7 +776,8 @@ def section3(c,logger,sec3_res, sec3_pat_val,lst_org_format, lst_numpat_CO,lst_n
             c.drawImage(path_result + 'Report3_AMR_' + lst_org_short[i] + "_Hospital.png", 0.3*inch, (list_fig_y[y]+(3.5 - ifig_dis_H))*inch, preserveAspectRatio=True, width=3.5*inch, height=ifig_dis_H*inch,showBoundary=False) 
             table_draw = ARC.report2_table_nons(list_sec3_org_table_HO[i])
             table_draw.wrapOn(c, 500, 300)
-            table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[y]+3.5)-((len(list_sec3_org_table_HO[i])*0.25)+0.5))*inch)
+            #table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[y]+3.5)-((len(list_sec3_org_table_HO[i])*0.25)+0.5))*inch)
+            table_draw.drawOn(c, 4.0*inch, ((list_tbl_y[y])-((len(list_sec3_org_table_HO[i])*0.25)+0.5))*inch)
             s = ARC.get_atbnote(list_sec3_atbnote_HO[i])
             snote = [section3_note_1 + section3_note_2_1 +  ("; " if len(s)>0 else " ") + s]
             ARC.report_context(c,snote, 1.0*inch,0.4*inch,460,120, font_size=9,line_space=12)

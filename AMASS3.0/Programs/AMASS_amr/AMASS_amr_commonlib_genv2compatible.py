@@ -9,8 +9,8 @@ import AMASS_amr_const as AC
 import pandas as pd
 from scipy.stats import norm
 
-CONST_COMBINE_ORG = {"Enterococcus spp.":["Enterococcus Faecalis","Enterococcus Faecium"]}
-CONST_COMBINE_ORG_SEC4_5 = {"Enterococcus spp.":["Enterococcus Faecalis","Enterococcus Faecium"]}
+CONST_COMBINE_ORG = {AC.CONST_ORG_ENTEROCOCCUS_SPP:[AC.CONST_ORG_ENTEROCOCCUS_FAECALIS,AC.CONST_ORG_ENTEROCOCCUS_FAECIUM]}
+CONST_COMBINE_ORG_SEC4_5 = {AC.CONST_ORG_ENTEROCOCCUS_SPP:["E. faecalis","E. faecium"]}
 CONST_V2_LIST_ORG = [AC.CONST_ORG_STAPHYLOCOCCUS_AUREUS, AC.CONST_ORG_ENTEROCOCCUS_SPP, AC.CONST_ORG_STREPTOCOCCUS_PNEUMONIAE, 
               AC.CONST_ORG_SALMONELLA_SPP, AC.CONST_ORG_ESCHERICHIA_COLI, AC.CONST_ORG_KLEBSIELLA_PNEUMONIAE, 
               AC.CONST_ORG_PSEUDOMONAS_AERUGINOSA, AC.CONST_ORG_ACINETOBACTER_BAUMANNII]
@@ -23,6 +23,7 @@ CONST_V2_DICT_ORG_ATB = {AC.CONST_ORG_STAPHYLOCOCCUS_AUREUS:['Methicillin', 'Van
                          AC.CONST_ORG_KLEBSIELLA_PNEUMONIAE:['Gentamicin', 'Amikacin','Co-trimoxazole','FLUOROQUINOLONES','Ciprofloxacin','Levofloxacin','3GC','Cefpodoxime','Ceftriaxone','Cefotaxime','Ceftazidime','Cefepime','CARBAPENEMS','Imipenem','Meropenem','Ertapenem','Doripenem','Colistin'],
                          AC.CONST_ORG_PSEUDOMONAS_AERUGINOSA:['Ceftazidime', 'Ciprofloxacin','Piperacillin/tazobactam','AMINOGLYCOSIDES','Gentamicin','Amikacin','CARBAPENEMS','Imipenem','Meropenem','Doripenem','Colistin'],
                          AC.CONST_ORG_ACINETOBACTER_BAUMANNII:['Tigecycline', 'Minocycline','AMINOGLYCOSIDES','Gentamicin','Amikacin','CARBAPENEMS','Imipenem','Meropenem','Doripenem','Colistin']}
+CONST_V2_LIST_RENAME_ATB={"Oxacillin by MIC","Oxacillin"}
 def fn_wilson_lowerCI(x, n, conflevel, decimalplace):
     zalpha = abs(norm.ppf((1-conflevel)/2))
     phat = x/n

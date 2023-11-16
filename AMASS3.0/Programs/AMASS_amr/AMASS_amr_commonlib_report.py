@@ -64,13 +64,13 @@ def cal_sec4_fig_height(irow):
 ##### Cal figure height for section2 and section3
 def cal_sec2and3_fig_height(iatbrow):
     if iatbrow <= m.ceil(AC.CONST_MAX_ATBCOUNTFITHALFPAGE/2):
-        return 2.5
+        return 2.62
     elif iatbrow <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE:
         return 3.5 #default height
     elif iatbrow <= AC.CONST_MAX_ATBCOUNTFITHALFPAGE*1.2:
         return 4.5 #default height
     else:
-        return 5.5 
+        return 5.47 
 def count_atbperorg(raw_df,org_full,origin="", org_col="Organism", drug_col="Antibiotic",  ns_col="Non-susceptible(N)", total_col="Total(N)"):
     if origin == "": #section2
         sel_df = raw_df.loc[raw_df[org_col]==org_full].set_index(drug_col).fillna(0)
