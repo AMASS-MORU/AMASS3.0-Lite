@@ -80,7 +80,7 @@ CONST_COL_OTHWARD  = "Other wards"
 CONST_COL_DATAFILE  = "Type_of_data_file"
 CONST_COL_PARAM     = "Parameters"
 CONST_COL_DATE      = "Values"
-CONST_VALUE_DATAFILE= "microbiology_data"
+CONST_VALUE_DATAFILE= "overall_data"
 CONST_VALUE_SDATE   = "Minimum_date"
 CONST_VALUE_EDATE   = "Maximum_date"
 #Supplementary report

@@ -245,7 +245,7 @@ def create_graph_baseline(raw_df, swardid,scolweek,scolnumcase,sfilename,logger)
     ax=sns.barplot(x=scolweek,y=scolnumcase,data=raw_df,color='#E76F51')
     ax.set_yticks(np.arange(0,axislength[0]+1,step=axislength[1]))
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-    plt.ylabel("Number of patients(n)*", fontsize=10)
+    plt.ylabel("Number of patients (n)*", fontsize=10)
     plt.xlabel("Number of week (Start of weekday)", fontsize=10)
     plt.savefig(sfilename, format='png',dpi=200,transparent=True, bbox_inches="tight")
     plt.close()
@@ -399,7 +399,8 @@ def prepare_tabletoplot(logger,df,lst_col=[],lst_tosort=[], list_ascending=[],di
         logger.exception(e)
     return df
 def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol="",zcol="",list_privotcol=[], dict_profile_color={}, filename="",
-         xlabel="Number of week (Start of weekday)",ylabel="Number of patients(n)*",figsizex=20,figsizey=10):
+         xlabel="Number of week (Start of weekday)",ylabel="Number of patients (n)*",figsizex=20,figsizey=10):
+    import math
     #df_forsave=pd.DataFrame()
     df_sum = df.groupby([xcol_display])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
     axislength = get_axixlength(b_graph=len(df.columns)>1, real_max_yaxis=df_sum[ACC.CONST_COL_CASE].max())
@@ -427,11 +428,49 @@ def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol
     plt.ylabel(ylabel, fontsize=16)
     plt.xlabel(xlabel, fontsize=16)
     plt.yticks(np.arange(0,axislength[0]+1,step=axislength[1]), fontsize=16)
+    if len(df_org)/54 > 1:
+        plt.xticks(np.arange(0,len(df_org),step=math.ceil(len(df_org)/54)), fontsize=16)
+    else:
+        pass
     plt.savefig(filename, format='png',dpi=180,transparent=True, bbox_inches="tight")
     plt.close()
     plt.clf
     #sub_printprocmem(filename,logger)
     #return(df_org)
+# def gen_cluster_graph(logger,df=pd.DataFrame(),xcol_sort="",xcol_display="",ycol="",zcol="",list_privotcol=[], dict_profile_color={}, filename="",
+#          xlabel="Number of week (Start of weekday)",ylabel="Number of patients (n)*",figsizex=20,figsizey=10):
+#     #df_forsave=pd.DataFrame()
+#     df_sum = df.groupby([xcol_display])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
+#     axislength = get_axixlength(b_graph=len(df.columns)>1, real_max_yaxis=df_sum[ACC.CONST_COL_CASE].max())
+#     plt.figure()
+#     xcol = xcol_display
+#     if xcol_sort.strip() != "":
+#         xcol = [xcol_display,xcol_sort]
+#     else:
+#         xcol_sort = xcol_display
+#     df_org = df.pivot_table(index=xcol, columns=zcol, values=ycol, aggfunc='sum', fill_value=0)
+#     temp_list = [x for x in list_privotcol if x in df_org.columns.to_list()]
+#     temp_list2 = [x for x in df_org.columns.to_list() if x not in temp_list]
+#     col_list = temp_list + temp_list2
+#     df_org = df_org.sort_values(by=[xcol_sort], ascending=[True])
+#     df_org.reset_index(inplace=True)
+#     df_org.set_index(xcol_display, inplace=True)
+#     df_org = df_org[col_list]
+#     palette = [dict_profile_color.get(item, item) for item in df_org.columns.tolist()]
+#     df_org.plot(kind='bar', 
+#             stacked =True, 
+#             figsize =(figsizex, figsizey), 
+#             color =palette, 
+#             fontsize=16)
+#     plt.legend(prop={'size': 14},ncol=4)
+#     plt.ylabel(ylabel, fontsize=16)
+#     plt.xlabel(xlabel, fontsize=16)
+#     plt.yticks(np.arange(0,axislength[0]+1,step=axislength[1]), fontsize=16)
+#     plt.savefig(filename, format='png',dpi=180,transparent=True, bbox_inches="tight")
+#     plt.close()
+#     plt.clf
+#     #sub_printprocmem(filename,logger)
+#     #return(df_org)
 #-----------------------------------------------------------------------------------------------------------
 #Generate part of the report
 def cover(c,logger,strgendate):
@@ -486,22 +525,23 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
     sspecname = ACC.dict_spc[spec]
     sorgname = ACC.dict_org[sh_org][2]
     dict_dis_specname= {"blo":"blood",
-                        "all":"clinical specimens"}
+                        "all":"a clinical specimen"}
     sdis_spec = dict_dis_specname[spec]
     sheader_wardgrap = f'Display of patients with {sdis_spec} culture positive for {sorgname} in each ward over time'
     sfootnote = "* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
     sfootnote = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
     sfootnote = sfootnote + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
-    sfootnote = sfootnote + "Only wards with a cluster signal identified or having the top three highest number of patients were displayed. "
+    sfootnote_topward = "Only wards with a cluster signal identified or having the top three highest number of patients are displayed. "
     lst_footnote = [sfootnote]
+    lst_footnote_topward = [sfootnote + sfootnote_topward]
     lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
     
-    stotal_patient = "NA"
-    stotal_ward = "NA"
-    stotal_profile = "NA"
-    scluster_patient = "NA"
-    scluster_ward = "NA"
-    scluster_profile = "NA"
+    stotal_patient = "0"
+    stotal_ward = "0"
+    stotal_profile = "0"
+    scluster_patient = "0"
+    scluster_ward = "0"
+    scluster_profile = "0"
     try:
         stotal_patient = str(df_baseline[ACC.CONST_COL_CASE].sum())
         df_ward_sum = df_baseline.groupby(by=ACC.CONST_COL_WARDID)[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
@@ -517,11 +557,11 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
     REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "Baseline information" + "</b>"],                                       
                    1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
     REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of patients = {stotal_patient}' + "</i>"],
-                   1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 9.1*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of wards = {stotal_ward}' + "</i>"],
-                   1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 8.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile}' + "</i>"],
-                   1.5*inch, 8.8*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 8.7*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     #--------------------------------------------------------------------------------------------------------------
     #Profile
     try:
@@ -709,7 +749,9 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     REP_AL.report_context(canvas_sup_rpt, ["<b>"+ sheader_wardgrap +"</b>"],                                           
                                    1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
                 REP_AL.report_context(canvas_sup_rpt, ["<b><i><font color=\"#000080\">"+"Ward : " + swardid +"</font></i></b>"],              
-                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.3)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                               1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.5)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                # REP_AL.report_context(canvas_sup_rpt, ["<b><i><font color=\"#000080\">"+"Ward : " + swardid +"</font></i></b>"],              
+                #                1.0*inch, (ifirstpos_inch-((icurpos-1)*ifigoffset_inch)-0.3)*inch, 460, 50, font_size=11, font_align=TA_LEFT)
                 try:
                     canvas_sup_rpt.drawImage(AC.CONST_PATH_TEMPWITH_PID + ANXC_CONST_BASELINE_GRAPH_FNAME + "_" + str(sh_org) + "_" + str(spec) + "_" + str(swardid) + ".png", 
                                          (0-1)*inch, (ifirstpos_inch-(icurpos*ifigoffset_inch)+0.4) *inch, preserveAspectRatio=True, width=10*inch, height=2*inch,showBoundary=False) 
@@ -717,13 +759,13 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     AL.printlog("Error : checkpoint Annex C generate report (graph) " + str(spec) + ") of " + str(sh_org) + " : " +str(e),True,logger) 
                     logger.exception(e)
                 if (icurpos >= ANXC_CONST_MAX_BASELINEGRAPH_PERPAGE):
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote_topward, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     page = page + 1
                     balreadyprintpage = True
                 igc = igc+1
         if balreadyprintpage == False:
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_topward, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             page = page + 1
             balreadyprintpage = True
@@ -733,7 +775,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                        1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
         REP_AL.report_context(canvas_sup_rpt, ["None"],
                        1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote_topward, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1        
     return page
@@ -742,15 +784,15 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     shaveclustertext = "Wards with cluster signals with p value < " +str(pvaluelimit) + "."
     sspecname = ACC.dict_spc[spec]
     sorgname = ACC.dict_org[sh_org][2]
-    stotal_patient = "NA"
-    stotal_ward = "NA"
-    stotal_profile = "NA"
-    scluster_patient = "NA"
-    scluster_ward = "NA"
-    scluster_profile = "NA"
-    spercent_patient = "NA"
-    spercent_ward = "NA"
-    spercent_profile = "NA"
+    stotal_patient = "0"
+    stotal_ward = "0"
+    stotal_profile = "0"
+    scluster_patient = "0"
+    scluster_ward = "0"
+    scluster_profile = "0"
+    spercent_patient = "0"
+    spercent_ward = "0"
+    spercent_profile = "0"
     df_ward_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE])
     df_ward_cluster_sum = pd.DataFrame(columns=[ACC.CONST_COL_WARDID,ANXC_CONST_COL_WARDSUMCASE])
     df_resultdata_forsave = pd.DataFrame()
@@ -795,17 +837,17 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     #---------
     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     REP_AL.report_context(canvas_rpt, ["<b>"+ sspecname + ": " + sorgname + "</b>"],                                       
-                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                   1.0*inch, 9.4*inch, 460, 50, font_size=13, font_align=TA_LEFT)
     if bishosp_ava == True:
         REP_AL.report_context(canvas_rpt, ["<b>"+ "Hospital-origin" + "</b>"],                                       
-                   6.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                   4.0*inch, 9.4*inch, 460, 50, font_size=13, font_align=TA_LEFT)
     #General info ---------------------------------------
     REP_AL.report_context(canvas_rpt, ["<i>"+ f'No. of patients = {stotal_patient} ({scluster_patient} [{spercent_patient}%] were included in cluster signals)' + "</i>"],
-                   1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 9.1*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     REP_AL.report_context(canvas_rpt, ["<i>"+ f'No. of wards = {stotal_ward} ({scluster_ward} [{spercent_ward}%] were included in cluster signals)' + "</i>"],
-                   1.5*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 8.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     REP_AL.report_context(canvas_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile} ({scluster_profile} [{spercent_profile}%] were included in cluster signals)' + "</i>"],
-                   1.5*inch, 8.8*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.5*inch, 8.7*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     
     #-----------------------------------------------------
     if os.path.exists(filename_graph):
@@ -854,7 +896,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                 AL.printlog("Warning : generate first page for " + str(spec) + " of " + str(sh_org),False,logger) 
                 logger.exception(e)
             #drop first 20 (ANXC_CONST_CLUSTERLIST_MAXROW_FISTPAGE)
-            REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.0*inch, 0.30*inch, 460, 100, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.0*inch, 0.40*inch, 460, 100, font_size=9,line_space=12)
             REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
             df = df[ANXC_CONST_CLUSTERLIST_MAXROW_FIRSTPAGE:]
             page = page + 1
@@ -866,10 +908,10 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                     #ipage = i + 1
                     REP_AL.report_title(canvas_rpt,ANNEXC_RPT_CONST_TITLE,1.07*inch, 10.5*inch,'#3e4444',font_size=16)
                     REP_AL.report_context(canvas_rpt, ["<b>"+ sspecname + ": " + sorgname + " (Continue)</b>"],                                       
-                                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                                   1.0*inch, 9.4*inch, 460, 50, font_size=13, font_align=TA_LEFT)
                     if bishosp_ava == True:
                         REP_AL.report_context(canvas_rpt, ["<b>"+ "Hospital-origin" + "</b>"],                                       
-                                   6.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                                   4.0*inch, 9.4*inch, 460, 50, font_size=13, font_align=TA_LEFT)
                     REP_AL.report_context(canvas_rpt, [shaveclustertext], 
                                           1.0*inch, 9.0*inch, 460, 50, font_size=11, font_align=TA_LEFT)
                     ioffset = 0.25*(len(df[:ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON]) + 1)
@@ -883,7 +925,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
                         AL.printlog("Warning : generate continue page for " + str(spec) + " of " + str(sh_org),False,logger) 
                         logger.exception(e)
                     #drop another 40 (ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON)
-                    REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.1*inch, 0.30*inch, 460, 100, font_size=9,line_space=12)
+                    REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.1*inch, 0.40*inch, 460, 100, font_size=9,line_space=12)
                     REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
                     df = df[ANXC_CONST_CLUSTERLIST_MAXROW_SECONDPAGEON:]
                     page = page + 1
@@ -894,7 +936,7 @@ def prapare_mainAnnexC_per_org(canvas_rpt,logger,page,startpage,lastpage,totalpa
     else:
         REP_AL.report_context(canvas_rpt, [snoclustertext], 
                1.0*inch, 4.15*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.0*inch, 0.30*inch, 460, 100, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_rpt,footnote_annexC(spec), 1.0*inch, 0.40*inch, 460, 100, font_size=9,line_space=12)
         REP_AL.canvas_printpage(canvas_rpt,page,lastpage,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,'Annex C',totalpage,startpage)
         page = page + 1
     return [page,df_general_info_forsave,df_resultdata_forsave]

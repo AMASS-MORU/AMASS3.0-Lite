@@ -119,7 +119,7 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             print ("-----------------------")
             print ("-----------------------")
             #preparing SaTScan's inputs
-            evaluation_study = retrieve_startEndDate(filename=AC.CONST_PATH_RESULT+ACC.CONST_FILENAME_REPORT1) #for satscan_param.prm
+            evaluation_study = retrieve_startEndDate(filename=AC.CONST_PATH_RESULT+AC.CONST_FILENAME_sec1_res_i) #for satscan_param.prm
             for sh_spc in ACC.dict_spc.keys():
                 prepare_satscanInput(logger,
                                     filename_isolate =ACC.CONST_FILENAME_HO_DEDUP, 
@@ -203,7 +203,7 @@ def summation_numpatient(logger,df=pd.DataFrame(),lst_col=[],col_forgrouping="")
 #ID ordering by all specimen and then blood of each organism
 #d_profile["profile_sequence"]="profile_ID"
 def create_dictforMapProfileID_byorg(logger, df_all=pd.DataFrame(), df_blo=pd.DataFrame(), sh_org="", col_profileid=ACC.CONST_COL_PROFILEID, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP, col_numprofile_all=ACC.CONST_COL_NUMPROFILE_ALL, col_numprofile_blo=ACC.CONST_COL_NUMPROFILE_BLO):
-    prefixID=ACC.CONST_PRENAME_PROFILEID+sh_org+"_"
+    prefixID=ACC.CONST_PRENAME_PROFILEID+sh_org.upper()+"_"
     df_all_num = summation_numpatient(logger,df_all,lst_col=[col_profile,col_profiletemp],col_forgrouping=col_numprofile_all)
     df_blo_num = summation_numpatient(logger,df_blo,lst_col=[col_profile,col_profiletemp],col_forgrouping=col_numprofile_blo)
     df = pd.DataFrame(columns=[col_profiletemp,col_profile,col_numprofile_all,col_numprofile_blo])
@@ -298,7 +298,7 @@ def get_lstastforpathogen(lo_org="",check_writereport=False):
         for atb in lst_atb:
             if atb not in lst_atb_unique:
                 if check_writereport:
-                    lst_atb_unique.append(atb.replace("RIS",""))
+                    lst_atb_unique.append(atb.replace("RIS","").replace("Piperacillin_and_tazobactam","Piperacillin/tazobactam").replace("Sulfamethoxazole_and_trimethoprim","Co-trimoxazole"))
                 else:
                     lst_atb_unique.append(atb)
             else:
