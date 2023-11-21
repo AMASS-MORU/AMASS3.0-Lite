@@ -23,7 +23,7 @@ CONST_V2_DICT_ORG_ATB = {AC.CONST_ORG_STAPHYLOCOCCUS_AUREUS:['Methicillin', 'Van
                          AC.CONST_ORG_KLEBSIELLA_PNEUMONIAE:['Gentamicin', 'Amikacin','Co-trimoxazole','FLUOROQUINOLONES','Ciprofloxacin','Levofloxacin','3GC','Cefpodoxime','Ceftriaxone','Cefotaxime','Ceftazidime','Cefepime','CARBAPENEMS','Imipenem','Meropenem','Ertapenem','Doripenem','Colistin'],
                          AC.CONST_ORG_PSEUDOMONAS_AERUGINOSA:['Ceftazidime', 'Ciprofloxacin','Piperacillin/tazobactam','AMINOGLYCOSIDES','Gentamicin','Amikacin','CARBAPENEMS','Imipenem','Meropenem','Doripenem','Colistin'],
                          AC.CONST_ORG_ACINETOBACTER_BAUMANNII:['Tigecycline', 'Minocycline','AMINOGLYCOSIDES','Gentamicin','Amikacin','CARBAPENEMS','Imipenem','Meropenem','Doripenem','Colistin']}
-CONST_V2_LIST_RENAME_ATB={"Oxacillin by MIC","Oxacillin"}
+CONST_V2_LIST_RENAME_ATB={"Oxacillin by MIC":"Oxacillin"}
 def fn_wilson_lowerCI(x, n, conflevel, decimalplace):
     zalpha = abs(norm.ppf((1-conflevel)/2))
     phat = x/n
