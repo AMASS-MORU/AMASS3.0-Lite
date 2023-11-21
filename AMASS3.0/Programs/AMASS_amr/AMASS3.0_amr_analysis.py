@@ -817,25 +817,28 @@ def mainloop() :
                     itotal = iRIS_R +  iRIS_I + iRIS_S
                     iSuscep = iRIS_S
                     iNonsuscep = iRIS_R +  iRIS_I
-                    nNonSuscepPercent = "NA"
+                    nNonSuscepPercent = "NaN"
                     nLowerCI = "NA"
                     nUpperCI = "NA"
                     #Version 3.0.2
-                    nR_percent = "NA"
-                    nI_percent = "NA"
+                    nR_percent = "NaN"
+                    nI_percent = "NaN"
                     nR_LowerCI = "NA"
                     nR_UpperCI = "NA"
                     nI_LowerCI = "NA"
                     nI_UpperCI = "NA"
                     if itotal != 0 :
-                        nNonSuscepPercent = round(iNonsuscep / itotal, 2) * 100
+                        #nNonSuscepPercent = round(iNonsuscep / itotal, 2) * 100
+                        nNonSuscepPercent = round(iNonsuscep / itotal*100, 1)
                         nLowerCI = fn_wilson_lowerCI(x=iNonsuscep, n=itotal, conflevel=0.95, decimalplace=1)
                         nUpperCI  = fn_wilson_upperCI(x=iNonsuscep, n=itotal, conflevel=0.95, decimalplace=1)
                         if scuratbmicrocol[0:len(AC.CONST_NEWVARNAME_PREFIX_RIS)] == AC.CONST_NEWVARNAME_PREFIX_RIS:
-                            nR_percent = round(iRIS_R / itotal, 2) * 100
+                            #nR_percent = round(iRIS_R / itotal, 2) * 100
+                            nR_percent = round(iRIS_R / itotal*100, 1)
                             nR_LowerCI = fn_wilson_lowerCI(x=iRIS_R, n=itotal, conflevel=0.95, decimalplace=1)
                             nR_UpperCI  = fn_wilson_upperCI(x=iRIS_R, n=itotal, conflevel=0.95, decimalplace=1)
-                            nI_percent = round(iRIS_I / itotal, 2) * 100
+                            #nI_percent = round(iRIS_I / itotal, 2) * 100
+                            nI_percent = round(iRIS_I / itotal*100, 1)
                             nI_LowerCI = fn_wilson_lowerCI(x=iRIS_I, n=itotal, conflevel=0.95, decimalplace=1)
                             nI_UpperCI  = fn_wilson_upperCI(x=iRIS_I, n=itotal, conflevel=0.95, decimalplace=1)
                     onew_row = {"Organism":sorgname,"Antibiotic":scuratbname,"Susceptible(N)":iSuscep,"Non-susceptible(N)": iNonsuscep,"Total(N)":itotal,
@@ -955,25 +958,28 @@ def mainloop() :
                         itotal = iRIS_R +  iRIS_I + iRIS_S
                         iSuscep = iRIS_S
                         iNonsuscep = iRIS_R +  iRIS_I
-                        nNonSuscepPercent = "NA"
+                        nNonSuscepPercent = "NaN"
                         nLowerCI = "NA"
                         nUpperCI = "NA"
                         #Version 3.0.2
-                        nR_percent = "NA"
-                        nI_percent = "NA"
+                        nR_percent = "NaN"
+                        nI_percent = "NaN"
                         nR_LowerCI = "NA"
                         nR_UpperCI = "NA"
                         nI_LowerCI = "NA"
                         nI_UpperCI = "NA"
                         if itotal != 0 :
-                            nNonSuscepPercent = round(iNonsuscep / itotal, 2) * 100
+                            #nNonSuscepPercent = round(iNonsuscep / itotal, 2) * 100
+                            nNonSuscepPercent = round(iNonsuscep / itotal*100, 1)
                             nLowerCI = fn_wilson_lowerCI(x=iNonsuscep, n=itotal, conflevel=0.95, decimalplace=1)
                             nUpperCI  = fn_wilson_upperCI(x=iNonsuscep, n=itotal, conflevel=0.95, decimalplace=1)
                             if scuratbmicrocol[0:len(AC.CONST_NEWVARNAME_PREFIX_RIS)] == AC.CONST_NEWVARNAME_PREFIX_RIS:
-                                nR_percent = round(iRIS_R / itotal, 2) * 100
+                                #nR_percent = round(iRIS_R / itotal, 2) * 100
+                                nR_percent = round(iRIS_R / itotal*100, 1)
                                 nR_LowerCI = fn_wilson_lowerCI(x=iRIS_R, n=itotal, conflevel=0.95, decimalplace=1)
                                 nR_UpperCI  = fn_wilson_upperCI(x=iRIS_R, n=itotal, conflevel=0.95, decimalplace=1)
-                                nI_percent = round(iRIS_I / itotal, 2) * 100
+                                #nI_percent = round(iRIS_I / itotal, 2) * 100
+                                nI_percent = round(iRIS_I / itotal*100, 1)
                                 nI_LowerCI = fn_wilson_lowerCI(x=iRIS_I, n=itotal, conflevel=0.95, decimalplace=1)
                                 nI_UpperCI  = fn_wilson_upperCI(x=iRIS_I, n=itotal, conflevel=0.95, decimalplace=1)
                         onew_row = {"Organism":sorgname,"Infection_origin":sCOHO,"Antibiotic":scuratbname,"Susceptible(N)":iSuscep,"Non-susceptible(N)": iNonsuscep,"Total(N)":itotal,
