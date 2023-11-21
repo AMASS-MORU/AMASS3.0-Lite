@@ -1664,7 +1664,8 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 ocurorg_incidence = dict_orgwithatb_incidence[sorgkey]
                 #lst_org_rpt4_0.append(ocurorg_incidence[4])
                 lst_org_rpt4_0.append(ocurorg_incidence[5])
-                list_atbname_incidence = ocurorg_incidence[1]
+                #list_atbname_incidence = ocurorg_incidence[1]
+                list_atbname_incidence = ocurorg_incidence[6]
                 list_atbname_incidence_mode = ocurorg_incidence[4]
                 for iiatb in range(len(list_atbname_incidence)):
                     #Only list atb in mode defined (NS or RIS)

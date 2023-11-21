@@ -50,7 +50,18 @@ def fn_wilson_upperCI(x, n, conflevel, decimalplace):
     midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
     uplim = round((midpnt + bound)*100, decimalplace)
     return uplim
-
+def correct_digit(val):
+    nval = val
+    try:
+        if float(nval) < 0.05:
+            nval = 0
+        elif float(nval) >= 0.95:
+            nval= int(round(nval))
+        else:
+            pass 
+    except:
+        pass
+    return str(nval)
 # function that print obj if in debug mode (bisdebug = true)
 def printdebug(obj) :
     try:
@@ -907,10 +918,10 @@ def mainloop() :
                                                      "Intermediate(%)","Intermediate-lower95CI(%)*","Intermediate-upper95CI(%)*"])
 
         df_COHO_isoRep_blood_byorg = pd.DataFrame(columns=["Organism","Number_of_patients_with_blood_culture_positive","Number_of_patients_with_blood_culture_positive_merged_with_hospital_data_file","Community_origin","Hospital_origin","Unknown_origin"])
-        df_COHO_isoRep_blood_mortality = pd.DataFrame(columns=["Organism","Infection_origin","Antibiotic","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients","IncludeonlyR"])
+        df_COHO_isoRep_blood_mortality = pd.DataFrame(columns=["Organism","Antibiotic","Infection_origin","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients","IncludeonlyR"])
         df_COHO_isoRep_blood_mortality_byorg = pd.DataFrame(columns=["Organism","Infection_origin","Number_of_deaths","Total_number_of_patients"])
-        df_COHO_isoRep_blood_incidence = pd.DataFrame(columns=["Organism","Infection_origin","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"])
-        df_COHO_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","IncludeonlyR"])
+        df_COHO_isoRep_blood_incidence = pd.DataFrame(columns=["Organism","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","Infection_origin"])
+        df_COHO_isoRep_blood_incidence_atb = pd.DataFrame(columns=["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","Infection_origin","IncludeonlyR"])
         for sorgkey in dict_orgcatwithatb.keys():
             ocurorg = dict_orgcatwithatb[sorgkey]
             # skip no growth
@@ -1021,7 +1032,7 @@ def mainloop() :
                                 nUpperCI  = fn_wilson_upperCI(x=iDied, n=itotal, conflevel=0.95, decimalplace=1)
                                 nDiedPercent = int(round((iDied/itotal)*100, 0))
                                 sMortality = str(nDiedPercent) + "% " + "(" + str(iDied) + "/" + str(itotal) + ")"
-                            onew_row = {"Organism":sorgname_mortality,"Infection_origin":sCOHO_mortality,"Antibiotic":scuratbname,"Mortality":sMortality,
+                            onew_row = {"Organism":sorgname_mortality,"Antibiotic":scuratbname,"Infection_origin":sCOHO_mortality,"Mortality":sMortality,
                                         "Mortality_lower_95ci":nLowerCI,"Mortality_upper_95ci":nUpperCI,"Number_of_deaths":iDied,"Total_number_of_patients":itotal,"IncludeonlyR":sMode}   
                             df_COHO_isoRep_blood_mortality = pd.concat([df_COHO_isoRep_blood_mortality,pd.DataFrame([onew_row])],ignore_index = True)         
                         df_COHO_isoRep_blood_mortality_byorg = pd.concat([df_COHO_isoRep_blood_mortality_byorg,pd.DataFrame([{"Organism":sorgname_mortality,"Infection_origin":sCOHO_mortality,
@@ -1046,7 +1057,7 @@ def mainloop() :
                             nPercent = (nPatient/nTotal)*AC.CONST_PERPOP
                             nLowerCI = (AC.CONST_PERPOP/100)*fn_wilson_lowerCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
                             nUpperCI  = (AC.CONST_PERPOP/100)*fn_wilson_upperCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
-                        onew_row = {"Organism":sorgname_incidence,"Infection_origin":sCOHO,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI  }   
+                        onew_row = {"Organism":sorgname_incidence,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI,"Infection_origin":sCOHO  }   
                         df_COHO_isoRep_blood_incidence = pd.concat([df_COHO_isoRep_blood_incidence,pd.DataFrame([onew_row])],ignore_index = True)
                         for i in range(len(list_atbname_incidence)):
                             scuratbname = list_atbname_incidence[i]
@@ -1066,7 +1077,7 @@ def mainloop() :
                                 nPercent = (nPatient/nTotal)*AC.CONST_PERPOP
                                 nLowerCI = (AC.CONST_PERPOP/100)*fn_wilson_lowerCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
                                 nUpperCI  = (AC.CONST_PERPOP/100)*fn_wilson_upperCI(x=nPatient, n=nTotal, conflevel=0.95, decimalplace=10)
-                            onew_row = {"Organism":sorgname_incidence,"Infection_origin":sCOHO,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI,"IncludeonlyR":sMode  }   
+                            onew_row = {"Organism":sorgname_incidence,"Priority_pathogen":scuratbname,"Number_of_patients":nPatient,"frequency_per_tested":nPercent,"frequency_per_tested_lci":nLowerCI,"frequency_per_tested_uci":nUpperCI,"Infection_origin":sCOHO,"IncludeonlyR":sMode  }   
                             df_COHO_isoRep_blood_incidence_atb = pd.concat([df_COHO_isoRep_blood_incidence_atb,pd.DataFrame([onew_row])],ignore_index = True) 
                 #Save count CO/HO by org
                 df_COHO_isoRep_blood_byorg = pd.concat([df_COHO_isoRep_blood_byorg,pd.DataFrame([{"Organism":sorgname,
@@ -1390,7 +1401,9 @@ def mainloop() :
                                                                  col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",sec4_5_totaln=dict_progvar["n_blood_patients"])
                 v2_df_isoRep_blood_incidence = V2.fn_filterorg(v2_df_isoRep_blood_incidence ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)                
                 #All before dedup
-                v2_df_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_isoRep_blood_incidence_atb[df_isoRep_blood_incidence_atb["IncludeonlyR"]==0],
+                v2_df_isoRep_blood_incidence_atb = V2.fn_rename_beforecombine(logger,df_isoRep_blood_incidence_atb[df_isoRep_blood_incidence_atb["IncludeonlyR"]==0],"Priority_pathogen",V2.CONST_RENAME_SEC4_5)
+                #v2_df_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_isoRep_blood_incidence_atb[df_isoRep_blood_incidence_atb["IncludeonlyR"]==0],
+                v2_df_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,v2_df_isoRep_blood_incidence_atb,
                                                                  dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
                                                                  lst_groupbycol=["Priority_pathogen"],
                                                                  lst_sumcol=["Number_of_patients"],
@@ -1455,23 +1468,27 @@ def mainloop() :
                                                                      sec4_5_totaln=dict_progvar["n_HO_blood_patients"])
                     v2_df_HO_isoRep_blood_incidence = V2.fn_filterorg(v2_df_HO_isoRep_blood_incidence ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5) 
                     #by pathogen CO
-                    v2_df_CO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                    v2_df_CO_isoRep_blood_incidence_atb = V2.fn_rename_beforecombine(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],"Priority_pathogen",V2.CONST_RENAME_SEC4_5)
+                    #v2_df_CO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_CO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                    v2_df_CO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,v2_df_CO_isoRep_blood_incidence_atb,
                                                                      dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
                                                                      lst_groupbycol=["Infection_origin","Priority_pathogen"],
                                                                      lst_sumcol=["Number_of_patients"],
                                                                      col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
                                                                      sec4_5_totaln=dict_progvar["n_CO_blood_patients"])
                     v2_df_CO_isoRep_blood_incidence_atb = V2.fn_filterorg(v2_df_CO_isoRep_blood_incidence_atb ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)
-                    v2_df_CO_isoRep_blood_incidence_atb = v2_df_CO_isoRep_blood_incidence_atb[["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"]]
+                    v2_df_CO_isoRep_blood_incidence_atb = v2_df_CO_isoRep_blood_incidence_atb[["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","Infection_origin"]]
                     #by pathogen HO
-                    v2_df_HO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                    v2_df_HO_isoRep_blood_incidence_atb = V2.fn_rename_beforecombine(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],"Priority_pathogen",V2.CONST_RENAME_SEC4_5)
+                    #v2_df_HO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_incidence_atb[(df_COHO_isoRep_blood_incidence_atb["Infection_origin"]==AC.CONST_EXPORT_COHO_HO_DATAVAL) & (df_COHO_isoRep_blood_incidence_atb["IncludeonlyR"]==0)],
+                    v2_df_HO_isoRep_blood_incidence_atb = V2.fn_combine_orgdata(logger,v2_df_HO_isoRep_blood_incidence_atb,        
                                                                      dict_combineorg=V2.CONST_COMBINE_ORG_SEC4_5,
                                                                      lst_groupbycol=["Infection_origin","Priority_pathogen"],
                                                                      lst_sumcol=["Number_of_patients"],
                                                                      col_org="Organism",col_totaln="",col_n="Number_of_patients",col_percent="frequency_per_tested",col_lower95CI="frequency_per_tested_lci",col_upper95CI="frequency_per_tested_uci",
                                                                      sec4_5_totaln=dict_progvar["n_HO_blood_patients"])
                     v2_df_HO_isoRep_blood_incidence_atb = V2.fn_filterorg(v2_df_HO_isoRep_blood_incidence_atb ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG_SEC4_5)
-                    v2_df_HO_isoRep_blood_incidence_atb =  v2_df_HO_isoRep_blood_incidence_atb[["Organism","Infection_origin","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci"]]
+                    v2_df_HO_isoRep_blood_incidence_atb =  v2_df_HO_isoRep_blood_incidence_atb[["Organism","Priority_pathogen","Number_of_patients","frequency_per_tested","frequency_per_tested_lci","frequency_per_tested_uci","Infection_origin"]]
                     temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
                     if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_res_i, 2, logger):
                         print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_V2_sec5_res_i)
@@ -1525,7 +1542,7 @@ def mainloop() :
                                                                      lst_groupbycol=["Infection_origin"],
                                                                      lst_sumcol=["Number_of_deaths","Total_number_of_patients"],
                                                                      col_org="Organism")
-                    v2_df_COHO_isoRep_blood_mortality_byorge = V2.fn_filterorg(v2_df_COHO_isoRep_blood_mortality_byorg ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)                
+                    v2_df_COHO_isoRep_blood_mortality_byorg = V2.fn_filterorg(v2_df_COHO_isoRep_blood_mortality_byorg ,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)                
                     #All before dedup
                     v2_df_COHO_isoRep_blood_mortality = V2.fn_combine_orgdata(logger,df_COHO_isoRep_blood_mortality[df_COHO_isoRep_blood_mortality["IncludeonlyR"]==0],
                                                                      dict_combineorg=V2.CONST_COMBINE_ORG,
@@ -1534,7 +1551,7 @@ def mainloop() :
                                                                      col_org="Organism",col_totaln="Total_number_of_patients",col_n="Number_of_deaths",col_percent="Mortality",col_lower95CI="Mortality_lower_95ci",col_upper95CI="Mortality_upper_95ci",
                                                                      bIsSec6=True)
                     v2_df_COHO_isoRep_blood_mortality = V2.fn_filterorg(v2_df_COHO_isoRep_blood_mortality,col_org="Organism", lst_org=V2.CONST_V2_LIST_ORG)
-                    v2_df_COHO_isoRep_blood_mortality = v2_df_COHO_isoRep_blood_mortality[["Organism","Infection_origin","Antibiotic","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients"]]
+                    v2_df_COHO_isoRep_blood_mortality = v2_df_COHO_isoRep_blood_mortality[["Organism","Antibiotic","Infection_origin","Mortality","Mortality_lower_95ci","Mortality_upper_95ci","Number_of_deaths","Total_number_of_patients"]]
                     v2_temp_df = v2_df_COHO_isoRep_blood_mortality[v2_df_COHO_isoRep_blood_mortality["Infection_origin"] != AC.CONST_EXPORT_COHO_MORTALITY_CO_DATAVAL]
                     v2_df_COHO_isoRep_blood_mortality = v2_df_COHO_isoRep_blood_mortality[v2_df_COHO_isoRep_blood_mortality["Infection_origin"] == AC.CONST_EXPORT_COHO_MORTALITY_CO_DATAVAL]
                     v2_df_COHO_isoRep_blood_mortality = pd.concat([v2_df_COHO_isoRep_blood_mortality,v2_temp_df],ignore_index = True)

@@ -11,6 +11,7 @@ from scipy.stats import norm
 
 CONST_COMBINE_ORG = {AC.CONST_ORG_ENTEROCOCCUS_SPP:[AC.CONST_ORG_ENTEROCOCCUS_FAECALIS,AC.CONST_ORG_ENTEROCOCCUS_FAECIUM]}
 CONST_COMBINE_ORG_SEC4_5 = {AC.CONST_ORG_ENTEROCOCCUS_SPP:["E. faecalis","E. faecium"]}
+CONST_RENAME_SEC4_5 = {"Vancomycin-NSE. faecalis":"Vancomycin-NSEnterococcus spp.","Vancomycin-NSE. faecium":"Vancomycin-NSEnterococcus spp."}
 CONST_V2_LIST_ORG = [AC.CONST_ORG_STAPHYLOCOCCUS_AUREUS, AC.CONST_ORG_ENTEROCOCCUS_SPP, AC.CONST_ORG_STREPTOCOCCUS_PNEUMONIAE, 
               AC.CONST_ORG_SALMONELLA_SPP, AC.CONST_ORG_ESCHERICHIA_COLI, AC.CONST_ORG_KLEBSIELLA_PNEUMONIAE, 
               AC.CONST_ORG_PSEUDOMONAS_AERUGINOSA, AC.CONST_ORG_ACINETOBACTER_BAUMANNII]
@@ -40,7 +41,11 @@ def fn_wilson_upperCI(x, n, conflevel, decimalplace):
     midpnt = (phat+(zalpha**2)/(2*n))/(1+(zalpha**2)/n)
     uplim = round((midpnt + bound)*100, decimalplace)
     return uplim
-
+def fn_rename_beforecombine(logger,df,scol,dict_rename={}):
+    temp_df = df.copy(deep=True)
+    for svalb in dict_rename:
+        temp_df.loc[temp_df[scol]==svalb , scol] = dict_rename[svalb]
+    return temp_df
 
 def fn_combine_orgdata(logger,df,dict_combineorg={},lst_groupbycol=[],lst_sumcol=[],col_org="",col_totaln="",col_n="",col_percent="",col_lower95CI="",col_upper95CI="",sec4_5_totaln=0,bIsSec6=False):
     temp_df = df.copy(deep=True)
