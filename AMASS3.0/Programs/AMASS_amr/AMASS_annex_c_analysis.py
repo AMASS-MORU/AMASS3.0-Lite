@@ -105,14 +105,14 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             if len(df_dedup_blo_profile)>0:
                 df_dedup_blo_profile = map_profileIDtoDataframe(logger, df=df_dedup_blo_profile, d_profile=d_profile[1], sh_org=sh_org, sh_spc="blo", col_profile=ACC.CONST_COL_PROFILE, col_profileid=ACC.CONST_COL_PROFILEID)
                 try:
-                    df_dedup_blo_profile.to_excel(AC.CONST_PATH_REPORTWITH_PID+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["blo"]+".xlsx", index=False)
+                    df_dedup_blo_profile.drop(columns=[ACC.CONST_COL_PROFILE,ACC.CONST_COL_PROFILETEMP]).to_excel(AC.CONST_PATH_REPORTWITH_PID+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["blo"]+".xlsx", index=False)
                 except Exception as e:
                     AL.printlog("Error, ANNEX C exporting "+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["blo"]+".xlsx"+": " +  str(e),True,logger)
             #mapping profile to dataframe -- all specimens
             if len(df_dedup_all_profile)>0:
                 df_dedup_all_profile = map_profileIDtoDataframe(logger, df=df_dedup_all_profile, d_profile=d_profile[1], sh_org=sh_org, sh_spc="all", col_profile=ACC.CONST_COL_PROFILE, col_profileid=ACC.CONST_COL_PROFILEID)
                 try:
-                    df_dedup_all_profile.to_excel(AC.CONST_PATH_REPORTWITH_PID+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["all"]+".xlsx", index=False)
+                    df_dedup_all_profile.drop(columns=[ACC.CONST_COL_PROFILE,ACC.CONST_COL_PROFILETEMP]).to_excel(AC.CONST_PATH_REPORTWITH_PID+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["all"]+".xlsx", index=False)
                 except Exception as e:
                     AL.printlog("Error, ANNEX C exporting "+ACC.CONST_FILENAME_HO_DEDUP+"_"+sh_org.upper()+"_"+ACC.dict_spc["all"]+".xlsx"+": " +  str(e),True,logger)
             print ("-----------------------")

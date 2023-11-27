@@ -529,11 +529,11 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
     sdis_spec = dict_dis_specname[spec]
     sheader_wardgrap = f'Display of patients with {sdis_spec} culture positive for {sorgname} in each ward over time'
     sfootnote = "* The AMASS-SatScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
-    sfootnote = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
-    sfootnote = sfootnote + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
-    sfootnote_topward = "Only wards with a cluster signal identified or having the top three highest number of patients are displayed. "
+    sfootnote_topward = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
+    sfootnote_topward = sfootnote_topward + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
+    sfootnote_topward = sfootnote_topward + "Only wards with a cluster signal identified or having the top three highest number of patients are displayed. "
     lst_footnote = [sfootnote]
-    lst_footnote_topward = [sfootnote + sfootnote_topward]
+    lst_footnote_topward = [sfootnote_topward]
     lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
     
     stotal_patient = "0"
@@ -622,7 +622,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
             table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
             table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (8.2-ioffset)*inch)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
             page = page + 1
@@ -642,7 +642,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     #table_draw._awgH[0] = iheader_h*inch
                     table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
                     table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (9.5-ioffset)*inch)
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
                     page = page + 1
@@ -651,11 +651,11 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                    1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
             REP_AL.report_context(canvas_sup_rpt, ["None"],
                            1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             page = page + 1
     except:
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     #--------------------------------------------------------------------------------------------------------------
@@ -702,7 +702,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             df = df[ANXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
             if icurcol >= ANXC_CONST_MAX_BASELINECOLTBL_PERPAGE-1:
                 if balreadyprintpage == False:
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     bisfirstpage = False
                     page = page + 1
@@ -711,7 +711,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             else:
                 icurcol = icurcol + 1
         if balreadyprintpage == False:
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             bisfirstpage = False
             page = page + 1
@@ -723,7 +723,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                        1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
         REP_AL.report_context(canvas_sup_rpt, ["None"],
                        1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     #--------------------------------------------------------------------------------------------------------------
@@ -1281,7 +1281,8 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                             if len(df_ward_sum) < ANXC_CONST_NUM_TOPWARD_TODISPLAY:
                                 df_ward_sum[ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                             else:
-                                df_ward_sum.loc[df.head(ANXC_CONST_NUM_TOPWARD_TODISPLAY).index, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                                df_ward_sum.loc[:ANXC_CONST_NUM_TOPWARD_TODISPLAY - 1, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                                # df_ward_sum.loc[df.head(ANXC_CONST_NUM_TOPWARD_TODISPLAY).index, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                             #df.loc[df[(df.A % 2 == 0)].head(10).index,'B'] = 100
                         df_ward_sum.loc[df_ward_sum[ANXC_CONST_COL_GOTCLUSTER] >0, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                         #Merge to get ward name

@@ -183,9 +183,9 @@ dict_configuration_prm = {"CaseFile=":"satscan_input_",
 dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin", 
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ofloxacin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Gentamycin",
-                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Amikacin", #!
-                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Sulfamethoxazole_and_trimethoprim", #!
-                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Rifampicin", #!
+                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Amikacin",
+                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Sulfamethoxazole_and_trimethoprim",
+                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Rifampicin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Teicoplanin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Daptomycin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Linezolid",
