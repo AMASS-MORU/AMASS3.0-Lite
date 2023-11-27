@@ -280,6 +280,8 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
                 df_merged[AC.CONST_NEWVARNAME_WARDTYPE].fillna(df_merged[AC.CONST_NEWVARNAME_WARDTYPE_HOSP], inplace=True)
                 df_merged.drop(AC.CONST_NEWVARNAME_WARDCODE_HOSP, axis=1, inplace=True) 
                 df_merged.drop(AC.CONST_NEWVARNAME_WARDTYPE_HOSP, axis=1, inplace=True)  
+                df_merged[AC.CONST_NEWVARNAME_WARDCODE].fillna(AC.CONST_WARD_ID_WARDNOTINDICT, inplace=True)
+                df_merged[AC.CONST_NEWVARNAME_WARDTYPE].fillna("", inplace=True)
             except Exception as e: # work on python 3.x
                 AL.printlog("Warning unable to manage ward info from micro and hospital admission data : " + sErrorat + " : " + str(e),False,logger)
                 logger.exception(e)

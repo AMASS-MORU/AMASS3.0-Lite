@@ -5,8 +5,8 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "21 Nov 2023"
-CONST_SOFTWARE_BUILD = "3020"
+CONST_SOFTWARE_RELEASE = "27 Nov 2023"
+CONST_SOFTWARE_BUILD = "3022"
 CONST_SOFTWARE_MAJOR_VERSION = "3.0 (BETA)"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " Build " + CONST_SOFTWARE_BUILD + " on " + CONST_SOFTWARE_RELEASE
 CONST_SOFTWARE_VERSION_SHORT = CONST_SOFTWARE_MAJOR_VERSION +"B" + CONST_SOFTWARE_BUILD
@@ -46,6 +46,8 @@ CONST_PATH_REPORTWITH_PID = "./Report_with_patient_identifiers/"
 CONST_PATH_TEMPWITH_PID= "./temporary_folder_with_patient_identifiers/"
 CONST_PATH_ROOT = "./"
 CONST_ANNEXA_NON_ORG = "non-organism-annex-A"
+
+CONST_WARD_ID_WARDNOTINDICT = "-"
 #CONST_ANNEXC_TITLE = 'Annex C: Cluster signals'
 # COnst for ANNEX B using data after map with dict or original microbiology data file.
 CONST_ANNEXB_USING_MAPPEDDATA = False

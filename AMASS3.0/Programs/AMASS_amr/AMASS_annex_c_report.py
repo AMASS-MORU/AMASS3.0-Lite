@@ -1269,6 +1269,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                          AL.printlog("Warning : Unable to calculate summary by profile: "+ str(sh_org) + ":" + str(sp),True,logger)
                          logger.exception(e)   
                 df_ward_sum = pd.DataFrame()
+                df_ward_sum_forgraph = pd.DataFrame()
                 if len(df_baseline) > 0:
                     try:
                         df_ward_sum = df_baseline_sum.groupby([ACC.CONST_COL_WARDID])[ACC.CONST_COL_CASE].sum().reset_index(name=ACC.CONST_COL_CASE)
@@ -1285,7 +1286,10 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                                 # df_ward_sum.loc[df.head(ANXC_CONST_NUM_TOPWARD_TODISPLAY).index, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
                             #df.loc[df[(df.A % 2 == 0)].head(10).index,'B'] = 100
                         df_ward_sum.loc[df_ward_sum[ANXC_CONST_COL_GOTCLUSTER] >0, ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] = 1
+                        df_ward_sum_forgraph = df_ward_sum.copy(deep=True)
+                        #Obsoleted in version 3.0 build 3022 -------------------------
                         #Merge to get ward name
+                        """
                         try:
                             lst_col_before_merge = df_ward_sum.columns.tolist()
                             df_ward_sum = df_ward_sum.merge(df_dict_ward,how="left", left_on=ACC.CONST_COL_WARDID, right_on=AC.CONST_DICTCOL_AMASS,suffixes=("", "_WD"))
@@ -1293,17 +1297,18 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                         except Exception as e:
                             AL.printlog("Warning : Unable to merge with ward dict: "+ str(sh_org) + ":" + str(sp),True,logger)
                             logger.exception(e)
+                        """
                     except Exception as e:
                         AL.printlog("Warning : Unable to calculate summary by ward: "+ str(sh_org) + ":" + str(sp),True,logger)
                         logger.exception(e)
-                if len(df_ward_sum) > 0:
+                if len(df_ward_sum_forgraph) > 0:
                     #df_ward_sum = df_ward_sum.head(2)
                     #itopdis = 0
-                    for i in range(len(df_ward_sum)):
+                    for i in range(len(df_ward_sum_forgraph)):
                         try:
-                            swardid = df_ward_sum.iloc[i][ACC.CONST_COL_WARDID]
+                            swardid = df_ward_sum_forgraph.iloc[i][ACC.CONST_COL_WARDID]
                             temp_df = df_baseline[df_baseline[ACC.CONST_COL_WARDID] == swardid]
-                            if df_ward_sum.iloc[i][ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] > 0:
+                            if df_ward_sum_forgraph.iloc[i][ANXC_CONST_COL_SUP_DISPLAYWARDGRAPH] > 0:
                                 df_graph = df_week.copy(deep=True)
                                 df_graph = df_graph.merge(temp_df, how="left", left_on=ANXC_CONST_BASELINE_NEWVAR_WEEK, right_on=ANXC_CONST_BASELINE_NEWVAR_WEEK,suffixes=("", "_DUP"))
                                 df_graph = df_graph[[ACC.CONST_COL_SWEEKDAY,ANXC_CONST_BASELINE_NEWVAR_WEEK,ANXC_CONST_COL_PROFILE_WITHCLUSTER,ACC.CONST_COL_CASE]]
