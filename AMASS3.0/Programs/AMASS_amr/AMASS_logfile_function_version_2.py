@@ -68,8 +68,7 @@ def report_table_appendix(df):
     LOCALFONT_BOLD = list_font[1]
     #print(LOCALFONT)
     return Table(df,style=[('FONT',(0,0),(-1,0),'Helvetica-Bold'),
-                           ('FONT',(0,1),(-1,-1),'Helvetica'),
-                           ('FONT',(1,1),(1,-1),LOCALFONT),
+                           ('FONT',(0,1),(-1,-1),LOCALFONT),
                            ('FONTSIZE',(0,0),(-1,-1),8),
                            ('FONTSIZE',(0,0),(0,-1),8),
                            ('GRID',(0,0),(-1,-1),0.5,colors.darkgrey),
