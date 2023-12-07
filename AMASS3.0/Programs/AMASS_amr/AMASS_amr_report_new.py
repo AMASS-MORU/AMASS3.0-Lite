@@ -255,7 +255,7 @@ def introduction(c,logger,startpage, lastpage, today=date.today().strftime("%d %
     intro_page1_2_6 = "− data sharing with national and international organizations to support decisions on resource allocation for interventions against AMR and to inform the implementation of action plans at national and global levels."
     intro_page1_3 = "When reporting AMR surveillance results, it is generally recommended that (a) duplicate results of bacterial isolates are removed, and (b) reports are stratified by infection origin (community−origin or hospital−origin), if possible [2]. "+ \
                     "Many hospitals in LMICs lack time and resources needed to analyze the data (particularly to deduplicate data and to generate tables and figures), write the reports, and to release the data or reports [4]."
-    intro_page1_4 = "AutoMated tool for Antimicrobial resistance Surveillance System (AMASS) was developed as an offline, open−access and easy−to−use application that allows a hospital to perform data analysis independently and generate AMR proportion and AMR frequency reports stratified by infection origin from routinely collected electronic databases. The application was built in R, which is a free software environment. The application has been placed within a user−friendly interface that only requires the user to double−click on the application icon. The AMASS application can be downloaded at: <u><link href=\"https://www.amass.website\" color=\"blue\"fontName=\"Helvetica\">https://www.amass.website</link></u>"
+    intro_page1_4 = "AutoMated tool for Antimicrobial resistance Surveillance System (AMASS) was developed as an offline, open−access and easy−to−use application that allows a hospital to perform data analysis independently and generate AMR proportion and AMR frequency reports stratified by infection origin from routinely collected electronic databases. The application was built in a free software environment. The application has been placed within a user−friendly interface that only requires the user to double−click on the application icon. The AMASS application can be downloaded at: <u><link href=\"https://www.amass.website\" color=\"blue\"fontName=\"Helvetica\">https://www.amass.website</link></u>"
     intro_page1 = [intro_page1_1, 
                 add_blankline + intro_page1_2_1, 
                 iden1_op + intro_page1_2_2 + iden_ed, 
@@ -1436,10 +1436,10 @@ def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strfti
     method_page1_13 = "<b>" + "− Internet to run AMASS application" + "</b>"
     method_page1_14 = "The AMASS application will run offline. No data are transferred while the application is running and reports are being generated; the reports are in PDF format (do not contain any patient identifier) and can be shared under the user's jurisdiction."
     method_page1_15 = "<b>" + "− R and Python" + "</b>"
-    method_page1_16 = "The download package (AMASSv3.0.zip) included R portable, Python portable and their libraries that the AMASS application requires. " + \
+    method_page1_16 = "The download package (AMASSv3.0.zip) included Python portable and their libraries that the AMASS application requires. " + \
                     "The user does not need to install any programme before using the AMASS. " + \
-                    "The user also does not have to uninstall R or Python if the computer already has the programme installed. " + \
-                    "The user does not need to know how to use R and Python."
+                    "The user also does not have to uninstall Python if the computer already has the programme installed. " + \
+                    "The user does not need to know how to use Python."
     method_page1 = [method_page1_1, method_page1_2, method_page1_3, method_page1_4, method_page1_5, 
                     method_page1_6, method_page1_7, method_page1_8, method_page1_9, method_page1_10, 
                     method_page1_11, method_page1_12, method_page1_13, method_page1_14, method_page1_15, 
@@ -1573,7 +1573,7 @@ def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"
     add_blankline = "<br/>"
     ##variables
     ##Investor
-    invest_1_1 = "The AMASS application is being developed by Cherry Lim, Clare Ling, Elizabeth Ashley, Paul Turner, Rahul Batra, Rogier van Doorn, Soawapak Hinjoy, Sopon Iamsirithaworn, Susanna Dunachie, Tri Wangrangsimakul, Viriya Hantrakun, William Schilling, John Stelling, Jonathan Edgeworth, Guy Thwaites, Nicholas PJ Day, Ben Cooper and Direk Limmathurotskul."
+    invest_1_1 = "The AMASS application version 1.0 was developed by Cherry Lim, Clare Ling, Elizabeth Ashley, Paul Turner, Rahul Batra, Rogier van Doorn, Soawapak Hinjoy, Sopon Iamsirithaworn, Susanna Dunachie, Tri Wangrangsimakul, Viriya Hantrakun, William Schilling, John Stelling, Jonathan Edgeworth, Guy Thwaites, Nicholas PJ Day, Ben Cooper and Direk Limmathurotskul."
     invest_1_2 = "The AMASS application version 2.0 and 3.0 was developed by Chalida Rangsiwutisak, Preeyarach Klaytong, Prapass Wannapinij, Paul Tuner, John Stelling, Cherry Lim and Direk Limmathurotsakul."
     invest_1_3 = "The AMASS application version 1.0 was funded by the Wellcome Trust (grant no. 206736 and 101103). C.L. was funded by a Research Training Fellowship (grant no. 206736) and D.L. was funded by an Intermediate Training Fellowship (grant no. 101103) from the Wellcome Trust."
     invest_1_4 = "The AMASS application version 2.0 and 3.0 was funded by the Wellcome Trust (grant no. 224681/Z/21/Z and Institutional Translational Partnership Award-MORU) "

@@ -19,7 +19,7 @@ from reportlab.lib.units import inch #for importing inch for plotting
 from reportlab.lib.colors import * #for importing color palette
 from reportlab.lib import colors #for importing color palette
 from reportlab.platypus.flowables import Flowable #for plotting graph and tables
-
+import AMASS_amr_commonlib as AL
 # Check that is there either CSV or XLSX with the specific file name or not
 def checkxlsorcsv(spath,sfilename) :
     bfound = False
@@ -63,8 +63,13 @@ def report_context(c,context_list,pos_x,pos_y,wide,height,font_size=10,font_alig
     return f.addFromList(context_list_style,c)
 
 def report_table_appendix(df):
+    list_font = AL.setlocalfont()
+    LOCALFONT = list_font[0]
+    LOCALFONT_BOLD = list_font[1]
+    #print(LOCALFONT)
     return Table(df,style=[('FONT',(0,0),(-1,0),'Helvetica-Bold'),
                            ('FONT',(0,1),(-1,-1),'Helvetica'),
+                           ('FONT',(1,1),(1,-1),LOCALFONT),
                            ('FONTSIZE',(0,0),(-1,-1),8),
                            ('FONTSIZE',(0,0),(0,-1),8),
                            ('GRID',(0,0),(-1,-1),0.5,colors.darkgrey),

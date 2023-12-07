@@ -10,6 +10,29 @@ import sys
 import csv
 from xlsx2csv import Xlsx2csv
 import logging #for creating error_log
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+import AMASS_amr_const as AC
+from pathlib import Path #for retrieving input's path
+# Added build 3023 ---------------------------------------------------------------
+def setlocalfont():
+    LOCALFONT = "Helvetica"
+    LOCALFONT_BOLD = "Helvetica-Bold"
+    try:
+        font_path = AC.CONST_PATH_CONFIG + "localfont.ttf"  
+        if Path(font_path).is_file():
+            LOCALFONT = "LOCALFONT"
+            pdfmetrics.registerFont(TTFont(LOCALFONT, font_path))
+    except:
+        LOCALFONT = "Helvetica"
+    try:
+        font_path = AC.CONST_PATH_CONFIG + "localfont_bold.ttf"  
+        if Path(font_path).is_file():
+            LOCALFONT_BOLD = "LOCALFONT_BOLD"
+            pdfmetrics.registerFont(TTFont(LOCALFONT_BOLD, font_path))
+    except:
+        LOCALFONT_BOLD = "Helvetica-Bold"
+    return [LOCALFONT,LOCALFONT_BOLD]
 # function for init log file
 def initlogger(sprogname,slogname) :
     # Create a logging instance
@@ -101,18 +124,19 @@ def readxlsxorcsv(spath,sfilename,logger) :
     return df
 # Read csv or xlsx file and specify header in columnheader list, csv first, if no file convert xlsx to csv beflor load
 def readxlsorcsv_noheader(spath,sfilename,columnheader,logger) :
+    ncol = len(columnheader)
     try:
-        df = pd.read_csv(spath + sfilename + ".csv",header=None,names=columnheader).fillna("")
+        df = pd.read_csv(spath + sfilename + ".csv",header=None,names=columnheader,usecols=range(ncol)).fillna("")
     except:
         try:
-            df= pd.read_csv(spath + sfilename + ".csv", encoding="windows-1252",header=None,names=columnheader).fillna("")
+            df= pd.read_csv(spath + sfilename + ".csv", encoding="windows-1252",header=None,names=columnheader,usecols=range(ncol)).fillna("")
         except:
             try:
-                df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader).fillna("")
+                df= pd.read_excel(spath + sfilename + ".xlsx",header=None,names=columnheader,usecols=range(ncol)).fillna("")
             except Exception as e:
                 #printlog("Warning : using xlsxtocsv to convert, it may be strict open xml file format : "+ str(e),False,logger)
                 Xlsx2csv(spath + sfilename + ".xlsx", outputencoding="utf-8").convert(spath + sfilename + "_temp.csv")
-                df = pd.read_csv(spath + sfilename + "_temp.csv",header=None,names=columnheader).fillna("")
+                df = pd.read_csv(spath + sfilename + "_temp.csv",header=None,names=columnheader,usecols=range(ncol)).fillna("")
     return df
 # Read csv or xlsx file and specify header in columnheader list, csv first, if no file convert xlsx to csv beflor load
 def readxlsorcsv_noheader_forceencode(spath,sfilename,columnheader,sencoding,logger) :
@@ -135,6 +159,22 @@ def fn_savecsv(df,fname,iquotemode,logger) :
             df.to_csv(fname,index=False, quotechar='"', quoting=csv.QUOTE_ALL)  
         else:
             df.to_csv(fname,index=False)
+        #logger.info("save csv file : " + fname)
+        return True
+    except Exception as e: # work on python 3.x
+        printlog("Failed to save csv file : " + fname + " : "+ str(e),True,logger)
+        return False
+# Save to csv, with encoding
+def fn_savecsvwithencoding(df,fname,sencoding,iquotemode,logger) :
+    if sencoding.strip() == "":
+        sencoding = 'utf-8'
+    try:
+        if iquotemode == 1:
+            df.to_csv(fname,index=False, quotechar='"', encoding=sencoding, quoting=csv.QUOTE_NONNUMERIC)
+        elif iquotemode == 2:
+            df.to_csv(fname,index=False, quotechar='"', encoding=sencoding,quoting=csv.QUOTE_ALL)  
+        else:
+            df.to_csv(fname,index=False,encoding=sencoding)
         #logger.info("save csv file : " + fname)
         return True
     except Exception as e: # work on python 3.x

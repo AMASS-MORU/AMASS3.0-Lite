@@ -399,9 +399,9 @@ def fn_clean_ward(df,scol_wardindict,scol_wardid,scol_wardtype,path,f_dict_ward,
                 df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
                 if scol_wardorg in df.columns:
                     tempdict = pd.Series(df_dict_ward[AC.CONST_DICTCOL_AMASS].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
-                    df[scol_wardid] = df[scol_wardorg].astype("string").map(tempdict)
+                    df[scol_wardid] = df[scol_wardorg].astype("string").str.strip().map(tempdict)
                     tempdict = pd.Series(df_dict_ward["WARDTYPE"].values,index=df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
-                    df[scol_wardtype] = df[scol_wardorg].astype("string").map(tempdict)
+                    df[scol_wardtype] = df[scol_wardorg].astype("string").str.strip().map(tempdict)
                     df.rename(columns={scol_wardorg:scol_wardindict}, inplace=True)
                     bOK = True
                 else:
@@ -672,7 +672,8 @@ def mainloop() :
             df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY] = df_hosp[AC.CONST_NEWVARNAME_DAYTOENDDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] + 1
             df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO] = df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY] - 2
             df_hosp.loc[df_hosp[AC.CONST_NEWVARNAME_PATIENTDAY_HO] <0, AC.CONST_NEWVARNAME_PATIENTDAY_HO] = 0
-            debug_savecsv(df_hosp,path_repwithPID + "translated_hospital_data.csv",bisdebug,1,logger)
+            #debug_savecsv(df_hosp,path_repwithPID + "translated_hospital_data.csv",bisdebug,1,logger)
+            AL.fn_savecsvwithencoding(df_hosp,path_repwithPID + "translated_hospital_data.csv",'utf-8-sig',1,logger)
         # Start Org Cat vs AST of interest -------------------------------------------------------------------------------------------------------
         # Suggest to be in a configuration files hide from user is better in term of coding
         df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_NEWVARNAME_ORG3]
@@ -724,9 +725,12 @@ def mainloop() :
         df_micro_blood = df_micro.loc[df_micro[AC.CONST_NEWVARNAME_BLOOD]=="blood"]
         ## Only interesting org cat 
         df_micro_bsi = df_micro_blood.loc[df_micro_blood[AC.CONST_NEWVARNAME_ORGCAT]!=AC.CONST_ORG_NOTINTEREST_ORGCAT]
-        debug_savecsv(df_micro,path_repwithPID + "translated_microbiology.csv",bisdebug,1,logger)
-        debug_savecsv(df_micro_blood,path_repwithPID + "translated_microbiology_blood.csv",bisdebug,1,logger)
-        debug_savecsv(df_micro_bsi,path_repwithPID + "translated_microbiology_under_survey.csv",bisdebug,1,logger)
+        #debug_savecsv(df_micro,path_repwithPID + "translated_microbiology.csv",bisdebug,1,logger)
+        #debug_savecsv(df_micro_blood,path_repwithPID + "translated_microbiology_blood.csv",bisdebug,1,logger)
+        #debug_savecsv(df_micro_bsi,path_repwithPID + "translated_microbiology_under_survey.csv",bisdebug,1,logger)
+        AL.fn_savecsvwithencoding(df_micro,path_repwithPID + "translated_microbiology.csv",'utf-8-sig',1,logger)
+        AL.fn_savecsvwithencoding(df_micro_blood,path_repwithPID + "translated_microbiology_blood.csv",'utf-8-sig',1,logger)
+        AL.fn_savecsvwithencoding(df_micro_bsi,path_repwithPID + "translated_microbiology_under_survey.csv",'utf-8-sig',1,logger)
         #Version 3.0.3 Ward variables
         
         AL.printlog("Complete prepare data: " + str(datetime.now()),False,logger)        
@@ -757,9 +761,12 @@ def mainloop() :
         df_hospmicro_bsi = df_hospmicro_blood.loc[df_hospmicro_blood[AC.CONST_NEWVARNAME_ORGCAT]!=AC.CONST_ORG_NOTINTEREST_ORGCAT]
         sub_printprocmem("finish merge micro (bsi) and hosp data",logger)
         del df_hosp_formerge
-        debug_savecsv(df_hospmicro,path_repwithPID + "merged_hospital_microbiology_COHO.csv",bisdebug,1,logger)
-        debug_savecsv(df_hospmicro_blood,path_repwithPID + "merged_hospital_microbiology_COHO_blood.csv",bisdebug,1,logger)
-        debug_savecsv(df_hospmicro_bsi,path_repwithPID + "merged_hospital_microbiology_COHO_under_survey.csv",bisdebug,1,logger)
+        #debug_savecsv(df_hospmicro,path_repwithPID + "merged_hospital_microbiology_COHO.csv",bisdebug,1,logger)
+        #debug_savecsv(df_hospmicro_blood,path_repwithPID + "merged_hospital_microbiology_COHO_blood.csv",bisdebug,1,logger)
+        #debug_savecsv(df_hospmicro_bsi,path_repwithPID + "merged_hospital_microbiology_COHO_under_survey.csv",bisdebug,1,logger)
+        AL.fn_savecsvwithencoding(df_hospmicro,path_repwithPID + "merged_hospital_microbiology_COHO.csv",'utf-8-sig',1,logger)
+        AL.fn_savecsvwithencoding(df_hospmicro_blood,path_repwithPID + "merged_hospital_microbiology_COHO_blood.csv",'utf-8-sig',1,logger)
+        AL.fn_savecsvwithencoding(df_hospmicro_bsi,path_repwithPID + "merged_hospital_microbiology_COHO_under_survey.csv",'utf-8-sig',1,logger)
         gc.collect() 
         AL.printlog("Complete merge hosp and micro data: " + str(datetime.now()),False,logger)
     except Exception as e: # work on python 3.x
@@ -930,11 +937,13 @@ def mainloop() :
             if ocurorg[1] == 1 :
                 scurorgcat = ocurorg[0]
                 temp_df_byorgcat = fn_deduplicatebyorgcat_hospmico(df_hospmicro_bsi,AC.CONST_NEWVARNAME_ORGCAT, int(scurorgcat))
-                debug_savecsv(temp_df_byorgcat,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_COHO.csv",bisdebug,1,logger)
+                #debug_savecsv(temp_df_byorgcat,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_COHO.csv",bisdebug,1,logger)
+                AL.fn_savecsvwithencoding(temp_df_byorgcat,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_COHO.csv",'utf-8-sig',1,logger)
                 temp_df = fn_deduplicatebyorgcat(df_micro_bsi,AC.CONST_NEWVARNAME_ORGCAT, int(scurorgcat))
                 iAll = len(temp_df)
                 temp_df = fn_getunknownbyorg(ocurorg[2],temp_df_byorgcat,temp_df,AC.CONST_NEWVARNAME_HN,logger)
-                debug_savecsv(temp_df,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_unknown_origin.csv",bisdebug,1,logger)
+                #debug_savecsv(temp_df,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_unknown_origin.csv",bisdebug,1,logger)
+                AL.fn_savecsvwithencoding(temp_df,path_repwithPID + "section3_dedup_"  + ocurorg[2] + "_unknown_origin.csv",'utf-8-sig',1,logger)
                 iCO = 0
                 iHO = 0
                 for iCOHO in range(2):
