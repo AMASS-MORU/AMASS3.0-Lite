@@ -504,8 +504,10 @@ if ALogL.checkpoint(dict_i):
             ast_raw = pd.read_excel(ast_i)
         except:
             ast_raw = pd.read_csv(ast_i,encoding='windows-1252')
+        #print(dict_drug)
+        #print(ast_raw)
         ast_raw.columns = ["user_name", "frequency_raw"]
-        ast_merge = pd.merge(dict_drug,ast_raw,how="outer",left_on="amass_drug",right_on="user_name")
+        ast_merge = pd.merge(dict_drug,ast_raw,how="outer",left_on="user_drug",right_on="user_name")
         ast_merge[["user_drug","user_name"]] = ast_merge[["user_drug","user_name"]].fillna("")
         for idx in ast_merge.index:
             if ast_merge.loc[idx,"amass_drug"] == ast_merge.loc[idx,"user_name"]:
