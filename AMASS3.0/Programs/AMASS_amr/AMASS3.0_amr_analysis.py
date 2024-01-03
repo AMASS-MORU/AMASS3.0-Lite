@@ -612,6 +612,14 @@ def mainloop() :
         except Exception as e:
             AL.printlog("Warning : Fail get micro ward list: " +  str(e),True,logger)
             logger.exception(e)
+        try:
+            temp_df = df_micro.groupby([AC.CONST_NEWVARNAME_WARDCODE, AC.CONST_VARNAME_WARD],dropna=False).size().reset_index(name='Count')
+            if not AL.fn_savexlsx(temp_df, AC.CONST_PATH_RESULT + "logfile_ward.xlsx", logger):
+                print("Warning  : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "logfile_ward.xlsx")
+        except Exception as e:
+            AL.printlog("Warning : can't get list of ward in microbiology data file for display in data verification log "  + str(e),True,logger)
+            logger.exception(e)
+            pass
         #Remove unused column to save memory
         list_micorcol = [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_SPECDATERAW,AC.CONST_VARNAME_COHO,AC.CONST_VARNAME_ORG,AC.CONST_VARNAME_SPECTYPE,AC.CONST_VARNAME_WARD,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE]
         list_micorcol = list_micorcol + list_antibiotic
@@ -642,6 +650,16 @@ def mainloop() :
             df_hosp = AL.fn_keeponlycol(df_hosp, [AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_ADMISSIONDATE,AC.CONST_VARNAME_DISCHARGEDATE,
                                                   AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_BIRTHDAY,AC.CONST_VARNAME_AGEY,AC.CONST_VARNAME_AGEGROUP,
                                                   AC.CONST_VARNAME_WARD_HOSP,AC.CONST_NEWVARNAME_WARDCODE_HOSP,AC.CONST_NEWVARNAME_WARDTYPE_HOSP])
+            #Save log ward data verification log
+            try:
+                
+                temp_df = df_hosp.groupby([AC.CONST_NEWVARNAME_WARDCODE_HOSP, AC.CONST_VARNAME_WARD_HOSP],dropna=False).size().reset_index(name='Count')
+                if not AL.fn_savexlsx(temp_df, AC.CONST_PATH_RESULT + "logfile_ward_hosp.xlsx", logger):
+                    print("Warning  : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "logfile_ward_hosp.xlsx")
+            except Exception as e:
+                AL.printlog("Warning : can't get list of ward in hospital data file for display in data verification log "  + str(e),True,logger)
+                logger.exception(e)
+                pass
             # Trim of space and unreadable charector for field that may need to map values such as spectype, organism.
             df_hosp = AL.fn_df_strstrips(df_hosp,[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_COHO],logger)
             df_hosp = clean_hn(df_hosp,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN_HOSP,logger)

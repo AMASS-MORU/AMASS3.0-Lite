@@ -2145,11 +2145,16 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
         sub_printprocmem("AMR surveillance report - checkpoint annex A,A1",logger)
         lst_annexA_org_full = []
         lst_annexA_org_format= []
+        lst_annexA_org_format_full= []
         for sorgkey in AC.dict_annex_a_listorg:
             ocurorg = AC.dict_annex_a_listorg[sorgkey]
             #exclude no growth
             if ocurorg[1] == 1:
                 lst_annexA_org_format.append(ocurorg[5])
+                try:
+                    lst_annexA_org_format_full.append(ocurorg[6])
+                except:
+                    lst_annexA_org_format_full.append(ocurorg[5])
                 lst_annexA_org_full.append(ocurorg[2])
         style_normal = ParagraphStyle('normal',fontName='Helvetica',fontSize=11,alignment=TA_LEFT)
         style_small = ParagraphStyle('normal',fontName='Helvetica',fontSize=9,alignment=TA_LEFT)
@@ -2164,9 +2169,9 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
                 ihalf = m.ceil(icountorg/2)
                 for i in range(icountorg):
                     if i < ihalf:
-                        lst_page1_l.append(Paragraph("- " + lst_annexA_org_format[i],style_normal))
+                        lst_page1_l.append(Paragraph("- " + lst_annexA_org_format_full[i],style_normal))
                     else:
-                        lst_page1_r.append(Paragraph("- " + lst_annexA_org_format[i],style_normal))
+                        lst_page1_r.append(Paragraph("- " + lst_annexA_org_format_full[i],style_normal))
                     lst_page2.append(Paragraph(lst_annexA_org_format[i],style_small)) 
                 annexA_org_page1 = []
                 for i in range(len(lst_page1_l)):

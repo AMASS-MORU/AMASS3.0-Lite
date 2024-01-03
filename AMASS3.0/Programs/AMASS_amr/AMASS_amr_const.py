@@ -5,8 +5,8 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "13 Dec 2023"
-CONST_SOFTWARE_BUILD = "3024"
+CONST_SOFTWARE_RELEASE = "2 Jan 2024"
+CONST_SOFTWARE_BUILD = "3025"
 CONST_SOFTWARE_MAJOR_VERSION = "3.0 (BETA)"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " Build " + CONST_SOFTWARE_BUILD + " on " + CONST_SOFTWARE_RELEASE
 CONST_SOFTWARE_VERSION_SHORT = CONST_SOFTWARE_MAJOR_VERSION +"B" + CONST_SOFTWARE_BUILD
@@ -427,17 +427,17 @@ list_antibiotic = ["Amikacin","Amoxicillin","Amoxicillin_and_clavulanic_acid","A
                  "Polymyxin_B","Rifampicin","Streptomycin","Teicoplanin","Telavancin","Tetracycline","Ticarcillin_and_clavulanic_acid","Tigecycline",
                  "Tobramycin","Trimethoprim","Sulfamethoxazole_and_trimethoprim","Vancomycin","Cefoperazone_and_sulbactam"]
 #Annex A
-dict_annex_a_listorg = {"organism_burkholderia_pseudomallei":[1,1,"Burkholderia pseudomallei",1,[],"<i>B. pseudomallei</i>"],
-                        "organism_brucella_spp":[2,1,"Brucella spp.",1,[],"<i>Brucella </i>spp."],
-                        "organism_corynebacterium_diphtheriae":[3,1,"Corynebacterium. diphtheriae",1,[],"<i>C. diphtheriae</i>"],
-                        "organism_neisseria_gonorrhoeae":[4,1,"Neisseria. gonorrhoeae",1,[],"<i>N. gonorrhoeae</i>"],
-                        "organism_neisseria_meningitidis":[5,1,"Neisseria. meningitidis",1,[],"<i>N. meningitidis</i>"],
-                        "organism_non-typhoidal_salmonella_spp":[6,1,"Non-typhoidal Salmonella spp",1,[],"Non-typhoidal <i>Salmonella </i>spp."],
-                        "organism_salmonella_paratyphi":[7,1,"Salmonella. Paratyphi",1,[],"<i>S. Paratyphi</i>"],
-                        "organism_salmonella_typhi":[8,1,"Salmonella. Typhi",1,[],"<i>S. Typhi</i>"],
-                        "organism_shigella_spp":[9,1,"Shigella spp.",1,[],"<i>Shigella </i>spp."],
-                        "organism_streptococcus_suis":[10,1,"Streptococcus. suis",1,[],"<i>S. suis</i>"],
-                        "organism_vibrio_spp":[11,1,"Vibrio spp.",1,[],"<i>Vibrio </i>spp."],
+dict_annex_a_listorg = {"organism_burkholderia_pseudomallei":[1,1,"Burkholderia pseudomallei",1,[],"<i>B. pseudomallei</i>","<i>Burkholderia pseudomallei</i>"],
+                        "organism_brucella_spp":[2,1,"Brucella spp.",1,[],"<i>Brucella </i>spp.","<i>Brucella</i> spp."],
+                        "organism_corynebacterium_diphtheriae":[3,1,"Corynebacterium. diphtheriae",1,[],"<i>C. diphtheriae</i>","<i>Corynebacterium diphtheriae</i>"],
+                        "organism_neisseria_gonorrhoeae":[4,1,"Neisseria. gonorrhoeae",1,[],"<i>N. gonorrhoeae</i>","<i>Neisseria gonorrhoeae</i>"],
+                        "organism_neisseria_meningitidis":[5,1,"Neisseria. meningitidis",1,[],"<i>N. meningitidis</i>","<i>Neisseria meningitidis</i>"],
+                        "organism_non-typhoidal_salmonella_spp":[6,1,"Non-typhoidal Salmonella spp",1,[],"Non-typhoidal <i>Salmonella </i>spp.","Non-typhoidal <i>Salmonella</i> spp."],
+                        "organism_salmonella_paratyphi":[7,1,"Salmonella. Paratyphi",1,[],"<i>S.</i> Paratyphi","<i>Salmonella</i> Paratyphi"],
+                        "organism_salmonella_typhi":[8,1,"Salmonella. Typhi",1,[],"<i>S.</i> Typhi","<i>Salmonella</i> Typhi"],
+                        "organism_shigella_spp":[9,1,"Shigella spp.",1,[],"<i>Shigella </i>spp.","<i>Shigella</i> spp."],
+                        "organism_streptococcus_suis":[10,1,"Streptococcus. suis",1,[],"<i>S. suis</i>","<i>Streptococcus suis</i>"],
+                        "organism_vibrio_spp":[11,1,"Vibrio spp.",1,[],"<i>Vibrio </i>spp.","<i>Vibrio</i> spp."],
                         CONST_ORG_NOGROWTH:[CONST_ORG_NOGROWTH_ORGCAT_ANNEX_A,0,"",1,[],""]
                         }
 dict_annex_a_spectype = {"specimen_blood":"Blood",

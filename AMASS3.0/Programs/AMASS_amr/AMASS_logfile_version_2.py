@@ -298,7 +298,12 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
         logger.exception(e)
 
     
-    
+def tsnodata(c,title_name,title_sub,nodatatext):
+    log_1 = "<b>" + title_name + ": " + title_sub + "</b>"
+    ALogL.report_context(c,[log_1], 1.0*inch, 10.0*inch, 460, 80, font_size=11)
+    log_2 = nodatatext
+    ALogL.report_context(c,[log_2], 1.0*inch, 8.5*inch, 460, 80, font_size=9)
+    c.showPage()
 def ts(c,df, df_col, marked_idx, title_name, title_sub):
     if len(marked_idx) == 1: # no.row < 30 rows
         log_1 = "<b>" + title_name + ": " + title_sub + "</b>"
@@ -345,6 +350,7 @@ logger.addHandler(fh)
 path = AC.CONST_PATH_ROOT
 dict_i = path + "dictionary_for_microbiology_data.xlsx"
 dict_hosp_i = path + "dictionary_for_hospital_admission_data.xlsx"
+dict_ward_i = path + "dictionary_for_wards.xlsx"
 over_i = AC.CONST_PATH_RESULT + "logfile_results.csv"
 org_i = AC.CONST_PATH_RESULT + "logfile_organism.xlsx"
 spc_i = AC.CONST_PATH_RESULT + "logfile_specimen.xlsx"
@@ -369,6 +375,8 @@ file_microhn = AC.CONST_PATH_RESULT + "logfile_microhn.xlsx"
 file_hosphn = AC.CONST_PATH_RESULT + "logfile_hosphn.xlsx"
 #file_dup = "ResultData/logfile_dup.xlsx"
 file_dup = AC.CONST_PATH_RESULT + "logfile_dup.xlsx"
+file_ward = AC.CONST_PATH_RESULT + "logfile_ward.xlsx"
+file_ward_hosp = AC.CONST_PATH_RESULT + "logfile_ward_hosp.xlsx"
 
 
 
@@ -693,6 +701,75 @@ if ALogL.checkpoint(file_dup):
     except Exception as e:
         logger.exception(e)
         pass
+#TS10
+df_ward = pd.DataFrame()
+df_ward_hosp = pd.DataFrame()
+col_wardcode = 'Data values of variable\nused for \"ward\" in AMASS'
+col_count = "Number of\nobservations"
+try:
+    #load dictionary ward
+    df_dict_ward = pd.DataFrame()
+    if AL.checkxlsorcsv(AC.CONST_PATH_ROOT,"dictionary_for_wards"):
+        try:
+            df_dict_ward = AL.readxlsorcsv_noheader_forceencode(AC.CONST_PATH_ROOT,"dictionary_for_wards", [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],"utf-8",logger)
+            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip() != ""]
+            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
+            df_dict_ward = df_dict_ward[[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL]]
+            df_dict_ward[AC.CONST_DICTCOL_DATAVAL] =  df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()
+            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS]!= 'ward_hosp']
+            if ALogL.checkpoint(file_ward):
+                try:#TS10 Micro
+                    col_wardname = 'Data values of variable\nrecorded for \"ward\"\nin your microbiology data file'
+                    col_wardname_hosp = 'Data values of variable\nrecorded for \"ward\"\nin your hospital data file'
+                    df_ward = pd.read_excel(file_ward)  
+                    df_ward[AC.CONST_NEWVARNAME_WARDCODE] = df_ward[AC.CONST_NEWVARNAME_WARDCODE].fillna("")
+                    df_ward[AC.CONST_VARNAME_WARD] = df_ward[AC.CONST_VARNAME_WARD].fillna("")
+                    df_ward = df_ward.merge(df_dict_ward, how="outer", left_on=[AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_VARNAME_WARD], right_on=[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL],suffixes=("", "CO"))
+                    df_ward[col_wardcode] = df_ward[AC.CONST_DICTCOL_AMASS].fillna(df_ward[AC.CONST_NEWVARNAME_WARDCODE]).fillna("")
+                    df_ward[col_wardname] = df_ward[AC.CONST_DICTCOL_DATAVAL].fillna(df_ward[AC.CONST_VARNAME_WARD])
+                    df_ward[col_count] = df_ward["Count"].fillna(0).astype(int).astype(str)
+                    df_ward["gotcode"] = 0 
+                    df_ward.loc[df_ward[col_wardcode] =="", "gotcode"] = 1
+                    df_ward = df_ward.sort_values(["gotcode",col_wardcode],ascending=True).reset_index().drop(columns=["index"])
+                    df_ward = df_ward[[col_wardcode,col_wardname,col_count]]
+                    AL.fn_savexlsx(df_ward, AC.CONST_PATH_RESULT + "logfile_TS10A_ward.xlsx", logger)
+                    marked_ward = ALogL.marked_idx(df_ward)  
+                    print("Generated TS10A")
+                except Exception as e:
+                    logger.exception(e)
+                    print(e)
+                    print("Warning : error generate ward log for microbiology data")
+                    pass
+            if ALogL.checkpoint(file_ward_hosp):
+                try:#TS10 hosp
+                    col_wardname = 'Data values of variable\nrecorded for \"ward\"\nin your hospital data file'
+                    df_ward_hosp = pd.read_excel(file_ward_hosp)  
+                    df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP] = df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP].fillna("")
+                    df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP] = df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP].fillna("")
+                    df_ward_hosp = df_ward_hosp.merge(df_dict_ward, how="outer", left_on=[AC.CONST_NEWVARNAME_WARDCODE_HOSP,AC.CONST_VARNAME_WARD_HOSP], right_on=[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL],suffixes=("", "CO"))
+                    df_ward_hosp[col_wardcode] = df_ward_hosp[AC.CONST_DICTCOL_AMASS].fillna(df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP]).fillna("")
+                    df_ward_hosp[col_wardname] = df_ward_hosp[AC.CONST_DICTCOL_DATAVAL].fillna(df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP])
+                    df_ward_hosp[col_count] = df_ward_hosp["Count"].fillna(0).astype(int).astype(str)
+                    df_ward_hosp["gotcode"] = 0 
+                    df_ward_hosp.loc[df_ward_hosp[col_wardcode] =="", "gotcode"] = 1
+                    df_ward_hosp = df_ward_hosp.sort_values(["gotcode",col_wardcode],ascending=True).reset_index().drop(columns=["index"])
+                    df_ward_hosp = df_ward_hosp[[col_wardcode,col_wardname,col_count]]
+                    AL.fn_savexlsx(df_ward_hosp, AC.CONST_PATH_RESULT + "logfile_TS10B_ward_hosp.xlsx", logger)
+                    marked_ward_hosp = ALogL.marked_idx(df_ward_hosp)  
+                    print("Generated TS10B")
+                except Exception as e:
+                    logger.exception(e)
+                    print(e)
+                    print("Warning : error generate ward log for hospital data")
+                    pass
+        except Exception as e:
+            logger.exception(e)
+            print("Warning : error generate ward log")
+            pass
+except Exception as e:
+    logger.exception(e)
+    print("Warning : error generate ward log")
+    pass
 ##Generating logfile_amass.pdf and Exporting logfile.xlsx
 try:
     c = canvas.Canvas(path + "Data_verification_logfile_report.pdf")
@@ -784,6 +861,30 @@ try:
     if ALogL.checkpoint(file_dup):
         try:
             ts(c,df_dup, [list(df_dup.columns)], marked_dup, "Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS")
+        except Exception as e:
+            logger.exception(e)
+            pass
+    if len(df_ward) > 0:
+        try:
+            ts(c,df_ward, [list(df_ward.columns)], marked_ward, "Table S10A", "List of data values of variable recorded for \"ward\" in your microbiology data file")
+        except Exception as e:
+            logger.exception(e)
+            pass
+    else:
+        try:
+            tsnodata(c,"Table S10A", "List of data values of variable recorded for \"ward\" in your microbiology data file","No ward column in microbiology data file defined in dictionary for wards.")
+        except Exception as e:
+            logger.exception(e)
+            pass
+    if len(df_ward_hosp) > 0:
+        try:
+            ts(c,df_ward_hosp, [list(df_ward_hosp.columns)], marked_ward_hosp, "Table S10B", "List of data values of variable recorded for \"ward\" in your hospital admission data file.\n(Data values will be used if missing ward data in microbiology data file for that merged data record.)")
+        except Exception as e:
+            logger.exception(e)
+            pass
+    else:
+        try:
+            tsnodata(c,"Table S10B", "List of data values of variable recorded for \"ward\" in your hospital admission data file.\n(Data values will be used if missing ward data in microbiology data file for that merged data record.)","No ward column in hospital admission data file defined in dictionary for wards.")
         except Exception as e:
             logger.exception(e)
             pass
