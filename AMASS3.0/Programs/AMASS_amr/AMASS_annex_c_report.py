@@ -136,7 +136,7 @@ def annexc_table_sup_micro_ward(df,cl):
     LOCALFONT = list_font[0]
     LOCALFONT_BOLD = list_font[1]
     return Table(df,colWidths=cl,style=[('FONT',(0,0),(-1,-1),'Helvetica-Bold'),
-                           ('FONT',(0,1),(-1,-1),'Helvetica'),             
+                           ('FONT',(0,1),(-1,-1),LOCALFONT),             
                            ('FONT',(1,1),(-1,-1),LOCALFONT),
                            ('FONTSIZE',(0,0),(-1,0),9),
                            ('FONTSIZE',(0,1),(-1,-1),9),

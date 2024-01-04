@@ -600,9 +600,15 @@ def mainloop() :
     try:
         # rename variable in dataval to amassval
         # What happen if key is duplicate
+        AL.printlog("Note : Microbiology data column before trim/map with dictionary: " +  str(df_micro.columns),False,logger)
+        df_micro.columns = df_micro.columns.str.strip()
         df_micro.rename(columns=dict_datavaltoamass, inplace=True)   
+        AL.printlog("Note : Microbiology data column after trim/map with dictionary: " +  str(df_micro.columns),False,logger)
         if bishosp_ava:
+            AL.printlog("Note : Hospital admission data column before trim/map with dictionary: " +  str(df_hosp.columns),False,logger)
+            df_hosp.columns = df_hosp.columns.str.strip()
             df_hosp.rename(columns=dict_datavaltoamass, inplace=True)
+            AL.printlog("Note : Hospital admission data column after trim/map with dictionary: " +  str(df_hosp.columns),False,logger)
         #CLean ward before remove column
         AL.printlog("-- Clean ward in micro --",False,logger) 
         fn_clean_ward(df_micro,AC.CONST_VARNAME_WARD,AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_NEWVARNAME_WARDTYPE,path_input,"dictionary_for_wards",logger) 
@@ -750,7 +756,9 @@ def mainloop() :
         AL.fn_savecsvwithencoding(df_micro_blood,path_repwithPID + "translated_microbiology_blood.csv",'utf-8-sig',1,logger)
         AL.fn_savecsvwithencoding(df_micro_bsi,path_repwithPID + "translated_microbiology_under_survey.csv",'utf-8-sig',1,logger)
         #Version 3.0.3 Ward variables
-        
+        AL.printlog("Note : Microbiology data column when finish prepare data: " +  str(df_micro.columns),False,logger)
+        if bishosp_ava:
+            AL.printlog("Note : Hospital admission data column when finish prepare data: " +  str(df_hosp.columns),False,logger)
         AL.printlog("Complete prepare data: " + str(datetime.now()),False,logger)        
     except Exception as e: # work on python 3.x
         AL.printlog("Fail prepare data: " +  str(e),True,logger)   
