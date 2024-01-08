@@ -199,12 +199,12 @@ def create_graph_nons_v3(raw_df, org_full, org_short, palette, drug_col, iMODE,i
         perc_col = 'Resistant(%)'
     upper_col = 'upper95CI(%)*'
     lower_col = 'lower95CI(%)*'
-    xlabel = '*Proportion of NS isolates(%)'
+    xlabel = '*Proportion of NS isolates (%)'
     if iMODE != AC.CONST_VALUE_MODE_AST:
         perc_col = 'Resistant(%)'
         upper_col = 'Resistant-upper95CI(%)*'
         lower_col = 'Resistant-lower95CI(%)*'
-        xlabel = '*Proportion of R(%)'
+        xlabel = '*Proportion of R (%)'
     raw_df[drug_col] = raw_df[drug_col].str.rjust(AC.CONST_MAXNUMCHAR_ATBNAME," ")
     if origin == "": #section2
         sel_df = raw_df.loc[raw_df['Organism']==org_full].set_index(drug_col).fillna(0)
