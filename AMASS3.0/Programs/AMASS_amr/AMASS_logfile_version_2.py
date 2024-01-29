@@ -304,7 +304,7 @@ def tsnodata(c,title_name,title_sub,nodatatext):
     log_2 = nodatatext
     ALogL.report_context(c,[log_2], 1.0*inch, 8.5*inch, 460, 80, font_size=9)
     c.showPage()
-def ts(c,df, df_col, marked_idx, title_name, title_sub):
+def ts_withfootnote(c,df, df_col, marked_idx, title_name, title_sub,footnote_txt):
     if len(marked_idx) == 1: # no.row < 30 rows
         log_1 = "<b>" + title_name + ": " + title_sub + "</b>"
         df_1 = df.loc[0:]
@@ -315,7 +315,8 @@ def ts(c,df, df_col, marked_idx, title_name, title_sub):
         table_draw = ALogL.report_table_appendix(table)
         table_draw.wrapOn(c, 500, 300)
         h = (30-len(table))*(0.25) ####Work!!!!!!!!!!!!!!!!!!!!!!!!
-        table_draw.drawOn(c, 1.07*inch, (h+2.0)*inch)
+        table_draw.drawOn(c, 1.07*inch, (h+2.1)*inch)
+        ALogL.report_context(c,[footnote_txt], 1.0*inch, 0.1*inch, 460, 120, font_size=9,line_space=12)
         c.showPage()
     else:                        # no.row >= 30 rows
         for i in range(len(marked_idx)):
@@ -335,7 +336,41 @@ def ts(c,df, df_col, marked_idx, title_name, title_sub):
             table_draw = ALogL.report_table_appendix(table)
             table_draw.wrapOn(c, 500, 300)
             h = (30-len(table))*(0.25) ####Work!!!!!!!!!!!!!!!!!!!!!!!!
-            table_draw.drawOn(c, 1.07*inch, (h+2.0)*inch)
+            table_draw.drawOn(c, 1.07*inch, (h+2.1)*inch)
+            ALogL.report_context(c,[footnote_txt], 1.0*inch, 0.1*inch, 460, 120, font_size=9,line_space=12)
+            c.showPage()
+def ts(c,df, df_col, marked_idx, title_name, title_sub):
+    if len(marked_idx) == 1: # no.row < 30 rows
+        log_1 = "<b>" + title_name + ": " + title_sub + "</b>"
+        df_1 = df.loc[0:]
+        df_1 = df_1.values.tolist()
+        df_1 = df_col + df_1
+        ALogL.report_context(c,[log_1], 1.0*inch, 10.0*inch, 460, 80, font_size=11)
+        table = df_1
+        table_draw = ALogL.report_table_appendix(table)
+        table_draw.wrapOn(c, 500, 300)
+        h = (30-len(table))*(0.25) ####Work!!!!!!!!!!!!!!!!!!!!!!!!
+        table_draw.drawOn(c, 1.07*inch, (h+2.1)*inch)
+        c.showPage()
+    else:                        # no.row >= 30 rows
+        for i in range(len(marked_idx)):
+            if i == 0:
+                log_1 = "<b>" + title_name + ": " + title_sub + "</b>"
+                df_1 = df.loc[marked_idx[i]:marked_idx[i+1]]
+            elif i+1 == len(marked_idx):
+                log_1 = "<b>" + title_name + " (continue): " + title_sub + "</b>"
+                df_1 = df.loc[marked_idx[i]:]
+            else:
+                log_1 = "<b>" + title_name + " (continue): " + title_sub + "</b>"
+                df_1 = df.loc[marked_idx[i]+1:marked_idx[i+1]]
+            df_1 = df_1.values.tolist()
+            df_1 = df_col + df_1
+            ALogL.report_context(c,[log_1], 1.0*inch, 10.0*inch, 460, 80, font_size=11)
+            table = df_1
+            table_draw = ALogL.report_table_appendix(table)
+            table_draw.wrapOn(c, 500, 300)
+            h = (30-len(table))*(0.25) ####Work!!!!!!!!!!!!!!!!!!!!!!!!
+            table_draw.drawOn(c, 1.07*inch, (h+2.1)*inch)
             c.showPage()
 """
 logger = logging.getLogger('AMASS_logfile_version_2.py')
@@ -355,6 +390,7 @@ over_i = AC.CONST_PATH_RESULT + "logfile_results.csv"
 org_i = AC.CONST_PATH_RESULT + "logfile_organism.xlsx"
 spc_i = AC.CONST_PATH_RESULT + "logfile_specimen.xlsx"
 ast_i = AC.CONST_PATH_RESULT + "logfile_ast.xlsx"
+ris_i = AC.CONST_PATH_RESULT + "logfile_ris_count.xlsx"
 gen_i = AC.CONST_PATH_RESULT + "logfile_gender.xlsx"
 age_i = AC.CONST_PATH_RESULT + "logfile_age.xlsx"
 dis_i = AC.CONST_PATH_RESULT + "logfile_discharge.xlsx"
@@ -430,6 +466,11 @@ if ALogL.checkpoint(dict_i):
         dict_org_opt = dict_raw.copy().iloc[idx_micro_org_opt+1:idx_micro_opt_2,:2].reset_index().drop(columns=['index']).fillna("")
         dict_org_opt["tag"] = "B"
         dict_org = pd.concat([dict_org_core,dict_org_opt],axis=0)
+        #Trim 
+        dict_drug["user_drug"] = dict_drug["user_drug"].astype("string").str.strip().fillna("")
+        dict_spc["user_name"] = dict_spc["user_name"].astype("string").str.strip().fillna("")
+        dict_org["user_name"] = dict_org["user_name"].astype("string").str.strip().fillna("")
+        
     except Exception as e:
         logger.exception(e)
         pass
@@ -525,22 +566,48 @@ if ALogL.checkpoint(dict_i):
                     pass
                 else:
                     ast_merge.at[idx,"user_drug"] = ast_merge.loc[idx,"user_name"]
-        ast_merge["frequency_raw"] = ast_merge["frequency_raw"].fillna(0).astype(int).astype(str)
+        ast_merge["frequency_raw"] = ast_merge["frequency_raw"].fillna(0).astype(int)
         ast_merge["amass_drug"] = ast_merge["amass_drug"].fillna("zzzz")
         ast_merge = ast_merge.sort_values(["amass_drug"],ascending=True).reset_index().drop(columns=["index"])
         ast_merge["amass_drug"] = ast_merge["amass_drug"].replace(regex=["zzzz"],value="")
         ast_merge = ast_merge.loc[~ast_merge["user_drug"].isin(lst_opt_2),:] #excluding variables out
         for idx in ast_merge.index:
             ast_merge.at[idx,"user_drug"] = ALogL.prepare_unicode(ast_merge.loc[idx,"user_drug"])
+        #Build 3027 #TS3 unmapped S\I\R values.
+        ast_merge["fdiff"] = -1
+        ris_raw = pd.DataFrame(columns =["amass_atb", "frequency_raw_ris"])
+        try:
+            try:
+                ris_raw = pd.read_excel(ris_i)
+            except:
+                ris_raw = pd.read_csv(ris_i,encoding='windows-1252')
+            ris_raw.columns = ["amass_atb", "frequency_raw_ris"]
+            ast_merge = pd.merge(ast_merge,ris_raw,how="left",left_on="amass_drug",right_on="amass_atb")
+            ast_merge["frequency_raw_ris"] = ast_merge["frequency_raw_ris"].fillna(-1).astype(int) 
+            ast_merge["fdiff"] = ast_merge["frequency_raw"] - ast_merge["frequency_raw_ris"]
+            ast_merge["frequency_raw"] = ast_merge["frequency_raw"].astype(str)
+            ast_merge["fdiff"] = ast_merge["fdiff"].astype(str)
+            ast_merge.loc[ast_merge["frequency_raw_ris"] == -1,"fdiff"] = "NA"
+            ast_merge.loc[ast_merge["amass_drug"].astype(str).str.strip() == "","fdiff"] = ""
+            #ast_merge.loc[ast_merge["frequency_raw_ris"] < ast_merge["frequency_raw"], "fdiff"] = ast_merge["frequency_raw"] - ast_merge["frequency_raw_ris"]
+        except Exception as e:
+            logger.exception(e)
+            pass
+        try:
+            ast_merge = ast_merge.drop(columns=["amass_atb","frequency_raw_ris"])
+        except Exception as e:
+            logger.exception(e)
+            pass
+        #ast_merge_for_ris = ast_merge.copy(deep=True)
         ast_merge = ast_merge.reset_index().drop(columns=["index","user_name"]).rename(columns={"amass_drug":"Variable names used for\n\"antibiotics\" described in AMASS",
                                                                         "user_drug":"Variable names recorded for\n\"antibiotics\" in your\nmicrobiology data file",
-                                                                        "frequency_raw":"Number of observations\ncontaining S, I, or R\nfor each antibiotic"})
+                                                                        "frequency_raw":"Number of observations\ncontaining S, I, or R\nfor each antibiotic",
+                                                                        "fdiff":"Number of observations\ncontaining some data\n(i.e. not blank)\nwhich were not translated\ninto S, I or R*"})
         ast_col = [list(ast_merge.columns)]
         marked_ast = ALogL.marked_idx(ast_merge)
     except Exception as e:
         logger.exception(e)
         pass
-
 ##dictionary_for_hospital_admission_data
 if ALogL.checkpoint(dict_hosp_i): 
     try:
@@ -552,11 +619,15 @@ if ALogL.checkpoint(dict_hosp_i):
             except:
                 dict_hosp_raw = pd.read_csv(path + "dictionary_for_hospital_admission_data.csv",encoding="windows-1252").iloc[:,:4]
         dict_hosp_raw.columns = ["amass_name","user_name","requirements","explanations"]
+        
         #Retrieving column names of hospital_admission_data.xlsx 
         male = dict_hosp_raw.loc[dict_hosp_raw["amass_name"]=="male",["amass_name","user_name"]]
         female = dict_hosp_raw.loc[dict_hosp_raw["amass_name"]=="female",["amass_name","user_name"]]
         dict_gen = pd.concat([male,female],axis=0)
         died = dict_hosp_raw.loc[dict_hosp_raw["amass_name"]=="died",["amass_name","user_name"]]
+        #trim
+        dict_gen["user_name"] = dict_gen["user_name"].astype("string").str.strip().fillna("")
+        died["user_name"] = died["user_name"].astype("string").str.strip().fillna("")
     except Exception as e:
         logger.exception(e)
         pass
@@ -566,6 +637,7 @@ if ALogL.checkpoint(dict_hosp_i):
             gen_raw = pd.read_excel(gen_i)
         except:
             gen_raw = pd.read_csv(gen_i,encoding='windows-1252')
+        gen_raw["Gender"] = gen_raw["Gender"].astype("string").str.strip().fillna("")
         gen_merge = pd.merge(dict_gen,gen_raw,how="outer",left_on="user_name",right_on="Gender")
         gen_merge["Frequency"] = gen_merge["Frequency"].fillna(0).astype(int).astype(str)
         for idx in gen_merge.index:
@@ -630,10 +702,18 @@ if ALogL.checkpoint(dict_hosp_i):
             dis_raw = pd.read_excel(dis_i)
         except:
             dis_raw = pd.read_csv(dis_i,encoding='windows-1252')
+        
+        dis_raw["Discharge status"] = dis_raw["Discharge status"].astype("string").str.strip().fillna("")
+        try:
+            dis_raw["Discharge status"] = dis_raw["Discharge status"].str.replace(r'\.0$','',regex=True)
+        except:
+            pass
         dis_merge = pd.merge(died,dis_raw,how="outer",left_on="user_name",right_on="Discharge status")
         dis_merge["Frequency"] = dis_merge["Frequency"].fillna(0).astype(int).astype(str)
+        dis_merge["user_name"] = dis_merge["user_name"].fillna("")
+        dis_merge["Discharge status"] = dis_merge["Discharge status"].fillna("")
         for idx in dis_merge.index:
-            if dis_merge.loc[idx,"user_name"] != "" and dis_merge.loc[idx,"Discharge status"] == "":
+            if (dis_merge.loc[idx,"user_name"] != "") and (dis_merge.loc[idx,"Discharge status"] == ""):
                 dis_merge.at[idx,"Discharge status"] = dis_merge.loc[idx,"user_name"]
             else:
                 pass
@@ -712,18 +792,18 @@ try:
     if AL.checkxlsorcsv(AC.CONST_PATH_ROOT,"dictionary_for_wards"):
         try:
             df_dict_ward = AL.readxlsorcsv_noheader_forceencode(AC.CONST_PATH_ROOT,"dictionary_for_wards", [AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL,"WARDTYPE","REQ","EXPLAINATION"],"utf-8",logger)
-            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip() != ""]
+            df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip() != ""]
             df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS].str.startswith("ward_")]
             df_dict_ward = df_dict_ward[[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL]]
-            df_dict_ward[AC.CONST_DICTCOL_DATAVAL] =  df_dict_ward[AC.CONST_DICTCOL_DATAVAL].str.strip()
+            df_dict_ward[AC.CONST_DICTCOL_DATAVAL] =  df_dict_ward[AC.CONST_DICTCOL_DATAVAL].astype("string").str.strip().fillna("")
             df_dict_ward = df_dict_ward[df_dict_ward[AC.CONST_DICTCOL_AMASS]!= 'ward_hosp']
             if ALogL.checkpoint(file_ward):
                 try:#TS10 Micro
                     col_wardname = 'Data values of variable\nrecorded for \"ward\"\nin your microbiology data file'
                     col_wardname_hosp = 'Data values of variable\nrecorded for \"ward\"\nin your hospital data file'
                     df_ward = pd.read_excel(file_ward)  
-                    df_ward[AC.CONST_NEWVARNAME_WARDCODE] = df_ward[AC.CONST_NEWVARNAME_WARDCODE].fillna("")
-                    df_ward[AC.CONST_VARNAME_WARD] = df_ward[AC.CONST_VARNAME_WARD].fillna("")
+                    df_ward[AC.CONST_NEWVARNAME_WARDCODE] = df_ward[AC.CONST_NEWVARNAME_WARDCODE].astype("string").str.strip().fillna("")
+                    df_ward[AC.CONST_VARNAME_WARD] = df_ward[AC.CONST_VARNAME_WARD].astype("string").str.strip().fillna("")
                     df_ward = df_ward.merge(df_dict_ward, how="outer", left_on=[AC.CONST_NEWVARNAME_WARDCODE,AC.CONST_VARNAME_WARD], right_on=[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL],suffixes=("", "CO"))
                     df_ward[col_wardcode] = df_ward[AC.CONST_DICTCOL_AMASS].fillna(df_ward[AC.CONST_NEWVARNAME_WARDCODE]).fillna("")
                     df_ward[col_wardname] = df_ward[AC.CONST_DICTCOL_DATAVAL].fillna(df_ward[AC.CONST_VARNAME_WARD])
@@ -744,8 +824,8 @@ try:
                 try:#TS10 hosp
                     col_wardname = 'Data values of variable\nrecorded for \"ward\"\nin your hospital data file'
                     df_ward_hosp = pd.read_excel(file_ward_hosp)  
-                    df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP] = df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP].fillna("")
-                    df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP] = df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP].fillna("")
+                    df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP] = df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP].astype("string").str.strip().fillna("")
+                    df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP] = df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP].astype("string").str.strip().fillna("")
                     df_ward_hosp = df_ward_hosp.merge(df_dict_ward, how="outer", left_on=[AC.CONST_NEWVARNAME_WARDCODE_HOSP,AC.CONST_VARNAME_WARD_HOSP], right_on=[AC.CONST_DICTCOL_AMASS,AC.CONST_DICTCOL_DATAVAL],suffixes=("", "CO"))
                     df_ward_hosp[col_wardcode] = df_ward_hosp[AC.CONST_DICTCOL_AMASS].fillna(df_ward_hosp[AC.CONST_NEWVARNAME_WARDCODE_HOSP]).fillna("")
                     df_ward_hosp[col_wardname] = df_ward_hosp[AC.CONST_DICTCOL_DATAVAL].fillna(df_ward_hosp[AC.CONST_VARNAME_WARD_HOSP])
@@ -815,7 +895,8 @@ try:
             
         if ALogL.checkpoint(ast_i):
             try:
-                ts(c,ast_merge, [list(ast_merge.columns)], marked_ast, "Table S3", "List of variables recorded for \"antibiotics\" in your microbiology data file")
+                ts_withfootnote(c,ast_merge, [list(ast_merge.columns)], marked_ast, "Table S3", "List of variables recorded for \"antibiotics\" in your microbiology data file",
+                                "* For antibiotics used for the AST, the numbers in this column should be 0. This is because there should be no data that is not translated into S, I or R. This may occur when laboratories record some number into the same column (e.g. a mix of S I R and zone size) or when dictionary is still incomplete (e.g. recording “R” and “R - no zone” but having only “R” in the dictionary); NA=Not applicable. This could occur when the variable names for antibiotics are not used in AMASS.")
                 ast_merge.columns = [w.replace("\n"," ") for w in ast_merge.columns.tolist()]
                 ast_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS3_antibiotics.xlsx",encoding="UTF-8",index=False,header=True)
             except Exception as e:
@@ -861,6 +942,12 @@ try:
     if ALogL.checkpoint(file_dup):
         try:
             ts(c,df_dup, [list(df_dup.columns)], marked_dup, "Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS")
+        except Exception as e:
+            logger.exception(e)
+            pass
+    else:
+        try:
+            tsnodata(c,"Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS","There are no duplicate records in dictionary files that need your revision.")
         except Exception as e:
             logger.exception(e)
             pass

@@ -287,9 +287,10 @@ def fn_df_strstrips(df,list_col,logger) :
                 printlog("Warning : unable to trim data in column : " + curcol+ " : "+ str(e),False,logger)         
     return df
 def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
-    CDATEFORMAT_YMD =["%Y/%m/%d","%y/%m/%d"] 
-    CDATEFORMAT_DMY =["%d/%m/%Y","%d/%m/%y"]
-    CDATEFORMAT_MDY =["%m/%d/%Y","%m/%d/%y"]
+    printlog("Note : Converting data field: " + oldfield + " to " + cleanfield,False,logger)  
+    CDATEFORMAT_YMD =["%Y/%m/%d","%y/%m/%d","%Y%m%d"] 
+    CDATEFORMAT_DMY =["%d/%m/%Y","%d/%m/%y","%d%m%Y"]
+    CDATEFORMAT_MDY =["%m/%d/%Y","%m/%d/%y","%m%d%Y"]
     CDATEFORMAT_OTH =["%d/%b/%Y","%d/%b/%y","%d/%B/%Y","%d/%B/%y"]
     cleanfieldtemp = cleanfield + "_tmpamassf"
     cft_1 = cleanfield + "_d1"
@@ -300,7 +301,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
         except:
             isalreadydatecol = False
         if isalreadydatecol != True:
-            df[cleanfield] = df[oldfield].astype("string")
+            df[cleanfield] = df[oldfield].astype("string").str.replace(r'\.0$','',regex=True)
             df[cleanfield] = df[cleanfield].fillna("1900-01-01")
             df[cleanfield] = df[cleanfield].str.rsplit(" ", n = 1, expand = True)[0]
             iDMY = 0
@@ -319,26 +320,44 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
                 df = df.drop(columns=[cft_1])  
                 df = df.drop(columns=[cft_2]) 
                 #print('Count date format DMY:' + str(iDMY) + ', MDY:' + str(iMDY) + ', YMD:' + str(iYMD))
+                #printlog("Able to specify string date format of " + oldfield,False,logger)  
             except Exception as e:
-                printlog("Warning date format of " + oldfield + " may be not in convert format defined or in other format", False, logger)
+                printlog("Warning string date format of " + oldfield + " may be not in convert format defined or in other format", False, logger)
                 #logger.exception(e)
                 iOTH = 1
             df_format = pd.DataFrame({'fname':['YMD','DMY','MDY','Others'],'fcount':[iYMD,iDMY,iMDY,iOTH],'cformat':[CDATEFORMAT_YMD,CDATEFORMAT_DMY,CDATEFORMAT_MDY,CDATEFORMAT_OTH]}) 
             df_format = df_format.sort_values(by=['fcount'],ascending=False)
             df[cleanfieldtemp] = df[cleanfield]
             bfirstformat = True
+            try:
+                idf_rt = len(df)
+                iprevconverted = 0
+                printlog("Total rows : " + str(idf_rt),False,logger) 
+            except:
+                pass
             for index, row in df_format.iterrows():
                 #print('Convert data format: ' + row['fname'] )
                 for sf in row['cformat']:
+                    #print(sf)
                     if bfirstformat:
                         df[cleanfield] = pd.to_datetime(df[cleanfield], format=sf, errors="coerce")
+                        #print(df[cleanfield])
                     else:
                         if df[cleanfield].isnull().values.any() == False:
                             break
                         df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[cleanfieldtemp], format=sf, errors="coerce"))
+                        #print(df[cleanfield])
                     bfirstformat = False
+                    try:
+                        icurna = df[cleanfield].isnull().sum()
+                        icurconverted = (idf_rt - icurna) - iprevconverted
+                        printlog("try format : " + sf + " : converted : " + str(icurconverted),False,logger) 
+                        iprevconverted= idf_rt - icurna
+                    except:
+                        pass
             if df[cleanfield].isnull().values.any() == True:
                 df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[oldfield], errors="coerce"))
+                print("do pandas general date convertion")
             #df.loc[df[cleanfield]<datetime(1900, 1, 1),cleanfield] = np.nan
             df = df.drop(columns=[cleanfieldtemp])  
         else:

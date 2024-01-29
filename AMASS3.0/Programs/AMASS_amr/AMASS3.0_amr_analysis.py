@@ -285,6 +285,20 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             except Exception as e: # work on python 3.x
                 AL.printlog("Warning unable to manage ward info from micro and hospital admission data : " + sErrorat + " : " + str(e),False,logger)
                 logger.exception(e)
+            #Build 3027 move ageyear calculate after clean
+            df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = 0
+            try:
+                if df_dict[df_dict[AC.CONST_DICTCOL_AMASS]=='age_year_available'][AC.CONST_DICTCOL_DATAVAL].values[0] == "yes" :
+                #if dict_amasstodataval['age_year_available'].lower() == "yes":
+                    df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_VARNAME_AGEY].apply(pd.to_numeric,errors='coerce')
+                    AL.printlog("Warning : age from age year column ",False,logger)
+                elif df_dict[df_dict[AC.CONST_DICTCOL_AMASS]=='birthday_available'][AC.CONST_DICTCOL_DATAVAL].values[0] == "yes" :
+                #elif dict_amasstodataval['birthday_available'].lower() == "yes":
+                    df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] =  (df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOBIRTHDATE])/365.25
+                    AL.printlog("Warning : age from calculate birthday and admission date ",False,logger)
+                df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_NEWVARNAME_AGEYEAR].apply(np.floor,errors='coerce')
+            except:
+                AL.printlog("Warning : unable to calculate age year ",False,logger)
             bMergedsuccess = True
         except Exception as e: # work on python 3.x
             AL.printlog("Failed merge hosp and micro data on " + sErrorat + " : " + str(e),True,logger)
@@ -671,17 +685,28 @@ def mainloop() :
             df_hosp = clean_hn(df_hosp,AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_HN_HOSP,logger)
             # Convert field to category type to save mem space
             df_hosp = AL.fn_df_tocategory_datatype(df_hosp,[AC.CONST_VARNAME_DISCHARGESTATUS,AC.CONST_VARNAME_GENDER,AC.CONST_VARNAME_AGEGROUP,AC.CONST_VARNAME_COHO],logger)
-            df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = 0
-            if dict_amasstodataval['age_year_available'].lower() == "yes":
-                df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_VARNAME_AGEY].apply(pd.to_numeric,errors='coerce')
-            elif dict_amasstodataval['birthday_available'].lower() == "yes":
-                df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] =  (df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOBIRTHDATE])/365.25
-            df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_NEWVARNAME_AGEYEAR].apply(np.floor,errors='coerce')
+            #Build 3027 move ageyear to right place for calculate after clean
+            # df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = 0
+            # if dict_amasstodataval['age_year_available'].lower() == "yes":
+            #     df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_VARNAME_AGEY].apply(pd.to_numeric,errors='coerce')
+            # elif dict_amasstodataval['birthday_available'].lower() == "yes":
+            #     df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] =  (df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOBIRTHDATE])/365.25
+            # df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_NEWVARNAME_AGEYEAR].apply(np.floor,errors='coerce')
             df_hosp_formerge = df_hosp.copy(deep=True)
             df_hosp[AC.CONST_NEWVARNAME_DISOUTCOME_HOSP] = df_hosp[AC.CONST_VARNAME_DISCHARGESTATUS].astype("string").map(dict_died_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_ADMISSIONDATE, AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_DAYTOADMDATE, AC.CONST_NEWVARNAME_ADMYEAR, AC.CONST_NEWVARNAME_ADMMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_DISCHARGEDATE, AC.CONST_NEWVARNAME_CLEANDISDATE, AC.CONST_NEWVARNAME_DAYTODISDATE, AC.CONST_NEWVARNAME_DISYEAR, AC.CONST_NEWVARNAME_DISMONTHNAME, AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
             df_hosp = fn_clean_date_andcalday_year_month(df_hosp, AC.CONST_VARNAME_BIRTHDAY, AC.CONST_NEWVARNAME_CLEANBIRTHDATE, AC.CONST_NEWVARNAME_DAYTOBIRTHDATE, "","", AC.CONST_CDATEFORMAT, AC.CONST_ORIGIN_DATE,logger)
+            #Build 3027 move ageyear calculate after clean
+            df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = 0
+            try:
+                if dict_amasstodataval['age_year_available'].lower() == "yes":
+                    df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_VARNAME_AGEY].apply(pd.to_numeric,errors='coerce')
+                elif dict_amasstodataval['birthday_available'].lower() == "yes":
+                    df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] =  (df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE] - df_hosp[AC.CONST_NEWVARNAME_DAYTOBIRTHDATE])/365.25
+                df_hosp[AC.CONST_NEWVARNAME_AGEYEAR] = df_hosp[AC.CONST_NEWVARNAME_AGEYEAR].apply(np.floor,errors='coerce')
+            except:
+                AL.printlog("Warning : unable to calculate age year ",False,logger)
             #V3.0.3 Calculate max date include
             df_hosp[AC.CONST_NEWVARNAME_DAYTOSTARTDATE] = df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE]
             df_hosp[AC.CONST_NEWVARNAME_DAYTOENDDATE] = df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE]
@@ -701,19 +726,46 @@ def mainloop() :
         # Start Org Cat vs AST of interest -------------------------------------------------------------------------------------------------------
         # Suggest to be in a configuration files hide from user is better in term of coding
         df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3] = df_micro[AC.CONST_NEWVARNAME_ORG3]
-        df_micro.loc[df_micro[AC.CONST_NEWVARNAME_ORG3].str.strip() == "","Temp" + AC.CONST_NEWVARNAME_ORG3] = AC.CONST_ORG_NOGROWTH
+        df_micro.loc[df_micro[AC.CONST_NEWVARNAME_ORG3].astype("string").str.strip() == "","Temp" + AC.CONST_NEWVARNAME_ORG3] = AC.CONST_ORG_NOGROWTH
         df_micro[AC.CONST_NEWVARNAME_ORGCAT] = df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3].map({k : vs[0] for k, vs in dict_orgcatwithatb.items()}).fillna(0)
         df_micro.drop("Temp" + AC.CONST_NEWVARNAME_ORG3, axis=1, inplace=True)              
+        #Build 3027 add log for count mapped S\I\R to compare with logfile_ast for unmap values count
+        temp_ris_mapped = pd.DataFrame(columns =["Antibiotics","frequency_raw"])         
         # Gen RIS columns
         for satb in list_antibiotic:
             if satb in df_micro.columns:
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb]  = ""
-                for s_toreplace in dict_ris:
-                    df_micro.loc[df_micro[satb].str.contains(s_toreplace), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
-                df_micro[satb] = df_micro[satb].astype("category")
+                try:
+                    for s_toreplace in dict_ris:
+                        df_micro.loc[df_micro[satb].astype("string").str.contains(s_toreplace), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
+                    df_micro[satb] = df_micro[satb].astype("category")
+                except Exception as e:
+                    AL.printlog("Waring: Unable to set " + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + " columns base on " + satb + "column, this may because original columns is duplicate during map with dictionary. " + str(e),False,logger)  
+                    try:
+                        if AC.CONST_ATBCOLDUP_ACTIONMODE == 1:
+                            if isinstance(df_micro[satb], pd.DataFrame):
+                                AL.printlog("Warning: confirm that columns is duplicated. Change the way to set data for "   + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + "column. ",False,logger) 
+                                for s_toreplace in dict_ris:
+                                    for iii in range(len(df_micro[satb].columns)):
+                                        temp_col = df_micro[satb].iloc[:,iii]
+                                        df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
+
+                    except Exception as e:
+                        AL.printlog("Warning : Still unable to set data for "   + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + "column. " + str(e),False,logger)
+                        logger.exception(e)
+                try:
+                    n_row = len(df_micro[(df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].isnull() == False) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] != "")])
+                    onew_row = {"Antibiotics":satb,"frequency_raw":str(n_row)}     
+                    temp_ris_mapped = pd.concat([temp_ris_mapped,pd.DataFrame([onew_row])], ignore_index = True)
+                except Exception as e:
+                    AL.printlog("Warning : unable to count value successfully map S\I\R for "   + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + "column. " + str(e),False,logger)
+                    logger.exception(e)
             else:
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = "" 
             df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].astype("category")
+        if not AL.fn_savexlsx(temp_ris_mapped, AC.CONST_PATH_RESULT + "logfile_ris_count.xlsx", logger):
+            AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "logfile_ris_count.xlsx",False,logger)  
+        del temp_ris_mapped
         # Gen AST columns
         for satb in list_antibiotic:
             df_micro[AC.CONST_NEWVARNAME_PREFIX_AST + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].map(dict_ast).fillna("NA") 
@@ -939,7 +991,8 @@ def mainloop() :
     # Summary data from hospmicro_blood and hospmicro_bsi 
     # Separate CO/HO dataframe
     try:
-        temp_df = df_hospmicro_blood.filter([AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_COHO_FINAL], axis=1)
+        #temp_df = df_hospmicro_blood.filter([AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_COHO_FINAL], axis=1)
+        temp_df = df_hospmicro_blood[[AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_COHO_FINAL]].copy(deep=True)
         temp_df = fn_deduplicatedata(temp_df,[AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE, AC.CONST_NEWVARNAME_CLEANSPECDATE],[True,True,True],"last",[AC.CONST_NEWVARNAME_HN,AC.CONST_NEWVARNAME_CLEANADMDATE],"first")
         temp_df2 = temp_df.loc[temp_df[AC.CONST_NEWVARNAME_COHO_FINAL] == 0]
         temp_df = temp_df.loc[temp_df[AC.CONST_NEWVARNAME_COHO_FINAL] == 1]
@@ -947,6 +1000,10 @@ def mainloop() :
         dict_progvar["n_HO_blood_patients"] = len(temp_df[AC.CONST_NEWVARNAME_HN].unique())
         temp_df = temp_df.merge(temp_df2, how="inner", left_on=AC.CONST_NEWVARNAME_HN, right_on=AC.CONST_NEWVARNAME_HN,suffixes=("", "CO"))
         dict_progvar["n_2adm_firstbothCOHO_patients"] = len(temp_df[AC.CONST_NEWVARNAME_HN].unique())
+    except Exception as e: # work on python 3.x
+        AL.printlog("Fail summary for section 3, number of CO, HO patients: " +  str(e),True,logger)     
+        logger.exception(e)
+    try:
         df_COHO_isoRep_blood = pd.DataFrame(columns=["Organism","Infection_origin","Antibiotic","Susceptible(N)","Non-susceptible(N)","Total(N)","Non-susceptible(%)","lower95CI(%)*","upper95CI(%)*",
                                                      "Resistant(N)","Intermediate(N)",
                                                      "Resistant(%)","Resistant-lower95CI(%)*","Resistant-upper95CI(%)*",
@@ -1148,9 +1205,9 @@ def mainloop() :
         df_dict_annex_a.loc[df_dict_annex_a[AC.CONST_DICTCOL_AMASS] == "t_paratyphi",AC.CONST_DICTCOL_AMASS] = "organism_salmonella_paratyphi"
         dict_datavaltoamass_annex_a = pd.Series(df_dict_annex_a[AC.CONST_DICTCOL_AMASS].values,index=df_dict_annex_a[AC.CONST_DICTCOL_DATAVAL].str.strip()).to_dict()
         df_micro_annex_a = df_micro.copy(deep=True)
-        df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_micro_annex_a[AC.CONST_VARNAME_SPECTYPE].str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
+        df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_micro_annex_a[AC.CONST_VARNAME_SPECTYPE].astype("string").str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
         df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA] = df_micro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA].str.strip().map(dict_annex_a_spectype).fillna("Others")
-        df_micro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA] =  df_micro_annex_a[AC.CONST_VARNAME_ORG].str.strip().map(dict_datavaltoamass_annex_a).fillna(AC.CONST_ANNEXA_NON_ORG)
+        df_micro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA] =  df_micro_annex_a[AC.CONST_VARNAME_ORG].astype("string").str.strip().map(dict_datavaltoamass_annex_a).fillna(AC.CONST_ANNEXA_NON_ORG)
         df_micro_annex_a[AC.CONST_NEWVARNAME_ORGCAT_ANNEXA] =  df_micro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA].map({k : vs[0] for k, vs in dict_annex_a_listorg.items()}).fillna(0)
         df_micro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA] =  df_micro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA].map({k : vs[2] for k, vs in dict_annex_a_listorg.items()}).fillna("")
         df_micro_annex_a = df_micro_annex_a.loc[df_micro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA]!=""]
@@ -1205,9 +1262,9 @@ def mainloop() :
         sub_printprocmem("finish analyse annex A1 data",logger)
         # Start Annex A2 summary table ----------------------------------------------------------------------------------------------------------
         df_hospmicro_annex_a = df_hospmicro
-        df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_VARNAME_SPECTYPE].str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
+        df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_VARNAME_SPECTYPE].astype("string").str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
         df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA] = df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA].str.strip().map(dict_annex_a_spectype).fillna("Others")
-        df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_VARNAME_ORG].str.strip().map(dict_datavaltoamass_annex_a).fillna(AC.CONST_ANNEXA_NON_ORG)
+        df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_VARNAME_ORG].astype("string").str.strip().map(dict_datavaltoamass_annex_a).fillna(AC.CONST_ANNEXA_NON_ORG)
         df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORGCAT_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA].map({k : vs[0] for k, vs in dict_annex_a_listorg.items()}).fillna(0)
         df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORG3_ANNEXA].map({k : vs[2] for k, vs in dict_annex_a_listorg.items()}).fillna("")
         df_hospmicro_annex_a = df_hospmicro_annex_a.loc[df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA]!=""]
