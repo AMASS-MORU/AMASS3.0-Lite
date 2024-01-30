@@ -640,8 +640,10 @@ if ALogL.checkpoint(dict_hosp_i):
         gen_raw["Gender"] = gen_raw["Gender"].astype("string").str.strip().fillna("")
         gen_merge = pd.merge(dict_gen,gen_raw,how="outer",left_on="user_name",right_on="Gender")
         gen_merge["Frequency"] = gen_merge["Frequency"].fillna(0).astype(int).astype(str)
+        gen_merge["user_name"] = gen_merge["user_name"].fillna("")
+        gen_merge["Gender"] = gen_merge["Gender"].fillna("")
         for idx in gen_merge.index:
-            if gen_merge.loc[idx,"user_name"] != "" and gen_merge.loc[idx,"Gender"] == "":
+            if (gen_merge.loc[idx,"user_name"] != "") and (gen_merge.loc[idx,"Gender"] == ""):
                 gen_merge.at[idx,"Gender"] = gen_merge.loc[idx,"user_name"]
             else:
                 pass
@@ -738,7 +740,7 @@ if (ALogL.checkpoint(var_mi_i) or ALogL.checkpoint(var_mi_icsv)): #TS7
             var_mi_raw = pd.read_excel(var_mi_i).rename(columns={"variables_micro":"Variable names used in your microbiology data file"})
         except:
             #var_mi_i = path+"Variables/variables_micro.csv"
-            var_mi_raw = pd.read_csv(var_mi_icsv,encoding='windows-1252').rename(columns={"variables_micro":"Variable names used in your microbiology data file"})
+            var_mi_raw = pd.read_csv(var_mi_icsv,encoding='utf-8').rename(columns={"variables_micro":"Variable names used in your microbiology data file"})
         var_mi_col = [list(var_mi_raw.columns)]
         marked_var_mi = ALogL.marked_idx(var_mi_raw)
     except Exception as e:
@@ -751,7 +753,7 @@ if (ALogL.checkpoint(var_ho_i) or ALogL.checkpoint(var_ho_icsv)): #TS8
             var_ho_raw = pd.read_excel(var_ho_i).rename(columns={"variables_hosp":"Variable names used in your hospital admission data file"})
         except:
             #var_ho_i = path+"Variables/variables_hosp.csv"
-            var_ho_raw = pd.read_csv(var_ho_icsv,encoding='windows-1252').rename(columns={"variables_hosp":"Variable names used in your hospital admission data file"})
+            var_ho_raw = pd.read_csv(var_ho_icsv,encoding='utf-8').rename(columns={"variables_hosp":"Variable names used in your hospital admission data file"})
         var_ho_col = [list(var_ho_raw.columns)]
         marked_var_ho = ALogL.marked_idx(var_ho_raw)
     except Exception as e:

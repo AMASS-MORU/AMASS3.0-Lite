@@ -538,11 +538,21 @@ def mainloop() :
         list_micro_val = list(df_micro.columns)
         df_micro_val = pd.DataFrame(list_micro_val)
         df_micro_val.columns = ['variables_micro']
-        df_micro_val.to_csv(path_variable + "variables_micro.csv",index=False)
+        if not AL.fn_savexlsx(df_micro_val, path_variable + "variables_micro.xlsx", logger):
+            AL.printlog("Warning: Cannot save xlsx file : " + path_variable + "variables_micro.xlsx",False,logger)
+            try:
+                df_micro_val.to_csv(path_variable + "variables_micro.csv",encoding='utf-8',index=False)
+            except:
+                AL.printlog("Warning: Cannot save csv file : " + path_variable + "variables_micro.csv",False,logger)
         if bishosp_ava:
             df_hosp_val = pd.DataFrame(list(df_hosp.columns))
             df_hosp_val.columns = ['variables_hosp']
-            df_hosp_val.to_csv(path_variable + "variables_hosp.csv",index=False)
+            if not AL.fn_savexlsx(df_micro_val, path_variable + "variables_hosp.xlsx", logger):
+                AL.printlog("Warning: Cannot save xlsx file : " + path_variable + "variables_hosp.xlsx",False,logger)
+                try:
+                    df_hosp_val.to_csv(path_variable + "variables_hosp.csv",encoding='utf-8',index=False)
+                except:
+                    AL.printlog("Warning: Cannot save csv file : " + path_variable + "variables_hosp.csv",False,logger)
         # --------------------------------------------------------------------------------------------------------------------------------------
         
         #Data validation log for df_dict duplicated value
