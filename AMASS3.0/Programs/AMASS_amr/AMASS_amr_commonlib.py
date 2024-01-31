@@ -293,8 +293,10 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
     CDATEFORMAT_MDY =["%m/%d/%Y","%m/%d/%y","%m%d%Y"]
     CDATEFORMAT_OTH =["%d/%b/%Y","%d/%b/%y","%d/%B/%Y","%d/%B/%y"]
     cleanfieldtemp = cleanfield + "_tmpamassf"
+    cleanfieldtemp2 = cleanfield + "_tmpamassf2"
     cft_1 = cleanfield + "_d1"
     cft_2 = cleanfield + "_d2"
+    cft_3 = cleanfield + "_d3"
     if oldfield != cleanfield:
         try:
             isalreadydatecol = pd.api.types.is_datetime64_any_dtype(df[oldfield])
@@ -329,6 +331,7 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
             df_format = df_format.sort_values(by=['fcount'],ascending=False)
             df[cleanfieldtemp] = df[cleanfield]
             bfirstformat = True
+            idf_rt = 0
             try:
                 idf_rt = len(df)
                 iprevconverted = 0
@@ -355,12 +358,40 @@ def fn_clean_date(df,oldfield,cleanfield,dformat,logger):
                         iprevconverted= idf_rt - icurna
                     except:
                         pass
+            #Build 3027 - add try convert format of yyyyMMddhhnnss or ddMMyyyyhhnnss or MMddyyyy
+            if df[cleanfield].isnull().values.any() == True:
+                printlog("Trim data string for first 8 charector and try format : yyyyMMdd*, ddMMyyyy*, MMddyyyy* ",False,logger) 
+                try:
+                    df[cleanfieldtemp2] = df[oldfield].astype("string").str.replace(r'\.0$','',regex=True).str[:8]
+                    df[cft_1]  = pd.to_numeric(df[cleanfieldtemp2].str[:2],downcast='signed',errors='coerce').fillna(0)
+                    df[cft_2]  = pd.to_numeric(df[cleanfieldtemp2].str[2:4],downcast='signed',errors='coerce').fillna(0)
+                    df[cft_3]  = pd.to_numeric(df[cleanfieldtemp2].str[:4],downcast='signed',errors='coerce').fillna(0)
+                    iDMY = len(df[(df[cft_1]>12) & (df[cft_1]<32) & ~((df[cft_3]>2000) & (df[cft_3]<2100))])                   
+                    iYMD = len(df[(df[cft_3]>2000) & (df[cft_3]<2100)])   
+                    iMDY = len(df[(df[cft_2]>12) & (df[cft_2]<32) & ~((df[cft_3]>2000) & (df[cft_3]<2100))]) 
+                    df_format = pd.DataFrame({'fname':['YMD','DMY','MDY'],'fcount':[iYMD,iDMY,iMDY],'cformat':["%Y%m%d","%d%m%Y","%m%d%Y"]}) 
+                    df_format = df_format.sort_values(by=['fcount'],ascending=False)
+                    for index, row in df_format.iterrows():
+                        iprevna = 0
+                        try:
+                            iprevna = df[cleanfield].isnull().sum()
+                            df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[cleanfieldtemp2], format=row['cformat'], errors="coerce"))
+                            icurconverted = iprevna - df[cleanfield].isnull().sum()
+                            printlog("try format : " + row['cformat'] + " : converted : " + str(icurconverted),False,logger) 
+                        except:
+                            printlog("warning : error try format : " + row['cformat'],False,logger) 
+                    df = df.drop(columns=[cft_1])  
+                    df = df.drop(columns=[cft_2]) 
+                    df = df.drop(columns=[cft_3]) 
+                    df = df.drop(columns=[cleanfieldtemp2]) 
+                except:
+                    printlog("warning : error try format : yyyyMMdd*, ddMMyyyy*, MMddyyyy* ",False,logger) 
             if df[cleanfield].isnull().values.any() == True:
                 df[cleanfield] = df[cleanfield].fillna(pd.to_datetime(df[oldfield], errors="coerce"))
-                print("do pandas general date convertion")
+                printlog("Try pandas general date convertion",False,logger) 
             #df.loc[df[cleanfield]<datetime(1900, 1, 1),cleanfield] = np.nan
             df = df.drop(columns=[cleanfieldtemp])  
         else:
             df[cleanfield] = df[oldfield]
-            print("Note: " + oldfield + " is already date time data type")
+            printlog("Note: " + oldfield + " is already date time data type",False,logger) 
     return df
