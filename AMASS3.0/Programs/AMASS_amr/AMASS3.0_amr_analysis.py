@@ -441,7 +441,7 @@ def mainloop() :
     df_micro_ward = pd.DataFrame()
     ## Init log 
     logger = AL.initlogger('AMR anlaysis',"./log_amr_analysis.txt")
-    AL.printlog("AMASS version : " + AC.CONST_SOFTWARE_VERSION,False,logger)
+    AL.printlog("AMASS version : " + AC.CONST_SOFTWARE_VERSION_FORLOG,False,logger)
     AL.printlog("Pandas library version : " + str(pd.__version__),False,logger)
     AL.printlog("Start AMR analysis: " + str(datetime.now()),False,logger)
     ## Date format
@@ -1724,7 +1724,22 @@ def mainloop() :
             pass
         AL.printlog("Complete export data for report section 1-6, Annex A: " + str(datetime.now()),False,logger)
         #Data logger
-        
+        #Build 3027
+        swrongspecdate = "NA"
+        swrongadmdate = "NA"
+        swrongdisdate = "NA"
+        try:
+            AC.CONST_ORIGIN_DATE 
+            d2000 = pd.to_datetime("2000-01-01")
+            d2100 = pd.to_datetime("2100-12-31")
+            day2000 = (d2000- AC.CONST_ORIGIN_DATE ).days
+            day2100 = (d2100- AC.CONST_ORIGIN_DATE ).days
+            swrongspecdate = str(len(df_micro[(df_micro[AC.CONST_NEWVARNAME_DAYTOSPECDATE].notnull()) & ((df_micro[AC.CONST_NEWVARNAME_DAYTOSPECDATE].fillna(0) < day2000) | (df_micro[AC.CONST_NEWVARNAME_DAYTOSPECDATE].fillna(0) > day2100))]))
+            swrongadmdate = str(len(df_hosp[(df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE].notnull()) & ((df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE].fillna(0) < day2000) | (df_hosp[AC.CONST_NEWVARNAME_DAYTOADMDATE].fillna(0) > day2100))]))
+            swrongdisdate = str(len(df_hosp[(df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE].notnull()) & ((df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE].fillna(0) < day2000) | (df_hosp[AC.CONST_NEWVARNAME_DAYTODISDATE].fillna(0) > day2100))]))
+        except Exception as e:
+            AL.printlog("Warning : Count wrong date/wrong date format error : " + str(e),True,logger)
+            logger.exception(e)
         temp_list = [['microbiology_data','Number_of_records', len(df_micro)], 
                      ['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
                      ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]], 
@@ -1750,7 +1765,10 @@ def mainloop() :
                      ['hospital_admission_data','Number_of_HN_with_leadingzero',str(iHN_leadzero_count_hosp)],
                      ['microbiology_data','Number_of_missing_or_unknown_specimen_date',str(len(df_micro[df_micro[AC.CONST_NEWVARNAME_CLEANSPECDATE].isnull()]))],
                      ['hospital_admission_data','Number_of_missing_or_unknown_admission_date',str(len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_CLEANADMDATE].isnull()])) if bishosp_ava else "NA"],
-                     ['hospital_admission_data','Number_of_missing_or_unknown_discharge_date',str(len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_CLEANDISDATE].isnull()])) if bishosp_ava else "NA"]
+                     ['hospital_admission_data','Number_of_missing_or_unknown_discharge_date',str(len(df_hosp[df_hosp[AC.CONST_NEWVARNAME_CLEANDISDATE].isnull()])) if bishosp_ava else "NA"],
+                     ['hospital_admission_data','Number_of_wrong_admission_date',swrongadmdate if bishosp_ava else "NA"],
+                     ['hospital_admission_data','Number_of_wrong_discharge_date',swrongdisdate if bishosp_ava else "NA"],
+                     ['microbiology_data','Number_of_wrong_specimen_date',swrongspecdate]
                      ]
         temp_df = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"]) 
         if not AL.fn_savecsv(temp_df, AC.CONST_PATH_RESULT + "logfile_results.csv",2, logger):
@@ -1811,7 +1829,7 @@ def mainloop() :
                     bisrunannexc = False
                 if bisrunannexc == True:
                     ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
-                    ANNEX_C.call_SaTScan(prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
+                    ANNEX_C.call_SaTScan(logger,prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
                     ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
                     sub_printprocmem("finish Analysis ANNEX C",logger)
                 else:

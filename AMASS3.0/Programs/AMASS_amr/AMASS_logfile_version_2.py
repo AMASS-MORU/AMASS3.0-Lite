@@ -223,10 +223,11 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
             pass
         log_1_6 = indent2("Missing data.")
         log_1_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_or_unknown_specimen_date","Parameters"))) + " records are missing or unknown format of collection date.")
+        log_1_7_1 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_wrong_specimen_date","Parameters"))) + " records are wrong date or wrong date format of collection date.")
         log_1_8 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_specimen_type","Parameters"))) + " records are missing specimen type.")
         log_1_9 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"microbiology_data","Type_of_data_file","Number_of_missing_culture_result","Parameters"))) + " records are missing culture result.")
         #log_1 = [log_1_1,log_1_2,log_1_3,log_1_4,log_1_5,log_1_6,log_1_7,log_1_8,log_1_9]
-        log_1 = [log_1_1,log_1_2,log_1_3] + list_log_1_4 + list_log_1_5 + [list_log_1_5_1] + [log_1_6,log_1_7,log_1_8,log_1_9]
+        log_1 = [log_1_1,log_1_2,log_1_3] + list_log_1_4 + list_log_1_5 + [list_log_1_5_1] + [log_1_6,log_1_7,log_1_7_1,log_1_8,log_1_9]
         #Hosp data , merged data
         log_2 = ['<br/>No hospital_admission_data file found in the same folder as the application file. Thus, no hsopital admission data set information.']
         log_3 = ['<br/>No hospital_admission_data file found in the same folder as the application file. Thus, no merged data set information.']
@@ -255,11 +256,13 @@ def ts0(c,logger,over_raw,fspcdate,fadmdate,fdisdate,fmhn,fhhn,bhosp_avi):
             log_2_6 = indent2("Missing data.")
             log_2_7 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_or_unknown_admission_date","Parameters"))) + " records are missing or unknown format of admission date.")
             log_2_8 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_or_unknown_discharge_date","Parameters"))) + " records are missing or unknown format of discharge date.")
+            log_2_7_1 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_wrong_admission_date","Parameters"))) + " records are wrong date or wrong date format of admission date.")
+            log_2_8_1 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_wrong_discharge_date","Parameters"))) + " records are wrong date or wrong date format of discharge date")
             log_2_9 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_outcome_result","Parameters"))) + " records are missing outcome.")
             log_2_10 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_age","Parameters"))) + " records are missing age.")
             log_2_11 = indent3(boldstr(ALogL.assign_na_toinfo(ALogL.retrieve_results(over_raw,"hospital_admission_data","Type_of_data_file","Number_of_missing_gender","Parameters"))) + " records are missing gender.")
             #log_2 = [log_2_1,log_2_2 ,log_2_3,log_2_4,log_2_5,log_2_6,log_2_7,log_2_8,log_2_9,log_2_10,log_2_11]
-            log_2 = [log_2_1,log_2_2] + list_log_2_3 + list_log_2_4 + list_log_2_5 + [list_log_2_5_1] + [log_2_6,log_2_7,log_2_8,log_2_9,log_2_10,log_2_11]
+            log_2 = [log_2_1,log_2_2] + list_log_2_3 + list_log_2_4 + list_log_2_5 + [list_log_2_5_1] + [log_2_6,log_2_7,log_2_8,log_2_7_1,log_2_8_1,log_2_9,log_2_10,log_2_11]
             #Merge data
             log_3_1 = "<br/>The merged data set between microbiology data and hospital admission data had:"
             log_3_2 = indent2("Microbiology data records unable to merged with hospital admission data records.")
@@ -434,7 +437,8 @@ except:
                              "merged_data","merged_data","merged_data","merged_data","merged_data","merged_data"],index=range(15), columns=["Type_of_data_file"])
     over_raw["Parameters"] =["Number_of_missing_specimen_date","Number_of_missing_specimen_type","Number_of_missing_culture_result","format_of_specimen_date",
                              "Number_of_missing_admission_date","Number_of_missing_discharge_type","Number_of_missing_outcome_result","format_of_admission_date","format_of_discharge_date", 
-                             "Number_of_missing_specimen_date","Number_of_missing_admission_date","Number_of_missing_discharge_type","Number_of_missing_age","Number_of_missing_gender","Number_of_missing_infection_origin_data"]
+                             "Number_of_missing_specimen_date","Number_of_missing_admission_date","Number_of_missing_discharge_type","Number_of_missing_age","Number_of_missing_gender","Number_of_missing_infection_origin_data",
+                             "Number_of_wrong_admission_date","Number_of_wrong_discharge_date","Number_of_wrong_specimen_date"]
     over_raw["Values"] = "NA"
 
 if ALogL.checkpoint(dict_i):
