@@ -194,7 +194,7 @@ def cover(c,over_raw, today=date.today().strftime("%d %b %Y")):
     c.setFillColor(grey)
     c.rect(0,420,800,150, fill=True, stroke=False)
     ALogL.report_title(c,'Data verification log file',0.7*inch, 485,'white',font_size=28)
-    ALogL.report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
+    ALogL.report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
     ALogL.report_context(c,cover_2, 0.7*inch, 0.8*inch, 460, 120, font_size=11)
     c.showPage()
 

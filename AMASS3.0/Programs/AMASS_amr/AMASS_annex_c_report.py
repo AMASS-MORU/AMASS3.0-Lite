@@ -523,7 +523,7 @@ def cover(c,logger,strgendate):
     c.rect(0,420,800,150, fill=True, stroke=False)
     REP_AL.report_title(c,'Supplementary report Annex C:',0.7*inch, 515,'white',font_size=28)
     REP_AL.report_title(c,'Cluster signals identify by AMASS-SaTScan',0.7*inch, 455,'white',font_size=20)
-    REP_AL.report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
+    REP_AL.report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
     REP_AL.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
     c.showPage()
 def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):

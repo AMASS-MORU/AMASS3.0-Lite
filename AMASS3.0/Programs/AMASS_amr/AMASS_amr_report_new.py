@@ -167,7 +167,7 @@ def cover(c,logger,today=date.today().strftime("%d %b %Y")):
     c.rect(0,420,800,150, fill=True, stroke=False)
     ARC.report_title(c,'Antimicrobial Resistance (AMR)',0.7*inch, 515,'white',font_size=28)
     ARC.report_title(c,'Surveillance report',0.7*inch, 455,'white',font_size=28)
-    ARC.report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
+    ARC.report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
     ARC.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 140, font_size=11)
     c.showPage()
 def generatedby(c,logger):

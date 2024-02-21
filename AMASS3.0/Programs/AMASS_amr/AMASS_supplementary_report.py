@@ -528,7 +528,7 @@ def generate_supplementary_report(df_dict_micro,logger,bisusingmappeddata):
         c.rect(0,420,800,150, fill=True, stroke=False)
         report_title(c,'Supplementary:',0.7*inch, 515,'white',font_size=28)
         report_title(c,'Data indicators report',0.7*inch, 455,'white',font_size=28)
-        report_context(c,cover_1, 0.7*inch, 3.0*inch, 460, 180, font_size=18,line_space=26)
+        report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
         report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
         c.showPage()
     
