@@ -14,10 +14,18 @@
 #Editing assign_org_popcon() from "; include" to "; including" (19/10/22)
 
 # Created on 20th April 2022
+import psutil,os
 import pandas as pd #for creating and manipulating dataframe
 from pathlib import Path #for retrieving input's path
 import AMASS_amr_const as AC
+import AMASS_amr_commonlib as AL
 
+def sub_printprocmem(sstate,logger) :
+    try:
+        process = psutil.Process(os.getpid())
+        AL.printlog("Memory usage at state " +sstate + " is " + str(process.memory_info().rss) + " bytes.",False,logger) 
+    except:
+        AL.printlog("Error get process memory usage at " + sstate,True,logger)
 
 #Checking process is either able for running or not
 #df_config: Dataframe of config file
@@ -439,12 +447,14 @@ def export_records_withwarning_wide(df,
                             "warning_indicator_3b":"3b"}).sort_values(by=[col_hn, "1", "2", "3a", "3b"]).rename(columns=dict_datai)
     #Change in V3.0 to use the date convert with common lib, fn_cleandate function 
     df_withstatus = format_date_forexportation(df = df,col_date = col_spcdate)
-    df_withstatus.to_excel(str_filename_withstatus,index=False)
+    # df_withstatus.to_excel(str_filename_withstatus,index=False)
+    df_withstatus.to_csv(str_filename_withstatus,index=False)
     df_withoutstatus = df_withstatus.drop(columns=["mapped_spctype","mapped_sci","mapped_gen","status_indicator_1","status_indicator_2","status_indicator_3a","status_indicator_3b","car_3gc","flu_3gc"])
     df_withoutstatus["Notifiable antibiotic-pathogen combination"] = df_withoutstatus["Notifiable antibiotic-pathogen combination"].replace(regex=["markednewline\("],value=" (")
     df_withoutstatus["Potential error in either identification or AST result: the species identified usually exhibits intrinsic resistant to the antibiotic but AST result suggested susceptible"] = df_withoutstatus["Potential error in either identification or AST result: the species identified usually exhibits intrinsic resistant to the antibiotic but AST result suggested susceptible"].replace(regex=["markednewline\("],value=" (")
     df_withoutstatus["Discordant AST results"] = df_withoutstatus["Discordant AST results"].replace(regex=["markednewline\("],value=" (")
-    df_withoutstatus.to_excel(str_filename_withoutstatus,index=False)
+    # df_withoutstatus.to_excel(str_filename_withoutstatus,index=False)
+    df_withoutstatus.to_csv(str_filename_withoutstatus,index=False)
 
 #Exporting records with warning (long format)
 #df: dataframe of blood records with warning
@@ -511,7 +521,8 @@ def export_records_withwarning_long(df,
                                                         "priority_indicator_3b",
                                                         "combine"])
     micro_onlywarning_3= format_date_forexportation(df = micro_onlywarning_3,col_date = col_spcdate)
-    micro_onlywarning_3.to_excel(str_filename_withstatus,index=False)
+    # micro_onlywarning_3.to_excel(str_filename_withstatus,index=False)
+    micro_onlywarning_3.to_csv(str_filename_withstatus,index=False)
     micro_onlywarning_2 = micro_onlywarning_2.rename(columns={"warning_indicator_1":"1",
                                                             "warning_indicator_2":"2",
                                                             "warning_indicator_3a":"3a",
@@ -525,7 +536,8 @@ def export_records_withwarning_long(df,
     micro_onlywarning_2["Potential error in either identification or AST result: the species identified usually exhibits intrinsic resistant to the antibiotic but AST result suggested susceptible"] = micro_onlywarning_2["Potential error in either identification or AST result: the species identified usually exhibits intrinsic resistant to the antibiotic but AST result suggested susceptible"].replace(regex=["markednewline\("],value=" (").replace(regex=["markedstartitalic","markedenditalic"],value="")
     micro_onlywarning_2["Discordant AST results"] = micro_onlywarning_2["Discordant AST results"].replace(regex=["markednewline\("],value=" (").replace(regex=["markedstartitalic","markedenditalic"],value="")
     micro_onlywarning_2 = format_date_forexportation(df = micro_onlywarning_2,col_date = col_spcdate)
-    micro_onlywarning_2.to_excel(str_filename_withoutstatus,index=False)
+    # micro_onlywarning_2.to_excel(str_filename_withoutstatus,index=False)
+    micro_onlywarning_2.to_csv(str_filename_withoutstatus,index=False)
 
 #Exporting records of annex A
 #return value: df of annexA
@@ -698,7 +710,8 @@ def map_ast_result(df_micro,df_drug,d_ast):
                     num += 1
                 else:
                     pass
-                df_micro[mapped_col+"_"+str(num)] = df_micro[df_drug.loc[idx,"user_drug"]].map(d_ast).fillna("") #mapping ast result
+                df_micro[mapped_col+"_"+str(num)] = df_micro[df_drug.loc[idx,"user_drug"]].map(d_ast).fillna("").astype("category") #mapping ast result
+                # df_micro[mapped_col+"_"+str(num)] = df_micro[df_drug.loc[idx,"user_drug"]].map(d_ast).fillna("") #mapping ast result
                 d_colname[mapped_col+"_"+str(num)] = mapped_col
     df_micro = df_micro.rename(columns=d_colname) #renaming col_name
     return df_micro

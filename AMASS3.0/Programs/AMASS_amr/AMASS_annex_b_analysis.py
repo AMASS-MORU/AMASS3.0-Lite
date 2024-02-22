@@ -7,7 +7,7 @@
 # Created on 20th April 2022
 import logging #for creating logfile
 import pandas as pd #for creating and manipulating dataframe
-import gc #for returning memory to system
+import psutil,gc #for returning memory to system
 import datetime #for setting date-time format
 #from AMASS_amr_commonlib_annex_b import * #for importing data indicators functions
 import AMASS_annex_b_commonlib as ALB
@@ -29,8 +29,8 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
     i_dataqc = path + "Configuration/list_of_indicators.xlsx"
     i_druglst= path + "Configuration/list_of_antibiotics.xlsx"
     
-    o_list_withoutstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB.xlsx"
-    o_list_withstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB_withstatus.xlsx"
+    o_list_withoutstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB.csv"
+    o_list_withstatus = AC.CONST_PATH_REPORTWITH_PID + "Report_with_patient_identifiers_annexB_withstatus.csv"
     
     o_tab_blo = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secB_blo_i
     o_tab_blo_bymonth = AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secB_blo_mon_i
@@ -142,6 +142,7 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
             #logger.exception(e)
             AL.printlog("Error, ANNEX B Dictionary and configuration loading: " +  str(e),True,logger)
             pass
+        ALB.sub_printprocmem("ANNEX B Dictionary and configuration loading",logger)
         AL.printlog("ANNEX B Data indicator loading",False,logger)
         try:
             #Retrieving verification rules from list_of_indicators.xlsx
@@ -226,11 +227,15 @@ def generate_annex_b(df_dict_micro,df_micro,logger,bisusingmappeddata,bisreload_
                 d_ast[i] = "S"
             #Mapping blood, spctype,culture
             micro_1 = micro_0.copy()
-            micro_1["mapped_blood"] = micro_1[spctype].map(d_blood).fillna("non-blood")
-            micro_1["mapped_spctype"] = micro_1[spctype].map(d_allspc).fillna("unknown")
-            micro_1["mapped_culture"] = micro_1[organism].map(d_no_growth).fillna("positive")
-
+            micro_1["mapped_blood"] = micro_1[spctype].map(d_blood).fillna("non-blood").astype("category") 
+            micro_1["mapped_spctype"] = micro_1[spctype].map(d_allspc).fillna("unknown").astype("category") 
+            micro_1["mapped_culture"] = micro_1[organism].map(d_no_growth).fillna("positive").astype("category") 
+            # micro_1["mapped_blood"] = micro_1[spctype].map(d_blood).fillna("non-blood")
+            # micro_1["mapped_spctype"] = micro_1[spctype].map(d_allspc).fillna("unknown")
+            # micro_1["mapped_culture"] = micro_1[organism].map(d_no_growth).fillna("positive")
+            ALB.sub_printprocmem("ANNEX B Mapping blood, specimen types",logger)
             micro_1 = ALB.map_ast_result(micro_1, df_drug, d_ast)
+            ALB.sub_printprocmem("ANNEX B Mapping antibiotics",logger)
             
             micro_pos = micro_1.copy().loc[micro_1["mapped_culture"]=="positive",:].reset_index().drop(columns=["index"]) #dataframe with possitive cultures
             micro_pos = ALB.map_fam_org_gen_name(micro_pos, organism, dict_org_fam, dict_org_sci)

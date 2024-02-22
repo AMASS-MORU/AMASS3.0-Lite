@@ -7,37 +7,18 @@
 # Created on: 30 AUG 2023 
 import AMASS_amr_const as AC
 import pandas as pd #for creating and manipulating dataframe
-# CONST_SOFTWARE_VERSION ="3.0.1 Build 30 Aug 2023"
-#columns for AMASS microbiology_data.xlsx
-# CONST_COL_HN = "hn"
-# CONST_COL_NUMAMR = "AMR"
-# CONST_COL_ORGNAME = "organism"
-#CONST_NEWVARNAME_ORG3 = "organism3"
-# CONST_COL_ORISPCDATE = "DateSpc"
-# CONST_COL_CLEANSPCDATE = "clean_spcdate"
-#CONST_COL_ORIGIN = "InfOri"
 CONST_RUN_ANNEXC_WITH_NOHOSP = False
 CONST_COL_PROFILE = "profile"
 CONST_COL_PROFILEID = "profile_ID"
 CONST_COL_PROFILETEMP = "profile_temp"
-# CONST_COL_MAPPEDWARD = "mapped_ward"
-# CONST_NEWVARNAME_PREFIX_AST = "NS_"
-# CONST_NEWVARNAME_PREFIX_RIS = "RIS"
-# CONST_NEWVARNAME_AST3GC = CONST_NEWVARNAME_PREFIX_AST + "3gc"
-# CONST_NEWVARNAME_ASTCBPN = CONST_NEWVARNAME_PREFIX_AST + "Carbapenem"
-# CONST_NEWVARNAME_ASTFRQ = CONST_NEWVARNAME_PREFIX_AST + "Fluoroquin"
-# CONST_NEWVARNAME_ASTTETRA = CONST_NEWVARNAME_PREFIX_AST + "Tetra"
-# CONST_NEWVARNAME_ASTAMINOGLY = CONST_NEWVARNAME_PREFIX_AST + "aminogly"
-# CONST_NEWVARNAME_ASTMRSA = CONST_NEWVARNAME_PREFIX_AST + "mrsa"
-# CONST_NEWVARNAME_ASTPEN = CONST_NEWVARNAME_PREFIX_AST + "pengroup"
-# CONST_NEWVARNAME_AST3GCCBPN = CONST_NEWVARNAME_PREFIX_AST + "3gcsCarbs"
-# CONST_NEWVARNAME_ASTVAN = CONST_NEWVARNAME_PREFIX_AST + "Vancomycin"
 CONST_NEWVARNAME_ASTVAN_RIS = AC.CONST_NEWVARNAME_PREFIX_RIS + "Vancomycin"
+#columns for Configuration
+CONST_COL_AMASS_PRMNAME= "AMASS basic run"
+CONST_COL_USER_PRMNAME = "Setting parameters"
 #columns for AMASS dictionaries
 CONST_COL_AMASSNAME = "amass_name"
 CONST_COL_USERNAME = "user_name"
 #columns for SATSCAN input.case
-#CONST_COL_CLUSTERCODE = "cluster_code"
 CONST_COL_TESTGROUP = "test_group"
 CONST_COL_SPCDATE = "specimen_collection_date"
 CONST_COL_RESISTPROFILE = "resistant_profile"
@@ -70,7 +51,6 @@ CONST_COL_NUMWARD = "Number_of_wards"
 CONST_PRENAME_PROFILEID = "profile_"
 CONST_VALUE_WARD = "ward"
 #columns for profile_information.xlsx
-#CONST_COL_PROFILEID = "profile_ID"
 CONST_COL_NUMPROFILE_ALL="No. of patients with a clinical specimen culture positive"
 CONST_COL_NUMPROFILE_BLO="No. of patients with blood culture positive"
 #columns for SATSCAN Graphs
@@ -91,28 +71,32 @@ CONST_LST_COLWIDTH_PROFILE = [0.8*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NU
                               0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,
                               0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH,0.7*CONST_NUM_INCH]
 #values for profiling
-CONST_VALUE_TESTATBRATE = "tested_antibiotic_rate"
-CONST_VALUE_RRATE = "resistant_rate"
-CONST_VALUE_IRATE = "intermediate_rate"
-CONST_VALUE_SRATE = "susceptible_rate"
+# CONST_VALUE_TESTATBRATE = "tested_antibiotic_rate"
+# CONST_VALUE_RRATE = "resistant_rate"
+# CONST_VALUE_IRATE = "intermediate_rate"
+# CONST_VALUE_SRATE = "susceptible_rate"
+CONST_VALUE_MIN_TESTATBRATE = "minimum_tested_antibiotic_rate"
+CONST_VALUE_MAX_TESTATBRATE = "maximum_tested_antibiotic_rate"
+CONST_VALUE_MIN_RRATE = "minimum_resistant_rate"
+CONST_VALUE_MAX_RRATE = "maximum_resistant_rate"
+CONST_VALUE_MIN_IRATE = "minimum_intermediate_rate"
+CONST_VALUE_MAX_IRATE = "maximum_intermediate_rate"
+CONST_VALUE_MIN_SRATE = "minimum_susceptible_rate"
+CONST_VALUE_MAX_SRATE = "maximum_susceptible_rate"
 
 
 #INPUTs-OUTPUTs for AnnexC
-
 CONST_FILENAME_WARD    = "dictionary_for_wards"
 CONST_FILENAME_REPORT1 = AC.CONST_FILENAME_sec1_res_i 
 CONST_FILENAME_HO_DEDUP= "AnnexC_dedup_profile"
 CONST_FILENAME_ORIPARAM= ".\Programs\AMASS_amr\satscan_param.prm"
 CONST_FILENAME_NEWPARAM= "satscan_param"
-#CONST_FILENAME_WARDINFO= "ResultData\ward_information"
 CONST_FILENAME_PROFILE = "profile_information"
 CONST_FILENAME_LOCATION= "satscan_location"
 CONST_FILENAME_RESULT  = "satscan_results"
 CONST_FILENAME_INPUT   = "satscan_input"
 CONST_FILENAME_ACLUSTER= "AnnexC_listofallclusters"
 CONST_FILENAME_PCLUSTER= "AnnexC_listofpassedclusters"
-#CONST_FILENAME_WARDPROF= "AnnexC_graph_wardprof"
-#CONST_FILENAME_WARDTOP2= "AnnexC_graph_top2"
 CONST_FILENAME_AWARDPROF= "AnnexC_graphofallwardprof"
 CONST_FILENAME_PWARDPROF= "AnnexC_graphofpassedwardprof"
 CONST_FILENAME_COUNT   = "AnnexC_counts_by_organism"
@@ -142,8 +126,8 @@ CONST_STYLE_IDEN_ED = "</para>"
 #1 resistant profile  >>> "organism_escherichia_coli":[[CONST_NEWVARNAME_ASTCBPN,"1","crec"]]
 #2 resistant profiles >>> "organism_escherichia_coli":[[CONST_NEWVARNAME_ASTCBPN,"1","crec"], [CONST_NEWVARNAME_AST3GC,"1",CONST_NEWVARNAME_ASTCBPN,"0","3gcr-csec"]]
 dict_ast = {"organism_staphylococcus_aureus":  [[AC.CONST_NEWVARNAME_ASTMRSA_RIS,"R","mrsa"]],
-            "organism_enterococcus_faecalis":  [[CONST_NEWVARNAME_ASTVAN_RIS,"R","vrefa"]],
-            "organism_enterococcus_faecium":   [[CONST_NEWVARNAME_ASTVAN_RIS,"R","vrefm"]],
+            "organism_enterococcus_faecalis":  [[CONST_NEWVARNAME_ASTVAN_RIS,    "R","vrefa"]],
+            "organism_enterococcus_faecium":   [[CONST_NEWVARNAME_ASTVAN_RIS,    "R","vrefm"]],
             "organism_escherichia_coli":       [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crec"]],
             "organism_klebsiella_pneumoniae":  [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crkp"]],
             "organism_pseudomonas_aeruginosa": [[AC.CONST_NEWVARNAME_ASTCBPN_RIS,"R","crpa"]],
@@ -151,30 +135,44 @@ dict_ast = {"organism_staphylococcus_aureus":  [[AC.CONST_NEWVARNAME_ASTMRSA_RIS
 #For namimg AST results
 dict_ris = {"resistant":"R","intermediate":"I","susceptible":"S"}
 #For calling, naming, and reporting pathogens
-dict_org = {"mrsa"     :["organism_staphylococcus_aureus",  "Methicillin-resistant <i>S. aureus</i>",  "MRSA"],
+dict_org = {"mrsa"     :["organism_staphylococcus_aureus",  "Methicillin-resistant <i>S. aureus</i>",   "MRSA"],
             "vrefa"    :["organism_enterococcus_faecalis",  "Vancomycin-resistant <i>E. faecalis</i>",  "VREfs"],
             "vrefm"    :["organism_enterococcus_faecium",   "Vancomycin-resistant <i>E. faecium</i>",   "VREfm"],
-            "crec"     :["organism_escherichia_coli",       "Carbapenem-resistant <i>E. coli</i>",       "CREC"],
-            "crkp"     :["organism_klebsiella_pneumoniae",  "Carbapenem-resistant <i>K. pneumoniae</i>",  "CRKP"],
-            "crpa"     :["organism_pseudomonas_aeruginosa", "Carbapenem-resistant <i>P. aeruginosa</i>", "CRPA"],
-            "crab"     :["organism_acinetobacter_baumannii","Carbapenem-resistant <i>A. baumannii</i>","CRAB"]}
+            "crec"     :["organism_escherichia_coli",       "Carbapenem-resistant <i>E. coli</i>",      "CREC"],
+            "crkp"     :["organism_klebsiella_pneumoniae",  "Carbapenem-resistant <i>K. pneumoniae</i>","CRKP"],
+            "crpa"     :["organism_pseudomonas_aeruginosa", "Carbapenem-resistant <i>P. aeruginosa</i>","CRPA"],
+            "crab"     :["organism_acinetobacter_baumannii","Carbapenem-resistant <i>A. baumannii</i>", "CRAB"]}
 #For calling and naming specimens
 dict_spc = {"blo":"Blood specimen",
             "all":"All specimens"}
 #For configuring parameters in SaTScan
-dict_configuration_prm = {"CaseFile=":"satscan_input_", 
-                          "CoordinatesFile=":"satscan_location_", 
-                          "ResultsFile=":"satscan_results_", 
-                          "CoordinatesType=":"0",
-                          "AnalysisType=":"3",
-                          "ModelType=":"9",
-                          "ScanAreas=":"1",
-                          "TimeAggregationUnits=":"3",
-                          "MaxSpatialSizeInMaxCirclePopulationFile=":"50", 
-                          "MaxSpatialSizeInDistanceFromCenter=":"1",
-                          "MaxTemporalSize=":"100",
-                          "MinimumCasesInHighRateClusters=":"2",
-                          "MonteCarloReps=":"9999"}
+dict_configuration_prm = {"CaseFile="                               :"satscan_input_", 
+                          "CoordinatesFile="                        :"satscan_location_", 
+                          "ResultsFile="                            :"satscan_results_", 
+                          "CoordinatesType="                        :"0",
+                          "AnalysisType="                           :"satscan_analysis_type",
+                          "ModelType="                              :"satscan_model_type",
+                          "ScanAreas="                              :"1",
+                          "TimeAggregationUnits="                   :"3",
+                          "MaxSpatialSizeInMaxCirclePopulationFile=":"satscan_maximum_spatial_size_of_total_isolate", 
+                          "MaxSpatialSizeInDistanceFromCenter="     :"1",
+                          "MaxTemporalSize="                        :"satscan_maximum_temporal_days",
+                          "MinimumCasesInHighRateClusters="         :"satscan_minimum_isolates_in_high_clusters",
+                          "MonteCarloReps="                         :"satscan_number_monte_carlo_replications"}
+
+dict_configuration_prm_default = {"CaseFile="                               :"satscan_input_", 
+                                  "CoordinatesFile="                        :"satscan_location_", 
+                                  "ResultsFile="                            :"satscan_results_", 
+                                  "CoordinatesType="                        :"0",
+                                  "AnalysisType="                           :"3",
+                                  "ModelType="                              :"9",
+                                  "ScanAreas="                              :"1",
+                                  "TimeAggregationUnits="                   :"3",
+                                  "MaxSpatialSizeInMaxCirclePopulationFile=":"50", 
+                                  "MaxSpatialSizeInDistanceFromCenter="     :"1",
+                                  "MaxTemporalSize="                        :"100",
+                                  "MinimumCasesInHighRateClusters="         :"2",
+                                  "MonteCarloReps="                         :"9999"}
 
 #For adding additional antibiotics for profiling
 #Able to add more antibiotics for organisms
@@ -196,13 +194,47 @@ dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_N
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
                                     "organism_enterococcus_faecium":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
-                                                                    AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
-                                                                    AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
-                                                                    AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"]}
+                                                                     AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
+                                                                     AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
+                                                                     AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"]}
 #For setting criteria for selecting antibioitcs in profiling step
-#i.e. select an antibiotic when 0.1<resistant_rate<99.9 >>>>> "resistant_rate":[0.1,99.9]
-dict_configuration_profile = {CONST_VALUE_TESTATBRATE:[90.1,100],
-                              CONST_VALUE_RRATE:[0.1,99.9],
-                              CONST_VALUE_SRATE:[0.1,99.9]}
-# dict_configuration_profile = {"max_resistant_rate=":"99.9", 
-#                               "min_resistant_rate=":"0.1"}
+#i.e. select an antibiotic when 0.1<resistant_rate<99.9 >>>>> {"minimum_tested_antibiotic_rate":"0.1","maximum_tested_antibiotic_rate":"99.9"}
+dict_configuration_profile = {CONST_VALUE_MIN_TESTATBRATE:"profiling_minimum_tested_isolate_for_antibiotic",
+                              CONST_VALUE_MAX_TESTATBRATE:"profiling_maximum_tested_isolate_for_antibiotic",
+                              CONST_VALUE_MIN_RRATE      :"profiling_minimum_resistant_isolate_for_antibiotic",
+                              CONST_VALUE_MAX_RRATE      :"profiling_maximum_resistant_isolate_for_antibiotic",
+                              CONST_VALUE_MIN_SRATE      :"profiling_minimum_susceptible_isolate_for_antibiotic",
+                              CONST_VALUE_MAX_SRATE      :"profiling_maximum_susceptible_isolate_for_antibiotic"}
+
+dict_configuration_profile_default = {CONST_VALUE_MIN_TESTATBRATE:"90.1",
+                                      CONST_VALUE_MAX_TESTATBRATE:"100",
+                                      CONST_VALUE_MIN_RRATE      :"0.1",
+                                      CONST_VALUE_MAX_RRATE      :"99.9",
+                                      CONST_VALUE_MIN_SRATE      :"0.1",
+                                      CONST_VALUE_MAX_SRATE      :"99.9"}
+
+dict_intermediate_configtosatscan={"satscan_analysis_type":{"Purely Spatial"                      :"1", 
+                                                            "Purely Temporal"                     :"2", 
+                                                            "Retrospective Space-Time"            :"3", 
+                                                            "Prospective Space-Time"              :"4",
+                                                            "Spatial Variation in Temporal Trends":"5",
+                                                            "Prospective Purely Temporal"         :"6",
+                                                            "Seasonal Temporal"                   :"7"},
+                                   "satscan_model_type":{"Discrete Poisson"      :"0", 
+                                                         "Bernoulli"             :"1", 
+                                                         "Space-Time Permutation":"2", 
+                                                         "Ordinal"               :"3", 
+                                                         "Exponential"           :"4", 
+                                                         "Normal"                :"5", 
+                                                         "Continuous Poisson"    :"6", 
+                                                         "Multinomial"           :"7",
+                                                         "Rank"                  :"8", 
+                                                         "UniformTime"           :"9"},
+                                   "satscan_scan_areas":{"High Rates":"1", 
+                                                         "Low Rates" :"2", 
+                                                         "Both Areas":"3"},
+                                   "satscan_time_aggregation_units":{"None"   :"0", 
+                                                                     "Year"   :"1",
+                                                                     "Month"  :"2",
+                                                                     "Day"    :"3", 
+                                                                     "Generic":"4"}}

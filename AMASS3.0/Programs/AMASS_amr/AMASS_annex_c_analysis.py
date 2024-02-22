@@ -21,18 +21,24 @@ from reportlab.lib.units import inch #for importing inch for plotting
 from reportlab.lib import colors #for importing color palette
 from reportlab.platypus.flowables import Flowable #for plotting graph and tables
 import AMASS_amr_const as AC
-#import AMASS_amr_const_annex_c as ACC
 import AMASS_annex_c_const as ACC
 import AMASS_amr_commonlib as AL
-#import AMASS_amr_report_new as AMR_REPORT_NEW
 
 #######################################################################
 #######################################################################
-#####Step1. Merged Hospital-Microbiology data to SaTScan's output######
+#####Step1. Merged Hospital-Microbiology data to SaTScan's input#######
 #######################################################################
 #######################################################################
 def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataFrame()):
     AL.printlog("Start Cluster signal identification (ANNEX C): " + str(datetime.datetime.now()),False,logger)
+    #Preparing configurations from Configuration.xlsx
+    df_config = AL.readxlsxorcsv(AC.CONST_PATH_ROOT + "Configuration/", "Configuration",logger)
+    df_config_satscan = df_config.loc[df_config[ACC.CONST_COL_AMASS_PRMNAME].str.contains("satscan_")]
+    dict_configuration_prm_final = prepare_configuration_to_constant(df=df_config_satscan,dict_const=ACC.dict_configuration_prm,dict_intermediate=ACC.dict_intermediate_configtosatscan,
+                                                                    col_amassprm=ACC.CONST_COL_AMASS_PRMNAME,col_userprm=ACC.CONST_COL_USER_PRMNAME,prefix="satscan_")
+    df_config_profile = df_config.loc[df_config[ACC.CONST_COL_AMASS_PRMNAME].str.contains("profiling_")]
+    dict_configuration_profile_final = prepare_configuration_to_constant(df=df_config_profile,dict_const=ACC.dict_configuration_profile,
+                                                                        col_amassprm=ACC.CONST_COL_AMASS_PRMNAME,col_userprm=ACC.CONST_COL_USER_PRMNAME,prefix="profiling_")
     for lo_org in ACC.dict_ast.keys():
     # for lo_org in ["organism_staphylococcus_aureus"]:
         lst_usedcolumns = []
@@ -80,11 +86,11 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             #selecting profiles from configuration
             #There are isolates positive to that pathogen in blood >>> do antibiotics selection for profiling
             lst_ris_profiletemp = []
-            lst_ris_profiletemp = select_atbforprofiling(logger, df=df_dedup_blo, lst_col_ris=lst_ris_rpt2)
+            lst_ris_profiletemp = select_atbforprofiling(logger, df=df_dedup_blo, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final)
             print ("Antibiotics for profiling from blood :",[atb.replace("RIS","") for atb in lst_ris_profiletemp])
             #There is no isolate positive to that pathogen in blood >>> do antibiotics selection for profiling by using isolates positive to that pathogen in clinical specimen
             if len(lst_ris_profiletemp)==0:
-                lst_ris_profiletemp = select_atbforprofiling(logger, df=df_dedup_all, lst_col_ris=lst_ris_rpt2)
+                lst_ris_profiletemp = select_atbforprofiling(logger, df=df_dedup_all, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final)
                 print ("Antibiotics for profiling from clinical specimens :",[atb.replace("RIS","") for atb in lst_ris_profiletemp])
             else:
                 pass
@@ -121,7 +127,8 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             #preparing SaTScan's inputs
             evaluation_study = retrieve_startEndDate(filename=AC.CONST_PATH_RESULT+AC.CONST_FILENAME_sec1_res_i) #for satscan_param.prm
             for sh_spc in ACC.dict_spc.keys():
-                prepare_satscanInput(logger,
+                prepare_satscanInput(logger, 
+                                    configuration_prm=dict_configuration_prm_final,
                                     filename_isolate =ACC.CONST_FILENAME_HO_DEDUP, 
                                     filename_ward    =ACC.CONST_FILENAME_WARD, 
                                     filename_case    =ACC.CONST_FILENAME_INPUT, 
@@ -153,6 +160,28 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
     df_all_org_ho=pd.DataFrame()
 
 #####Small functions in the step1.1#####
+#Mapping configs from Configuration file to annex_c_const
+def prepare_configuration_to_constant(df=pd.DataFrame(), dict_const={}, dict_intermediate={}, prefix="", col_amassprm="", col_userprm=""):
+    dict_const_mapped = dict_const
+    for amass_prm in df.loc[:,col_amassprm]:
+        user_prm = df.loc[df[col_amassprm]==amass_prm,col_userprm].tolist()[0]
+        satscan_value = ""
+        try:
+            satscan_value = dict_intermediate[amass_prm][user_prm]
+        except:
+            if (isinstance(user_prm, int)) or (isinstance(user_prm, float)):
+                satscan_value = user_prm
+            else:
+                print ("ERROR: Please check configuarion file.")
+
+        for keys,values in dict_const.items():
+            if amass_prm == values:
+                if prefix == "satscan_":
+                    dict_const_mapped[keys] = str(satscan_value)
+                elif prefix == "profiling_":
+                    dict_const_mapped[keys] = satscan_value
+    return dict_const_mapped
+
 #Assigning dtype as string for all used columns
 #Original dtype is category
 def assign_strtypetocolumns(df=pd.DataFrame(), lst_col=[]):
@@ -308,22 +337,19 @@ def get_lstastforpathogen(lo_org="",check_writereport=False):
     return lst_atb_unique
 #Selecting range of criteria for selecting antibiotics profiling
 #In the case that there is no setting >>> using default setting
-def select_rateRangeforprofiling(configuration_profile=ACC.dict_configuration_profile,param=""):
-    try:
-        min_ = float(configuration_profile[param][0])
-    except:
-        if ACC.CONST_VALUE_TESTATBRATE == param:
-            min_ = 91
+def select_configvalue(configuration_user={},configuration_default={},b_satscan=True,param=""):
+    val_ = ""
+    if b_satscan:
+        if "satscan_" in str(configuration_user[param]):
+            val_ = str(configuration_default[param]) #real user value didn't mapped and disappear
         else:
-            min_ = 0.1
-    try:
-        max_ = float(configuration_profile[param][1])
-    except:
-        if ACC.CONST_VALUE_TESTATBRATE == param:
-            min_ = 100
-        else:
-            max_ = 99.9
-    return min_,max_
+            val_ = str(configuration_user[param]) #real user value is mapped completely
+    else:
+        try:
+            val_ = float(configuration_user[param])
+        except:
+            val_ = float(configuration_default[param])
+    return val_
 #Counting number of resistant, intermediate, and susceptible
 #In the case that there is no setting >>> assign 0
 def count_numRISbyATB(df=pd.DataFrame(),col_atb=[],val_forcount=""):
@@ -334,7 +360,7 @@ def count_numRISbyATB(df=pd.DataFrame(),col_atb=[],val_forcount=""):
         pass
     return num
 #Selecting list of ATBs which pass the criteria for profiling
-def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configuration_profile=ACC.dict_configuration_profile,
+def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configuration_profile={},
                           resistant=ACC.dict_ris["resistant"],intermediate=ACC.dict_ris["intermediate"],susceptible=ACC.dict_ris["susceptible"]):
     lst_col_ris_include = []
     for atb in lst_col_ris:
@@ -344,18 +370,25 @@ def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configurati
                 num_i = count_numRISbyATB(df=df,col_atb=atb,val_forcount=intermediate)
                 num_s = count_numRISbyATB(df=df,col_atb=atb,val_forcount=susceptible)
                 total_testedatb = num_r+num_i+num_s
-                min_testedatb = select_rateRangeforprofiling(param=ACC.CONST_VALUE_TESTATBRATE)[0]
-                max_testedatb = select_rateRangeforprofiling(param=ACC.CONST_VALUE_TESTATBRATE)[1]
+                min_testedatb = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_TESTATBRATE)
+                max_testedatb = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_TESTATBRATE)
                 if (total_testedatb*100/len(df)>=min_testedatb) and (total_testedatb*100/len(df)<=max_testedatb):
-                    for ris in [keys for keys in ACC.dict_configuration_profile.keys() if keys != ACC.CONST_VALUE_TESTATBRATE]:
-                        min_testedris = select_rateRangeforprofiling(param=ris)[0]
-                        max_testedris = select_rateRangeforprofiling(param=ris)[1]
+                    lst_profile_prm = list(set([keys.replace("minimum_","").replace("maximum_","") for keys in configuration_profile.keys() if (keys not in [ACC.CONST_VALUE_MIN_TESTATBRATE,ACC.CONST_VALUE_MAX_TESTATBRATE])]))
+                    for ris in lst_profile_prm:
                         numerator = 0
-                        if ACC.CONST_VALUE_RRATE == ris:
+                        min_testedris = 0
+                        max_testedris = 0
+                        if ris in ACC.CONST_VALUE_MIN_RRATE:
+                            min_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_RRATE)
+                            max_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_RRATE)
                             numerator = num_r
-                        elif ACC.CONST_VALUE_IRATE == ris:
+                        elif ris in ACC.CONST_VALUE_MIN_IRATE:
+                            min_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_IRATE)
+                            max_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_IRATE)
                             numerator = num_i
-                        elif ACC.CONST_VALUE_SRATE == ris:
+                        elif ris in ACC.CONST_VALUE_MIN_SRATE:
+                            min_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_SRATE)
+                            max_testedris = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_SRATE)
                             numerator = num_s
                         #calculating rate
                         if (numerator*100/total_testedatb>=min_testedris) and (numerator*100/total_testedatb<=max_testedris):
@@ -369,6 +402,7 @@ def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configurati
         if atb not in lst_col_ris_include_unique:
             lst_col_ris_include_unique.append(atb)
     return lst_col_ris_include_unique
+
 #Creating "R---I-S---R..."
 #lst_col_ris is list of full antibiotics recommended use from CLSI for that pathogen
 #lst_col_ristemp is list of antibiotics for profiling
@@ -405,7 +439,7 @@ def create_dictforMapProfileID(lst_profile=[], prefixID=""):
 #input : excel file of dataframe of deduplicated hospital-origin isolates with profiles
 #output: csv files for satscan_input.csv, satscan_location.csv, and satscan_param.prm
 def prepare_satscanInput(logger,filename_isolate="", filename_ward="", filename_case="", filename_oriparam="", filename_newparam="", path_input="", path_output="",
-                         sh_org="", sh_spc="", start_date="",  end_date="", str_ward=AC.CONST_VARNAME_WARD, 
+                         sh_org="", sh_spc="", start_date="",  end_date="", configuration_prm={}, configuration_default=ACC.dict_configuration_prm_default, str_ward=AC.CONST_VARNAME_WARD, 
                          col_amass=ACC.CONST_COL_AMASSNAME,    col_user=ACC.CONST_COL_USERNAME,        col_resist=ACC.CONST_COL_RESISTPROFILE,
                          col_mrsa=AC.CONST_NEWVARNAME_ASTMRSA_RIS,col_3gc=AC.CONST_NEWVARNAME_AST3GC_RIS,    col_crab=AC.CONST_NEWVARNAME_ASTCBPN_RIS,  col_van=ACC.CONST_NEWVARNAME_ASTVAN_RIS,
                          col_org=AC.CONST_NEWVARNAME_ORG3,    col_oriorg=AC.CONST_VARNAME_ORG,       col_profile=ACC.CONST_COL_PROFILEID, 
@@ -452,7 +486,7 @@ def prepare_satscanInput(logger,filename_isolate="", filename_ward="", filename_
             AL.printlog("Error, ANNEX C Location file preparation: " +  str(e),True,logger)
         #For satscan_param.prm
         try:
-            prepare_prmfile(ori_prmfile=filename_oriparam, new_prmfile=filename_newparam, 
+            prepare_prmfile(configuration_prm=configuration_prm, configuration_default=configuration_default,ori_prmfile=filename_oriparam, new_prmfile=filename_newparam, 
                             start_date=start_date, end_date=end_date, path_output=path_output,sh_org=sh_org, sh_spc=sh_spc)
         except Exception as e:
             AL.printlog("Error, ANNEX C Parameter file preparation: " +  str(e),True,logger)
@@ -500,18 +534,19 @@ def create_clusterCode(df=pd.DataFrame(), col_testgroup="", col_ward="", col_org
     df[col_testgroup] = df[col_ward] + ";" + df[col_profile] + ";" + df[col_org]
     return df
 #Prepare parameter file
-def prepare_prmfile(ori_prmfile="",start_date="", end_date="", new_prmfile="", sh_org="", sh_spc="", path_output=""):
+def prepare_prmfile(configuration_prm={}, configuration_default={} ,ori_prmfile="",start_date="", end_date="", new_prmfile="", sh_org="", sh_spc="", path_output=""):
     str_wholefile = ""
     file = open(ori_prmfile,"r", encoding="ascii")
     f = file.readline()
     while f != "":  
-        for keys,values in ACC.dict_configuration_prm.items():
+        for keys,values in configuration_prm.items():
             if keys in f:
                 if ("CaseFile=" == keys) or ("CoordinatesFile=" == keys) or ("ResultsFile=" == keys):
                     f = keys+ AC.CONST_PATH_ROOT+values+sh_org+"_"+sh_spc+".csv" + "\n"
                     break
                 else:
-                    f = keys + values + "\n"
+                    val_ = select_configvalue(configuration_user=configuration_prm,configuration_default=configuration_default,b_satscan=True,param=keys)
+                    f = keys + val_ + "\n"
                     break
             else:
                 if ("StartDate=" in f) and ("ProspectiveStartDate=" not in f):
@@ -553,12 +588,20 @@ def prepare_locfile(lst_clustercode=[], df_ward_ori=pd.DataFrame(),
 #######################################################################
 import os
 import subprocess
-def call_SaTScan(prmfile=""):
+def call_SaTScan(logger,path_output="",prmfile=""):
     for sh_org in ACC.dict_org.keys():
         for sh_spc in ACC.dict_spc.keys():
-            print ("Performing cluster detection for "+ str(sh_org).upper() + " in " + str(ACC.dict_spc[sh_spc]))
-            subprocess.run(".\Programs\AMASS_amr\SaTScanBatch64.exe -f "+ prmfile+"_"+sh_org+"_"+sh_spc+".prm", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            
+            if os.path.exists(path_output+ACC.CONST_FILENAME_INPUT+"_"+sh_org+"_"+sh_spc+".csv"):
+                try:
+                    subprocess.run(".\Programs\AMASS_amr\SaTScanBatch64.exe -f "+ path_output+prmfile+"_"+sh_org+"_"+sh_spc+".prm", shell=True, text=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                except subprocess.CalledProcessError as e:
+                    error_message = e.stderr
+                    AL.printlog("Error, ANNEX C Cluster signals for "+ str(sh_org).upper() + " in " + str(ACC.dict_spc[sh_spc])+": " + str(e.stderr),True,logger)
+                else:
+                    AL.printlog("Performing cluster signal detection for "+ str(sh_org).upper() + " in " + str(ACC.dict_spc[sh_spc]),False,logger)
+            else:
+                pass
+
 #######################################################################
 #######################################################################
 ################## Step3. Visualization for AnnexC ####################
@@ -740,7 +783,8 @@ def format_lancent_pvalue(df=pd.DataFrame(),col_pval="",col_clean_pval=""):
         elif (float(ori_pval)>0.0001) and (float(ori_pval)<=0.001):
             new_pval_temp = round(float(ori_pval),ndigits=5)
             new_pval_lancent = str(new_pval_temp)
-        elif (float(ori_pval)>0.00001) and (float(ori_pval)<=0.0001):
+        # elif (float(ori_pval)>0.00001) and (float(ori_pval)<=0.0001):
+        elif (float(ori_pval)<=0.0001):
             new_pval_temp = round(float(ori_pval),ndigits=6)
             new_pval_lancent = "<0.0001"
         df.at[idx,col_clean_pval+"_lancent"] = new_pval_lancent

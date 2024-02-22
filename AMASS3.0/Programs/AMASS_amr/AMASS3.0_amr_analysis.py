@@ -1829,7 +1829,7 @@ def mainloop() :
                     bisrunannexc = False
                 if bisrunannexc == True:
                     ANNEX_C.prepare_fromHospMicro_toSaTScan(logger,df_all=df_hospmicro, df_blo=df_hospmicro_blood)
-                    ANNEX_C.call_SaTScan(logger,prmfile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_NEWPARAM)
+                    ANNEX_C.call_SaTScan(logger,path_output=AC.CONST_PATH_TEMPWITH_PID,prmfile=ACC.CONST_FILENAME_NEWPARAM)
                     ANNEX_C.prepare_annexc_results(logger,b_wardhighpat=True, num_wardhighpat=2)
                     sub_printprocmem("finish Analysis ANNEX C",logger)
                 else:
