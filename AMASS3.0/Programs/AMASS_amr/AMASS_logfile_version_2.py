@@ -945,13 +945,17 @@ try:
         except Exception as e:
             logger.exception(e)
             pass
+    bisnodup = True
     if ALogL.checkpoint(file_dup):
         try:
-            ts(c,df_dup, [list(df_dup.columns)], marked_dup, "Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS")
+            if len(df_dup) > 0:
+                ts(c,df_dup, [list(df_dup.columns)], marked_dup, "Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS")
+                bisnodup = False
         except Exception as e:
             logger.exception(e)
-            pass
-    else:
+        pass
+    #else:
+    if  bisnodup:
         try:
             tsnodata(c,"Table S9", "Duplicate mapping of data value of variable in your with data values of variable describe in AMASS","There are no duplicate records in dictionary files that need your revision.")
         except Exception as e:

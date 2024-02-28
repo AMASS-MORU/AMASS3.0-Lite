@@ -547,7 +547,7 @@ def mainloop() :
         if bishosp_ava:
             df_hosp_val = pd.DataFrame(list(df_hosp.columns))
             df_hosp_val.columns = ['variables_hosp']
-            if not AL.fn_savexlsx(df_micro_val, path_variable + "variables_hosp.xlsx", logger):
+            if not AL.fn_savexlsx(df_hosp_val, path_variable + "variables_hosp.xlsx", logger):
                 AL.printlog("Warning: Cannot save xlsx file : " + path_variable + "variables_hosp.xlsx",False,logger)
                 try:
                     df_hosp_val.to_csv(path_variable + "variables_hosp.csv",encoding='utf-8',index=False)
@@ -565,6 +565,9 @@ def mainloop() :
                                    'Data values of the variable recorded for "organism" in your microbiology data file',
                                    'Data values of the variable recorded in your microbiology data file']
             temp_df = temp_df[~temp_df[AC.CONST_DICTCOL_DATAVAL].isin(list_notconsiderdup)]
+            temp_df_h = temp_df[temp_df[AC.CONST_DICTCOL_AMASS] == 'hospital_number']
+            if len(temp_df_h) > 0:
+                temp_df = temp_df[~temp_df[AC.CONST_COL_AMASS].isin(['hospital_number'])]
             if len(temp_df) > 0:
                 temp_df = temp_df[[AC.CONST_DICTCOL_DATAVAL,AC.CONST_DICTCOL_AMASS]]
             else:
