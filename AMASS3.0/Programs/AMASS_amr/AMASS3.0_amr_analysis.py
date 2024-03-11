@@ -254,7 +254,12 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
             # Translate gender, age year, age cat data
             sErrorat = "(do add columns)"
             # Translate gender, age year, age cat data
-            df_merged[AC.CONST_NEWVARNAME_GENDERCAT] = df_merged[AC.CONST_VARNAME_GENDER].astype("string").str.strip().map(dict_gender_datavaltoamass)
+            df_merged[AC.CONST_NEWVARNAME_GENDERCAT] = np.nan
+            try:
+                df_merged[AC.CONST_NEWVARNAME_GENDERCAT] = df_merged[AC.CONST_VARNAME_GENDER].astype("string").str.strip().map(dict_gender_datavaltoamass)
+            except Exception as e:
+                AL.printlog("Warning : Unable to identify gender data : "  + str(e),True,logger)
+                logger.exception(e)
             # CO/HO (If want to support case micro data have admission date move it outside of bishosp_ava condition)
             if AC.CONST_VARNAME_COHO in df_merged.columns:
                 df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS] = df_merged[AC.CONST_VARNAME_COHO].astype("string").str.strip().map(dict_inforg_datavaltoamass)
@@ -271,7 +276,12 @@ def fn_mergededup_hospmicro(df_micro,df_hosp,bishosp_ava,df_dict,dict_datavaltoa
                df_merged[AC.CONST_NEWVARNAME_COHO_FINAL] =  df_merged[AC.CONST_NEWVARNAME_COHO_FROMHOS]
             else:
                df_merged[AC.CONST_NEWVARNAME_COHO_FINAL] =  df_merged[AC.CONST_NEWVARNAME_COHO_FROMCAL]  
-            df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_VARNAME_DISCHARGESTATUS].astype("string").str.strip().map(dict_died_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
+            df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] =np.nan
+            try:
+                df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_VARNAME_DISCHARGESTATUS].astype("string").str.strip().map(dict_died_datavaltoamass).fillna(AC.CONST_ALIVE_VALUE) # From R code line 1154
+            except Exception as e:
+                AL.printlog("Warning : Unable to identify outcome (died,alive) : "  + str(e),True,logger)
+                logger.exception(e)
             sErrorat = "(do change columns to category type)"
             df_merged[AC.CONST_NEWVARNAME_DISOUTCOME] = df_merged[AC.CONST_NEWVARNAME_DISOUTCOME].astype("category")
             #Managing ward that may be from either micro or hosp
