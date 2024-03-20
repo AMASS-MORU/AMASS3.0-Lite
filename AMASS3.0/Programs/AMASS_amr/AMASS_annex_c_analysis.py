@@ -373,7 +373,7 @@ def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configurati
                 min_testedatb = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_TESTATBRATE)
                 max_testedatb = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_TESTATBRATE)
                 if (total_testedatb*100/len(df)>=min_testedatb) and (total_testedatb*100/len(df)<=max_testedatb):
-                    lst_profile_prm = list(set([keys.replace("minimum_","").replace("maximum_","") for keys in configuration_profile.keys() if (keys not in [ACC.CONST_VALUE_MIN_TESTATBRATE,ACC.CONST_VALUE_MAX_TESTATBRATE])]))
+                    lst_profile_prm = list(set([keys.replace("minimum_","").replace("maximum_","") for keys in ACC.dict_configuration_profile_default.keys() if (keys not in [ACC.CONST_VALUE_MIN_TESTATBRATE,ACC.CONST_VALUE_MAX_TESTATBRATE])]))
                     for ris in lst_profile_prm:
                         numerator = 0
                         min_testedris = 0

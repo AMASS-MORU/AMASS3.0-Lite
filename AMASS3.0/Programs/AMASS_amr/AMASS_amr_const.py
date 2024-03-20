@@ -5,7 +5,7 @@
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "11 MAR 2024"
+CONST_SOFTWARE_RELEASE = "20 MAR 2024"
 CONST_SOFTWARE_BUILD = "3030"
 CONST_SOFTWARE_MAJOR_VERSION = "3.0"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " released on " + CONST_SOFTWARE_RELEASE
@@ -424,7 +424,7 @@ def get_dict_orgwithatb_incidence(bisabom):
 list_antibiotic = ["Amikacin","Amoxicillin","Amoxicillin_and_clavulanic_acid","Ampicillin","Ampicillin_and_sulbactam","Aztreonam","Cefazolin",
                  "Cefepime","Cefixime","Cefotaxime","Cefotetan","Cefoxitin","Cefpodoxime","Ceftaroline",
                  "Ceftazidime","Ceftriaxone","Cefuroxime","Chloramphenicol","Ciprofloxacin",
-                 "Clarithromycin","Clindamycin","Colistin","Dal fopristin_and_quinupristin",
+                 "Clarithromycin","Clindamycin","Colistin","Dalfopristin_and_quinupristin",
                  "Daptomycin","Doripenem","Doxycycline","Ertapenem","Erythromycin","Fosfomycin",
                  "Fusidic_acid","Gentamicin","Imipenem","Levofloxacin","Linezolid","Meropenem",CONST_ATBNAME_ASTMRSA,"Minocycline",
                  "Moxifloxacin","Nalidixic_acid","Netilmicin","Nitrofurantoin","Oxacillin","Penicillin_G","Piperacillin_and_tazobactam",

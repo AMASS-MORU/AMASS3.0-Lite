@@ -804,10 +804,8 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     blo_num = result_table.loc[result_table["Parameters"]=="Number_of_blood_specimens_collected","Values"].tolist()[0]
     pat_num_pos_blo = result_table.loc[result_table["Parameters"]=="Number_of_patients_sampled_for_blood_culture","Values"].tolist()[0]
     ##Page1
-    section4_page1_1_1 = "A AMR frequency report is generated if data of culture negative is available."
-    section4_page1_1_2 = "The AMR frequency approach involves the collection of data on all blood samples taken for microbiological testing and includes information on the number of positive blood samples for a specific specimen type (both pathogens under the survey and other bacteria) as well as number of negative (no microbial growth) samples. " + \
-                        "After removal of duplicate results and assuming that routine blood culture testing is applied systematically, we can use the number of tested patients as a proxy for a number of patients with new cases of bloodstream infection (BSI)."
-    section4_page1_1 = [section4_page1_1_1, add_blankline + section4_page1_1_2]
+    section4_page1_1_1 = "For each pathogen and antibiotic under surveillance, the frequencies of patients with new infections are calculated per 100,000 tested patients."
+    section4_page1_1 = [section4_page1_1_1]
     section4_page1_2_1 = "The microbiology_data file had:"
     section4_page1_2_2 = "<i>" + "Specimen collection dates ranged from " +"</i>" +\
                         bold_blue_ital_op + spc_date_start + bold_blue_ital_ed + \
@@ -843,11 +841,11 @@ def section4(c,logger,result_table, result_blo_table, result_pat_table,sec4_pat,
     ARC.report_title(c,'Section [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
     ARC.report_context(c,section4_page1_1, 1.0*inch, 6.6*inch, 460, 200, font_size=11)
-    ARC.report_title(c,'Results',1.07*inch, 6.5*inch,'#3e4444',font_size=12)
-    ARC.report_context(c,section4_page1_2, 1.0*inch, 4.3*inch, 460, 150, font_size=11)
-    ARC.report_title(c,'Note',1.07*inch, 3.5*inch,'darkgreen',font_size=12)
-    ARC.report_context(c,section4_page1_3, 1.0*inch, 2.7*inch, 460, 50, font_size=11)
-    ARC.report_context(c,section4_page1_4, 1.0*inch, 1.5*inch, 460, 50, font_size=11)
+    ARC.report_title(c,'Results',1.07*inch, 7.5*inch,'#3e4444',font_size=12)
+    ARC.report_context(c,section4_page1_2, 1.0*inch, 5.25*inch, 460, 150, font_size=11)
+    ARC.report_title(c,'Note',1.07*inch, 4.5*inch,'darkgreen',font_size=12)
+    ARC.report_context(c,section4_page1_3, 1.0*inch, 3.65*inch, 460, 50, font_size=11)
+    ARC.report_context(c,section4_page1_4, 1.0*inch, 2.8*inch, 460, 50, font_size=11)
     canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION4: PAGE2 #########
     ARC.report_title(c,'Section [4]: AMR frequency report',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
@@ -900,7 +898,7 @@ def section5(c,logger,result_table, result_com_table, result_hos_table, result_c
     pat_num_unk     = result_table.loc[result_table["Parameters"]=="Number_of_patients_with_unknown_origin","Values"].tolist()[0]
     pat_num_oth     = result_table.loc[result_table["Parameters"]=="Number_of_patients_had_more_than_one_admission","Values"].tolist()[0]
     ##Page1
-    section5_page1_1_1 = "A AMR frequency report with stratification by origin of infection is generated only if data of culture negative is available and admission date or a variable containing the classification is available in the raw data file with the appropriate specification in the data dictionaries."
+    section5_page1_1_1 = "For each infection origin, pathogen and antibiotic under surveillance, the frequencies of patients with new infections are calculated per 100,000 tested patients."
     section5_page1_1 = [section5_page1_1_1]
     section5_page1_2_1 = "The data included in the analysis had:"
     section5_page1_2_2 = "<i>" + "Specimen collection dates ranged from " + "</i>" + \
@@ -1419,99 +1417,119 @@ def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strfti
     ##Page1
     method_page1_1 = "<b>" + "Data source:" + "</b>"
     method_page1_2 = "For each run (double−click on AMASS.bat file), the AMASS application used the microbiology data file (microbiology_data) and the hospital admission data file (hospital_admission_data) that were stored in the same folder as the application file. " + \
-                    "Hence, if the user would like to update, correct, revise or change the data, the data files in the folder should be updated before the AMASS.bat file is double−clicked again. " + \
-                    "A new report based on the updated data would then be generated."
+                     "Hence, in case that the user would like to update, correct, revise or change the data, the data files in the folder should be updated before the AMASS.bat file is double−clicked again. " + \
+                     "A new report based on the updated data will then be generated."
     method_page1_3 = add_blankline + "<b>" + "Requirements:" + "</b>"
-    method_page1_4 = "<b>" + "− Computer with Microsoft Windows 7 or 10" + "</b>"
+    method_page1_4 = "<b>" + "− Computer with Microsoft Windows 7 or higher" + "</b>"
     method_page1_5 = "AMASS may work in other versions of Microsoft Windows and other operating systems. " + \
-                    "However, thorough testing and adjustment have not been performed."
+                     "However, thorough testing and adjustment have not been performed."
     method_page1_6 = "<b>" + "− AMASSv3.0.zip package file" + "</b>"
     method_page1_7 = "The AMASS application is to be downloaded from " + "<u><link href=\"https://www.amass.website\" color=\"blue\"fontName=\"Helvetica\">https://www.amass.website</link></u>" + ", and unzipped to generate an AMASS folder that could be stored under any folder in the computer. " + \
-                    "The AMASS folder contains 3 files (AMASS.bat, dictionary_for_microbiology_data.xlsx, and dictionary_for_hospital_admission_data.xlsx), and 5 folders (Configuration, Example_Dataset_1_WHONET, Example_Dataset_2, Example_Dataset_3_longformat, Programs)."
+                    "The AMASS folder contains 4 files (AMASS.bat, dictionary_for_microbiology_data.xlsx, dictionary_for_hospital_admission_data.xlsx, and dictionary_for_wards.xlsx), and 6 folders (Configuration, Example_Dataset_1_WHONET, Example_Dataset_2, Example_Dataset_3_longformat, Example_dataset_4_cluster_signals, and Programs)."
     method_page1_8 = "<b>" + "− Microbiology data file (microbiology_data in .csv or .xlsx file format)" + "</b>"
     method_page1_9 = "The user needs to obtain microbiology data, and then copy & paste this data file into the same folder as the AMASS.bat file."
-    method_page1_10 = "<b>" + "− [Optional] Hospital admission data file (hospital_admission_data)" + "</b>"
+    method_page1_10 = "<b>" + "− [Optional] Hospital admission data file (hospital_admission_data in .csv or .xlsx file format)" + "</b>"
     method_page1_11 = "If available, the user could obtain hospital admission data, and then copy & paste this data file into the same folder as the AMASS.bat file."
     method_page1_12 = add_blankline + "<b>" + "Not required:" + "</b>"
-    method_page1_13 = "<b>" + "− Internet to run AMASS application" + "</b>"
-    method_page1_14 = "The AMASS application will run offline. No data are transferred while the application is running and reports are being generated; the reports are in PDF format (do not contain any patient identifier) and can be shared under the user's jurisdiction."
-    method_page1_15 = "<b>" + "− R and Python" + "</b>"
-    method_page1_16 = "The download package (AMASSv3.0.zip) included Python portable and their libraries that the AMASS application requires. " + \
-                    "The user does not need to install any programme before using the AMASS. " + \
-                    "The user also does not have to uninstall Python if the computer already has the programme installed. " + \
-                    "The user does not need to know how to use Python."
+    method_page1_13 = "<b>" + "− Internet to run the AMASS application" + "</b>"
+    method_page1_14 = "The AMASS application will run offline. " + \
+                      "No data are transferred while the application is running and reports are being generated. " + \
+                      "The automatically generated reports are in PDF format (do not contain any patient identifier) and can be shared under the user's jurisdiction."
     method_page1 = [method_page1_1, method_page1_2, method_page1_3, method_page1_4, method_page1_5, 
                     method_page1_6, method_page1_7, method_page1_8, method_page1_9, method_page1_10, 
-                    method_page1_11, method_page1_12, method_page1_13, method_page1_14, method_page1_15, 
-                    method_page1_16]
+                    method_page1_11, method_page1_12, method_page1_13, method_page1_14]
     ##Page2
-    method_page2_1_1 = green_op + "<b>" + "Note:" + "</b>" + green_ed
-    method_page2_1_2 = green_op + "[1] Please ensure that the file names of microbiology data file (microbiology_data) and the hospital admission data file (hospital_admission_data) are identical to what is written here. " + \
-                    "Please make sure that all are lower−cases with an underscore '_' at each space." + green_ed
-    method_page2_1_3 = green_op + "[2] Please ensure that both microbiology and hospital admission data files have no empty rows before the row of the variable names (i.e. the variable names are the first row in both files)." + green_ed
-    method_page2_1_4 = green_op + "[3] For the first run, an user may need to fill the data dictionary files to make sure that the AMASS application understands your variable names and values." + green_ed
+    method_page2_1_1 = "<b>" + "− Python" + "</b>"
+    method_page2_1_2 = "The download package (AMASSv3.0.zip) included Python portable and their libraries that the AMASS application requires. " + \
+                      "The user does not need to install any programme before using the AMASS. " + \
+                      "The user also does not have to uninstall Python if the computer already has the programme installed. " + \
+                      "The user does not need to know how to use Python."
+    method_page2_1_3 = "<b>" + "− SaTScan" + "</b>"
+    method_page2_1_4 = "The download package (AMASSv3.0.zip) included batch SaTScan. " + \
+                      "The user does not need to install SaTScan or any programme before using the AMASSv3.0. " + \
+                      "The user does not need to know how to use SaTScan. " + \
+                      "The user can configurate and edit the parameter values to run the cluster detection analyses through the file provided under the Configuration folder. "
     method_page2_1 = [method_page2_1_1, method_page2_1_2, method_page2_1_3, method_page2_1_4]
-    method_page2_2_1 = "AMASS uses a tier−based approach. In cases when only the microbiology data file with the results of culture positive samples is available, only section one and two would be generated for users. " + \
-                    "Section three would be generated only when data on admission date are available. " + \
-                    "This is because these data are required for the stratification by origin of infection. " + \
-                    "Section four would be generated only when data of specimens with culture negative (no microbial growth) are available in the microbiology data. " + \
-                    "This is because these data are required for the AMR frequency approach. " + \
-                    "Section five would be generated only when both data of specimens with culture negative and admission date are available. " + \
-                    "Section six would be generated only when mortality data are available."
-    method_page2_2_2 = add_blankline + "Mortality was calculated from the number of in−hospital deaths (numerator) over the total number of patients with blood culture positive for the organism (denominator). " + \
-                    "Please note that this is the all−cause mortality calculated using the outcome data in the data file, and may not necessarily represent the mortality directly due to the infections."
-    method_page2_2 = [method_page2_2_1, method_page2_2_2]
-    method_page2_3_1 = "<b>" + "How to use data dictionary files" + "</b>"
-    method_page2_3_2 = "In cases when variable names in the microbiology and hospital admission data files were not the same as the one that AMASS used, the data dictionary files could be edited. " + \
+
+    method_page2_2_1 = add_blankline + green_op + "<b>" + "Note:" + "</b>" + green_ed
+    method_page2_2_2 = green_op + "[1] Please ensure that the file names of microbiology data file (microbiology_data) and the hospital admission data file (hospital_admission_data) are identical to what is written here. " + \
+                       "Please make sure that all are lower−cases with an underscore '_' at each space." + green_ed
+    method_page2_2_3 = green_op + "[2] Please ensure that both microbiology and hospital admission data files have no empty rows. " + \
+                       "For example, please do not add an empty row before the row of the variable names, which are the first row in both files)." + green_ed
+    method_page2_2_4 = green_op + "[3] For the first run, a user may need to fill the data dictionary files to make sure that the AMASS application understands your variable names and values." + green_ed
+    method_page2_2 = [method_page2_2_1, method_page2_2_2, method_page2_2_3, method_page2_2_4]
+
+    method_page2_3_1 = add_blankline + "AMASS uses a tier−based approach. " + \
+                       "In cases when only the microbiology data file with the results of culture-negative specimens is not available, only section one, two, and three would be generated for users. " + \
+                       "Section three would be generated only when data on admission date are available. " + \
+                       "This is because these data are required for the stratification by origin of infection. " + \
+                       "Section four would be generated only when data of specimens with culture negative (no microbial growth) are available in the microbiology data. " + \
+                       "This is because these data are required for calculating the AMR frequency. " + \
+                       "Section five would be generated only when both data of specimens with culture negative and admission date are available. " + \
+                       "Section six would be generated only when mortality data are available."
+    method_page2_3_2 = add_blankline + "Mortality was calculated from the number of in−hospital deaths (numerator) over the total number of patients with blood culture positive for the organism (denominator). " + \
+                       "Please note that this is the all−cause mortality calculated using the outcome data in the data file, and may not necessarily represent the mortality directly due to the infections."
+    method_page2_3 = [method_page2_3_1, method_page2_3_2]
+    method_page2 = method_page2_1 + method_page2_2 + method_page2_3
+
+    ##Page3
+    method_page3_1_1 = "To detect spatio-temporal clusters of antimicrobial resistant bacterial species, the AMASS-SaTScan used the retrospective space-time uniform model of the SaTScan (http://www.satscan.org). " + \
+                       "The cluster detection was based on the first hospital-origin resistant isolate per organism per patient per evaluation period. " + \
+                       "Analyses were conducted separately for each of the seven species-groups, including MRSA, VREfs, VREfm, CREC, CRKP, CRPA, and CRAB identified from blood specimens only and from all types of specimens. " + \
+                       "Both ward names (or ward identifiers) and resistant profiles were defined as “location” in the SaTScan to allow the detection of spatio-temporal cluster of periods with a higher than the expected frequency of a specific resistance profile. " + \
+                       "The AMASS-SaTScan assumed that each ward was independent. " + \
+                       "In case that the ward name variable is not available (or some of the ward names are not filled in the dictionary file for wards), the whole hospital (or the wards that had no data in the dictionary files for wards) would be considered as a single space. " + \
+                       "The total resistance isolates were used as the denominator. " + \
+                       "Hypothesis testing was conducted using Monte Carlo simulations."
+    method_page3_1_2 = add_blankline + "<b>" + "How to use data dictionary files" + "</b>"
+    method_page3_1_3 = "In cases when variable names in the microbiology and hospital admission data files were not the same as the one that AMASS used, the data dictionary files could be edited. " + \
                     "The raw microbiology and hospital admission data files were to be left unchanged. " + \
                     "The data dictionary files provided could be edited and re−used automatically when the microbiology and hospital admission data files were updated and the AMASS.bat were to be double−clicked again (i.e. the data dictionary files would allow the user to re−analyze data files without the need to adjust variable names and data value again every time)."
-    method_page2_3 = [method_page2_3_1, method_page2_3_2]
-    ##Page3
-    method_page3_1_1 = "For example:"
-    method_page3_1_2 = "If variable name for 'hospital number' is written as 'hn' in the raw data file, the user would need to add 'hn' in the cell next to 'hospital_number'. " + \
+    method_page3_1_4 = add_blankline + "For example:"
+    method_page3_1_5 = "If variable name for 'hospital number' is written as 'hn' in the raw data file, the user would need to add 'hn' in the cell next to 'hospital_number'. " + \
                     "If data value for blood specimens is defined by 'Blood−Hemoculture' in the raw data file, then the user would need to add 'Blood−Hemoculture' in the cell next to 'blood_specimen'."
-    method_page3_1 = [method_page3_1_1, method_page3_1_2]
-    method_page3_2 = ["<b>" + "Dictionary file (dictionary_for_microbiology_data.xlsx) may show up as in the table below:" + "</b>"]
+    method_page3_1 = [method_page3_1_1, method_page3_1_2, method_page3_1_3, method_page3_1_4, method_page3_1_5]
+    ##Page4
+    method_page4_1 = ["<b>" + "Dictionary file (dictionary_for_microbiology_data.xlsx) may show up as in the table below:" + "</b>"]
     table_med_1 = [["Variable names used in AMASS", "Variable names used in \n your microbiology data file", "Requirements"],
                 ["Don't change values in this \n column, but you can add rows \n with similar values if you need", 
                     "Change values in this column to \n represent how variable names \n are written in your raw \n microbiology data file", ""], 
                 ["hospital_number", "", "Required"], 
                 ["Values described in AMASS", "Values used in your \n microbiology data file", "Requirements"], 
                 ["blood_specimen", "", "Required"]]
-
-    method_page3_3 = ["<b>" + "Please fill in your variable names as follows:" + "</b>"]
+    method_page4_2 = ["<b>" + "Please fill in your variable names as follows:" + "</b>"]
     table_med_2 = [["Variable names used in AMASS", "Variable names used in \n your microbiology data file", "Requirements"],
                 ["Don't change values in this \n column, but you can add rows \n with similar values if you need", 
                     "Change values in this column to \n represent how variable names \n are written in your raw \n microbiology data file", ""], 
                 ["hospital_number", "hn", "Required"], 
                 ["Values described in AMASS", "Values used in your \n microbiology data file", "Requirements"], 
                 ["blood_specimen", "Blood−Hemoculture", "Required"]]
-
-    method_page3_4 = ["Then, save the file. For every time the user double−clicked AMASS.bat, the application would know that the variable named 'hn' is similar to 'hospital_number' and represents the patient identifier in the analysis."]
-    ##Page4
-    method_page4_1 = ["<b>" + "Organisms included for the AMR Surveillance Report:" + "</b>"] 
-    method_page4_2 = []
+    method_page4_3 = ["Then, save the file. For every time the user double−clicked AMASS.bat, the application would know that the variable named 'hn' is similar to 'hospital_number' and represents the patient identifier in the analysis."]
+    
+    ##Page5
+    method_page5_1 = ["<b>" + "Organisms included for the AMR Surveillance Report:" + "</b>"] 
+    method_page5_2 = []
     icountorg = len(lst_org_format)
     ihalf = m.ceil(icountorg/2)
     for i in range(icountorg):
         if i < ihalf:
-            method_page4_1.append("− " + lst_org_format[i])
+            method_page5_1.append("− " + lst_org_format[i])
         else:
-            method_page4_2.append("− " + lst_org_format[i])
+            method_page5_2.append("− " + lst_org_format[i])
+    method_page5_1.append("The eight organisms and antibiotics included in the report were selected based on the global priority list of antibiotic resistant bacteria and Global Antimicrobial Resistance Surveillance System (GLASS) of WHO [1,2].")
 
-    method_page4_1.append("The eight organisms and antibiotics included in the report were selected based on the global priority list of antibiotic resistant bacteria and Global Antimicrobial Resistance Surveillance System (GLASS) of WHO [1,2].")
-    method_page4_5_1 = "<b>" + "Definitions:" + "</b>"
-    method_page4_5_2 = "The definitions of infection origin proposed by the WHO GLASS was used [1]. In brief, community−origin bloodstream infection (BSI) was defined for patients in the hospital within the first two calendar days of admission when the first blood culture positive specimens were taken. " + \
+    method_page5_5_1 = "<b>" + "Definitions:" + "</b>"
+    method_page5_5_2 = "The definitions of infection origin proposed by the WHO GLASS was used [1]. In brief, community−origin bloodstream infection (BSI) was defined for patients in the hospital within the first two calendar days of admission when the first blood culture positive specimens were taken. " + \
                     "Hospital−origin BSI was defined for patients in the hospital longer than the first two calendar days of admission when the first blood culture positive specimens were taken. " + \
                     "In cases when the user had additional data on infection origin defined by infection control team or based on referral data, the user could edit the data dictionary file (variable name \'infection_origin\') and the AMASS application would use the data of that variable to stratify the data by origin of infection instead of the above definition. " + \
                     "However, in cases when data on infection origin were not available (as in many hospitals in LMICs), the above definition would be calculated based on admission date and specimen collection date (with cutoff of 2 calendar days) and used to classify infections as community−origin or hospital−origin."
-    method_page4_5_3 = "<b>" + "De−duplication:" + "</b>"
-    method_page4_5_4 = "When more than one blood culture was collected during patient management, duplicated findings of the same patient were excluded (de−duplicated). " + \
+    method_page5_5_3 = "<b>" + "De−duplication:" + "</b>"
+    method_page5_5_4 = "When more than one blood culture was collected during patient management, duplicated findings of the same patient were excluded (de−duplicated). " + \
                     "Only one result was reported for each patient per sample type (blood) and surveyed organisms (listed above)." + \
                     "For example, if two blood cultures from the same patient had <i>E. coli</i>, only the first would be included in the report. " + \
                     "If there was growth of <i>E. coli</i> in one blood culture and of <i>K. pneumoniae</i> in the other blood culture, then both results would be reported. " + \
                     "One would be for the report on <i>E. coli</i> and the other one would be for the report on <i>K. pneumoniae</i>."
-    method_page4_5 = [method_page4_5_1, method_page4_5_2, add_blankline + method_page4_5_3, method_page4_5_4]
+    method_page5_5 = [method_page5_5_1, method_page5_5_2, add_blankline + method_page5_5_3, method_page5_5_4]
     ##Backcover
     backcover_1_1 = "<b>" + "References:" + "</b>"
     backcover_1_2 = "[1] World Health Organization (2018) Global Antimicrobial Resistance Surveillance System (GLASS) Report. Early implantation 2016−2017. http://apps.who.int/iris/bitstream/handle/10665/259744/9789241513449−eng.pdf. (accessed on 3 Dec 2018)"
@@ -1522,13 +1540,17 @@ def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strfti
     ARC.report_context(c,method_page1, 1.0*inch, 0.7*inch, 460, 680, font_size=11)
     canvas_printpage(c,startpage,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE2 ##########
-    ARC.report_context(c,method_page2_1, 1.0*inch, 8.0*inch, 460, 200, font_size=11)
-    ARC.report_context(c,method_page2_2, 1.0*inch, 4.0*inch, 460, 300, font_size=11)
-    ARC.report_context(c,method_page2_3, 1.0*inch, 1.5*inch, 460, 200, font_size=11)
+    ARC.report_context(c,method_page2, 1.0*inch, 1.15*inch, 460, 700, font_size=11)
+    # ARC.report_context(c,method_page2_1, 1.0*inch, 6.8*inch, 460, 300, font_size=11)
+    # ARC.report_context(c,method_page2_2, 1.0*inch, 3.5*inch, 460, 300, font_size=11)
+    # ARC.report_context(c,method_page2_3, 1.0*inch, 1.0*inch, 460, 300, font_size=11)
+    # ARC.report_context(c,method_page3_1, 1.0*inch, 0.7*inch, 460, 170, font_size=11)
     canvas_printpage(c,startpage+1,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ########## METHOD: PAGE3 ##########
-    ARC.report_context(c,method_page3_1, 1.0*inch, 8.7*inch, 460, 120, font_size=11)
-    ARC.report_context(c,method_page3_2, 1.0*inch, 8.0*inch, 460, 50, font_size=11)
+    ARC.report_context(c,method_page3_1, 1.0*inch, 2.4*inch, 460, 600, font_size=11)
+    canvas_printpage(c,startpage+2,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage)
+    ########## METHOD: PAGE4 ##########
+    ARC.report_context(c,method_page4_1, 1.0*inch, 10.0*inch, 460, 50, font_size=11)
     table_draw = ARC.Table(table_med_1,  style=[('FONT',(0,0),(-1,-1),'Helvetica'),
                                             ('FONT',(0,0),(2,0),'Helvetica-Bold'),
                                             ('FONT',(0,3),(-1,-2),'Helvetica-Bold'),
@@ -1539,8 +1561,8 @@ def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strfti
                                             ('ALIGN',(0,0),(-1,-1),'CENTER'),
                                             ('VALIGN',(0,0),(-1,-1),'MIDDLE')])
     table_draw.wrapOn(c, 500, 300)
-    table_draw.drawOn(c, 1.0*inch, 6.0*inch)
-    ARC.report_context(c,method_page3_3, 1.0*inch, 5.0*inch, 460, 50, font_size=11)
+    table_draw.drawOn(c, 1.0*inch, 8.0*inch)
+    ARC.report_context(c,method_page4_2, 1.0*inch, 7.0*inch, 460, 50, font_size=11)
     table_draw = ARC.Table(table_med_2,  style=[('FONT',(0,0),(-1,-1),'Helvetica'),
                                             ('FONT',(0,0),(2,0),'Helvetica-Bold'),
                                             ('FONT',(0,3),(-1,-2),'Helvetica-Bold'),
@@ -1551,22 +1573,24 @@ def method(c,logger,lst_org_format,startpage,lastpage, today=date.today().strfti
                                             ('ALIGN',(0,0),(-1,-1),'CENTER'),
                                             ('VALIGN',(0,0),(-1,-1),'MIDDLE')])
     table_draw.wrapOn(c, 500, 300)
-    table_draw.drawOn(c, 1.0*inch, 3.0*inch)
-    ARC.report_context(c,method_page3_4, 1.0*inch, 1.7*inch, 460, 80, font_size=11)
-    canvas_printpage(c,startpage+2,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
-    ########## METHOD: PAGE4 ##########
-    ARC.report_context(c,method_page4_1, 1.0*inch, 9.2*inch, 460, 120, font_size=11)
-    ARC.report_context(c,method_page4_2, 4.0*inch, 8.95*inch, 460, 120, font_size=11)
-    ARC.report_context(c,method_page4_5, 1.0*inch, 3.0*inch, 460, 450, font_size=11)
+    table_draw.drawOn(c, 1.0*inch, 5.2*inch)
+    ARC.report_context(c,method_page4_3, 1.0*inch, 3.8*inch, 460, 80, font_size=11)
+    # ARC.report_context(c,method_page5_1, 1.0*inch, 1.4*inch, 460, 180, font_size=11)
+    # ARC.report_context(c,method_page5_2, 4.0*inch, 2.0*inch, 460, 120, font_size=11)
+    canvas_printpage(c,startpage+3,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
+    ########## METHOD: PAGE5 ##########
+    ARC.report_context(c,method_page5_1, 1.0*inch, 8.3*inch, 460, 180, font_size=11)
+    ARC.report_context(c,method_page5_2, 4.0*inch, 8.9*inch, 460, 120, font_size=11)
+    ARC.report_context(c,method_page5_5, 1.0*inch, 2.1*inch, 460, 450, font_size=11)
     u = inch/10.0
     c.setLineWidth(2)
     c.setStrokeColor(black)
     p = c.beginPath()
-    p.moveTo(70,220) # start point (x,y)
-    p.lineTo(7.45*inch,220) # end point (x,y)
+    p.moveTo(70,190) # start point (x,y)
+    p.lineTo(7.45*inch,190) # end point (x,y)
     c.drawPath(p, stroke=1, fill=1)
-    ARC.report_context(c,backcover_1, 1.0*inch, 1.0*inch, 460, 150, font_size=9)
-    canvas_printpage(c,startpage+3,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
+    ARC.report_context(c,backcover_1, 1.0*inch, 0.5*inch, 460, 150, font_size=9)
+    canvas_printpage(c,startpage+4,lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
 
 def investor(c,logger,startpage,lastpage, today=date.today().strftime("%d %b %Y"),ipagemode=AC.CONST_REPORTPAGENUM_MODE,ssectionanme="",isecmaxpage=1):
     ##paragraph variables
@@ -1725,7 +1749,7 @@ def generate_amr_report(df_dict_micro,dict_orgcatwithatb,dict_orgwithatb_mortali
             ipage_annexC = REP_ANNEX_C.get_annexC_roughtotalpage(logger)
         except:
             pass
-    ipage_method = 4
+    ipage_method = 5
     ipage_investor = 1
     #Cal page for sec2, 3 and 63 total page using to cal start page in sec 3, 4 and Annex A
     if AC.CONST_REPORTPAGENUM_MODE != 3: #mode 1 and 2 need to calculate total page per section (Mode-3 total page per section is fix regarding AMASS2.0)
