@@ -199,14 +199,9 @@ dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_N
                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"]}
 #For setting criteria for selecting antibioitcs in profiling step
 #i.e. select an antibiotic when 0.1<resistant_rate<99.9 >>>>> {"minimum_tested_antibiotic_rate":"0.1","maximum_tested_antibiotic_rate":"99.9"}
-dict_configuration_profile = {CONST_VALUE_MIN_TESTATBRATE:"profiling_minimum_tested_isolate_for_antibiotic",
-                              CONST_VALUE_MAX_TESTATBRATE:"profiling_maximum_tested_isolate_for_antibiotic",
-                              CONST_VALUE_MIN_RRATE      :"profiling_minimum_resistant_isolate_for_antibiotic",
-                              CONST_VALUE_MAX_RRATE      :"profiling_maximum_resistant_isolate_for_antibiotic",
-                              CONST_VALUE_MIN_SRATE      :"profiling_minimum_susceptible_isolate_for_antibiotic",
-                              CONST_VALUE_MAX_SRATE      :"profiling_maximum_susceptible_isolate_for_antibiotic"}
+dict_configuration_profile = {CONST_VALUE_MIN_TESTATBRATE:"profiling_minimum_tested_isolate_for_antibiotic"}
 
-dict_configuration_profile_default = {CONST_VALUE_MIN_TESTATBRATE:"90.1",
+dict_configuration_profile_default = {CONST_VALUE_MIN_TESTATBRATE:"90",
                                       CONST_VALUE_MAX_TESTATBRATE:"100",
                                       CONST_VALUE_MIN_RRATE      :"0.1",
                                       CONST_VALUE_MAX_RRATE      :"99.9",
