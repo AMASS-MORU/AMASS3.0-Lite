@@ -917,11 +917,17 @@ try:
             except Exception as e:
                 logger.exception(e)
                 pass
-        if ALogL.checkpoint(age_i):
+        if (ALogL.checkpoint(age_i) and (len(age_merge) > 0)):
             try:
                 ts(c,age_merge, [list(age_merge.columns)], marked_age, "Table S5", "List of data values of variable recorded for \"age\" in your hospital admission data file")
                 age_merge.columns = [w.replace("\n"," ") for w in age_merge.columns.tolist()]
                 age_merge.to_excel(AC.CONST_PATH_RESULT + "logfile_TS5_age.xlsx",encoding="UTF-8",index=False,header=True)
+            except Exception as e:
+                logger.exception(e)
+                pass
+        else:
+            try:
+                tsnodata(c,"Table S5", "List of data values of variable recorded for \"age\" in your hospital admission data file","No age or birth date column in hospital admission data file defined in dictionary or the column defined contains blank data.")
             except Exception as e:
                 logger.exception(e)
                 pass
