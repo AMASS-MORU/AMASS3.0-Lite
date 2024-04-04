@@ -379,7 +379,7 @@ def create_df_weekday(s_studydate="2021/01/01", e_studydate="2021/12/31", fmt_st
     de_monday = (de - timedelta(days=de.weekday()))
     numweek = math.ceil((de_monday - ds_monday).days / 7)
     df = pd.DataFrame("",
-                        index=range(0,numweek), 
+                        index=range(0,numweek+1), 
                         columns=[col_yearweek,col_sweekday])
     for idx in df.index:
         dtmp_monday = ds_monday + timedelta(days=7*idx)
