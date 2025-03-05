@@ -72,13 +72,13 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             df_all_sp_amr = select_resistantProfile(df=df_all_sp, d_ast_val=lst_value)
             df_blo_sp_amr[ACC.CONST_COL_AMRPATHOGEN] = lst_value[-1] #named CRAB
             df_all_sp_amr[ACC.CONST_COL_AMRPATHOGEN] = lst_value[-1] #named CRAB
-            df_blo_sp_amr.to_excel("./df_blo_sp_amr_"+lst_value[-1]+".xlsx")
-            df_all_sp_amr.to_excel("./df_all_sp_amr_"+lst_value[-1]+".xlsx")
+            df_blo_sp_amr.to_excel(AC.CONST_PATH_TEMPWITH_PID+"df_blo_sp_amr_"+lst_value[-1]+".xlsx")
+            df_all_sp_amr.to_excel(AC.CONST_PATH_TEMPWITH_PID+"df_all_sp_amr_"+lst_value[-1]+".xlsx")
             #deduplicating data
             df_blo_sp_amr_dedup = fn_deduplicateannexc_hospmico(df_blo_sp_amr,ACC.CONST_COL_AMRPATHOGEN,lst_value[-1])
             df_all_sp_amr_dedup = fn_deduplicateannexc_hospmico(df_all_sp_amr,ACC.CONST_COL_AMRPATHOGEN,lst_value[-1])
-            df_blo_sp_amr_dedup.to_excel("./df_blo_sp_amr_dedup_"+lst_value[-1]+".xlsx")
-            df_all_sp_amr_dedup.to_excel("./df_all_sp_amr_dedup_"+lst_value[-1]+".xlsx")
+            df_blo_sp_amr_dedup.to_excel(AC.CONST_PATH_TEMPWITH_PID+"df_blo_sp_amr_dedup_"+lst_value[-1]+".xlsx")
+            df_all_sp_amr_dedup.to_excel(AC.CONST_PATH_TEMPWITH_PID+"df_all_sp_amr_dedup_"+lst_value[-1]+".xlsx")
             #selecting HO for AnnexC
             df_blo_sp_amr_dedup_ho = df_blo_sp_amr_dedup.loc[df_blo_sp_amr_dedup[AC.CONST_NEWVARNAME_COHO_FINAL]==1,:]
             df_all_sp_amr_dedup_ho = df_all_sp_amr_dedup.loc[df_all_sp_amr_dedup[AC.CONST_NEWVARNAME_COHO_FINAL]==1,:]
