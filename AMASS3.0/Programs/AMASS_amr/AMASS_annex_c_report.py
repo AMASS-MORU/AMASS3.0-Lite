@@ -195,7 +195,32 @@ def annexc_table_withtotalrow_rotate(df,rh):
                            ('FONT',(0,-1),(-1,-1),'Helvetica-Bold'),
                            ('BACKGROUND',(0,-1),(-1,-1),colors.lightgrey)])
                            #('ROWHEIGHT', (0, 0), (-1, -1), 1.5*inch)])
-
+def annexc_table_nototalrow_rotate_ast(df,lst_style_bg,rh):
+    #BACGROUD, (FIRSTCOL,FIRSTROW), (LASTCOL,LASTROW), color - This can set to overlap, last one will be on top of previous one
+    lst_style   =[('FONT',(0,0),(-1,-1),'Helvetica-Bold'),
+                  ('FONT',(0,1),(-1,-1),'Helvetica'),
+                  ('FONTSIZE',(0,0),(-1,0),9),
+                  ('FONTSIZE',(0,1),(-1,-1),7.5),
+                  ('GRID',(0,0),(-1,-1),0.5,colors.darkgrey),
+                  ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+                  ('ALIGN',(0,0),(-1,-1),'CENTER'),
+                  ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+                  ('ALIGN',(1,0),(-1,0),'CENTER'),
+                  ('VALIGN',(1,0),(-1,0),'BOTTOM')]
+    if len(lst_style_bg)>0:
+        lst_style = lst_style + lst_style_bg
+    return Table(df,rowHeights=rh,style=lst_style)
+def annexc_continue_bgstyle(df=pd.DataFrame(), str_passast=ACC.CONST_VALUE_PASSEDATB):
+    lst_style_bg = []
+    if len(df)>0:
+        for icol in range(len(df.columns)):
+            if df.iloc[-1,icol] == str_passast: #if that antibiotic pass the criteria
+                lst_style_bg.append(('BACKGROUND', (icol, 0), (icol, -1), colors.yellowgreen))
+            else:
+                pass
+    else:
+        pass
+    return lst_style_bg
 #Assign profile color done once for each org-atb
 def get_colorlist():
     tab10_palette = sns.color_palette("tab10")
@@ -526,7 +551,7 @@ def cover(c,logger,strgendate):
     REP_AL.report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
     REP_AL.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
     c.showPage()
-def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):
+def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ast=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):
     #noclustertext = "There is no cluster with p-value < " +str(pvaluelimit) + "."
     #shaveclustertext = "Table of clusters with p-value < " +str(pvaluelimit) + "."
     style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=9,alignment=TA_CENTER)
@@ -540,8 +565,13 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
     sfootnote_topward = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
     sfootnote_topward = sfootnote_topward + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
     sfootnote_topward = sfootnote_topward + "Only wards with a cluster signal identified or having the top three highest number of patients are displayed. "
+    sfootnote_ast = sfootnote + "R was number of patients who had resistant to an antibiotic, I was number of patients who had intermediate to an antibiotic, S was number of patients who had susceptible to an antibiotic, ND was number of patients who had no AST result available for an antibiotic, and - was antibiotic that had no AST result available and not included for the cluster signals. "
+    sfootnote_ast = sfootnote_ast + "Criteria 1 (C1): the proportion of patients who had known AST results against the antibiotic among identified pathogen isolates exceeded a threshold. "
+    sfootnote_ast = sfootnote_ast + "Criteria 2 (C2): the proportion of patients who had R or S ranged between 0.1% and 99.9%. "
+    sfootnote_ast = sfootnote_ast + "Summary: summary results of antibiotic which passed both criteria and included to cluster signals. "
     lst_footnote = [sfootnote]
     lst_footnote_topward = [sfootnote_topward]
+    lst_footnote_ast     = [sfootnote_ast]
     lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
     
     stotal_patient = "0"
@@ -570,6 +600,58 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                    1.5*inch, 8.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
     REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile}' + "</i>"],
                    1.5*inch, 8.7*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+        #--------------------------------------------------------------------------------------------------------------
+    #AST
+    try:
+        if len(df_ast) > 0:
+            #rename column
+            try:
+                df_ast = df_ast.iloc[:,:-1]
+                df_ast.rename(columns={ACC.CONST_COL_PROFILEID:"AST\nresults"}, inplace=True)
+            except Exception as e:
+                pass
+            #prepare rotate column header
+            lst_column_head = []
+            atbname_c = 0
+            for scol in df_ast.columns.tolist():
+                if len(scol) > atbname_c:
+                    atbname_c = len(scol)
+                if scol in list_profile_atb_column:
+                    lst_column_head = lst_column_head + [ROTATETEXT(scol)]
+                else:
+                    lst_column_head = lst_column_head + [scol]
+            #print table
+            iheader_h = 0.068*atbname_c
+            #Print report
+            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of AST results" + "</b>"],                                       
+                           1.0*inch, 8.2*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+            df1 = df_ast[:ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
+            ioffset = 0.25*(len(df1)) + iheader_h
+            lst_df = [lst_column_head] + df1.values.tolist()
+            rh = [iheader_h*inch]
+            for i in range(len(df1)):
+                rh = rh + [0.25*inch]
+            lst_style_bg = annexc_continue_bgstyle(df=df_ast, str_passast=ACC.CONST_VALUE_PASSEDATB)
+            table_draw = annexc_table_nototalrow_rotate_ast(lst_df,lst_style_bg,rh)
+            table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
+            table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (8.2-ioffset)*inch)
+            # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_ast, 1.0*inch, 0.3*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            df_ast = df_ast[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
+            page = page + 1
+        else:
+            REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of AST results" + "</b>"], 
+                   1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+            REP_AL.report_context(canvas_sup_rpt, ["None"],
+                           1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+            REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+            page = page + 1
+    except:
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+        REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
+        page = page + 1
     #--------------------------------------------------------------------------------------------------------------
     #Profile
     try:
@@ -619,8 +701,9 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             #print table
             iheader_h = 0.068*atbname_c
             #Print report
+            REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
             REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles" + "</b>"],                                       
-                           1.0*inch, 8.2*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                           1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
             df1 = df_profile[:ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
             ioffset = 0.25*(len(df1)) + iheader_h
             lst_df = [lst_column_head] + df1.values.tolist()
@@ -629,7 +712,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                 rh = rh + [0.25*inch]
             table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
             table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-            table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (8.2-ioffset)*inch)
+            table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch)
             REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
@@ -649,7 +732,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
                     #table_draw._awgH[0] = iheader_h*inch
                     table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-                    table_draw.drawOn(canvas_sup_rpt, 1.1*inch, (9.5-ioffset)*inch)
+                    table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch)
                     REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
@@ -1018,6 +1101,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     dict_org_profilecolor = {} # key is org value is dict of profile and it color assigned -> for cluster plus x profile with most cases
     dict_org_profilecolor_onlycluster = {} # key is org value is dict of profile and it color assigned
     dict_list_org_profile_sortbycase = {}
+    dict_df_ast_pdf_org_sp = {}
     for sh_org in ACC.dict_org.keys():
         df_pc= pd.DataFrame()
         try:
@@ -1026,6 +1110,13 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             AL.printlog("Warning : Unable to profile information at: "+ AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PROFILE+"_"+ str.upper(sh_org) +".xlsx" + " for " + str(sh_org),True,logger)
             logger.exception(e)
         dict_df_org_profile_config[sh_org] = df_pc
+        #AST
+        df_ast= pd.DataFrame()
+        try:
+            df_ast= pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+ str.upper(sh_org) +".xlsx")
+        except Exception as e:
+            AL.printlog("Warning : Unable to profile information at: "+ AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+ str.upper(sh_org) +".xlsx" + " for " + str(sh_org),True,logger)
+            logger.exception(e)
         #loop for load data to df and prepare dict color for all profile matching p-value condition
         #Global use for 
         dict_df_sp = {}
@@ -1035,6 +1126,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         dict_profilecolor = {}
         dict_profilecolor_onlycluster = {}
         dict_list_sp_profile_sortbycase = {}
+        dict_df_ast_temp_sp = {}
         #Local use
         list_cluster_profile = []
         list_top_num_case_profile = []
@@ -1129,6 +1221,14 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             except Exception as e:
                 AL.printlog("Warning : Unable to load/reformat baseline data at: "+ sbaselinefile + " for " + str(sh_org) + ":" + str(sp),True,logger)
                 logger.exception(e)
+            
+            #AST
+            try:
+                dict_df_ast_temp_sp[sp] = df_ast.loc[df_ast[AC.CONST_NEWVARNAME_AMASSSPECTYPE]==sp,:]
+            except Exception as e:
+                AL.printlog("Warning : Unable to load ast_information.xlsx" + " for " + str(sh_org) + ":" + str(sp),True,logger)
+                logger.exception(e)
+
             dict_df_sp_baseline[sp] = temp_df
             dict_df_sp_baseline_sum[sp] = temp_df_sum
             dict_df_sp_profile_sum[sp] = temp_df_profile_sum
@@ -1149,6 +1249,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         dict_list_org_profile_sortbycase[sh_org] = dict_list_sp_profile_sortbycase 
         dict_org_profilecolor[sh_org] = dict_profilecolor
         dict_org_profilecolor_onlycluster[sh_org] = dict_profilecolor_onlycluster
+        dict_df_ast_pdf_org_sp[sh_org] = dict_df_ast_temp_sp
     
     #------------------------------------------------------------------------------------------------
     #Print main annexC
@@ -1338,12 +1439,19 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                             AL.printlog("Warning : Unable to generate graph: "+ str(sh_org) + ":" + str(sp),True,logger)
                             logger.exception(e)   
                 #AL.printlog("Finish generating base line graph per organism : " + str(sp) + " of " + str(sh_org) ,False,logger)
+                df_ast = pd.DataFrame()
+                try:
+                    df_ast = dict_df_ast_pdf_org_sp[sh_org][sp]
+                except Exception as e:
+                    AL.printlog("Warning : Unable to generate Table for AST results: "+ str(sh_org) + ":" + str(sp),True,logger)
+                    logger.exception(e)
                 
                 page = prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,
                                                         sh_org=sh_org,spec=sp,
                                                         df=df_cluster,
                                                         df_baseline=df_baseline,
                                                         df_profile=df_profile_sum_det,
+                                                        df_ast=df_ast,
                                                         df_ward=df_ward_sum,
                                                         list_profile_atb_column=list_profile_atb_column)
             except Exception as e:

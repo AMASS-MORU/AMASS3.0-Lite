@@ -5,7 +5,7 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: CHALIDA RAMGSIWUTISAK
 # Created on: 30 AUG 2023
-# Last update on: 12 MAR 2025
+# Last update on: 31 MAR 2025
 import AMASS_amr_const as AC
 import pandas as pd #for creating and manipulating dataframe
 CONST_RUN_ANNEXC_WITH_NOHOSP = False
@@ -54,6 +54,10 @@ CONST_COL_NUMWARD = "Number_of_wards"
 #values for AMASS microbiology_data.xlsx
 CONST_PRENAME_PROFILEID = "profile_"
 CONST_VALUE_WARD = "ward"
+#columns for ast_information.xlsx
+CONST_VALUE_PASSEDATB   ="P"
+CONST_VALUE_NOTPASSEDATB="F"
+CONST_VALUE_NOTTESTEDATB="-"
 #columns for profile_information.xlsx
 CONST_COL_NUMPROFILE_ALL="No. of patients with a clinical specimen culture positive"
 CONST_COL_NUMPROFILE_BLO="No. of patients with blood culture positive"
@@ -96,6 +100,7 @@ CONST_FILENAME_HO_DEDUP= "AnnexC_dedup_profile"
 CONST_FILENAME_ORIPARAM= ".\Programs\AMASS_amr\satscan_param.prm"
 CONST_FILENAME_NEWPARAM= "satscan_param"
 CONST_FILENAME_PROFILE = "profile_information"
+CONST_FILENAME_AST = "ast_information"
 CONST_FILENAME_LOCATION= "satscan_location"
 CONST_FILENAME_RESULT  = "satscan_results"
 CONST_FILENAME_INPUT   = "satscan_input"
@@ -187,7 +192,7 @@ dict_configuration_prm_default = {"CaseFile="                               :"sa
 #2 antibiotics >>> "organism_staphylococcus_aureus":[CONST_NEWVARNAME_PREFIX_RIS+"Cefoperazone_and_sulbactam",CONST_NEWVARNAME_PREFIX_RIS+"Trimethoprim"]
 dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin", 
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ofloxacin",
-                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Gentamycin",
+                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Gentamicin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Amikacin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Sulfamethoxazole_and_trimethoprim",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Rifampicin",
