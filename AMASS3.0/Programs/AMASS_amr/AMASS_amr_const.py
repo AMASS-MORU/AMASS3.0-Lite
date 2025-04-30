@@ -4,9 +4,9 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: PRAPASS WANNAPINIJ
 # Created on: 09 MAR 2023 
-# Updated on: 31 MAR 2025 #Update software version
+# Updated on: 30 APR 2025 #Update software version
 import pandas as pd #for creating and manipulating dataframe
-CONST_SOFTWARE_RELEASE = "31 MAR 2025"
+CONST_SOFTWARE_RELEASE = "30 APR 2025"
 CONST_SOFTWARE_BUILD = "3032"
 CONST_SOFTWARE_MAJOR_VERSION = "3.1"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " released on " + CONST_SOFTWARE_RELEASE

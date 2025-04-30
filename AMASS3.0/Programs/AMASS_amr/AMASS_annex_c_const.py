@@ -5,7 +5,7 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: CHALIDA RAMGSIWUTISAK
 # Created on: 30 AUG 2023
-# Last update on: 31 MAR 2025
+# Last update on: 30 APR 2025
 import AMASS_amr_const as AC
 import pandas as pd #for creating and manipulating dataframe
 CONST_RUN_ANNEXC_WITH_NOHOSP = False
@@ -55,9 +55,9 @@ CONST_COL_NUMWARD = "Number_of_wards"
 CONST_PRENAME_PROFILEID = "profile_"
 CONST_VALUE_WARD = "ward"
 #columns for ast_information.xlsx
-CONST_VALUE_PASSEDATB   ="P"
-CONST_VALUE_NOTPASSEDATB="F"
-CONST_VALUE_NOTTESTEDATB="-"
+CONST_VALUE_PASSEDATB   ="P" #v3.1 3032
+CONST_VALUE_NOTPASSEDATB="F" #v3.1 3032
+CONST_VALUE_NOTTESTEDATB="-" #v3.1 3032
 #columns for profile_information.xlsx
 CONST_COL_NUMPROFILE_ALL="No. of patients with a clinical specimen culture positive"
 CONST_COL_NUMPROFILE_BLO="No. of patients with blood culture positive"
@@ -100,7 +100,7 @@ CONST_FILENAME_HO_DEDUP= "AnnexC_dedup_profile"
 CONST_FILENAME_ORIPARAM= ".\Programs\AMASS_amr\satscan_param.prm"
 CONST_FILENAME_NEWPARAM= "satscan_param"
 CONST_FILENAME_PROFILE = "profile_information"
-CONST_FILENAME_AST = "ast_information"
+CONST_FILENAME_AST = "ast_information" #v3.1 3032
 CONST_FILENAME_LOCATION= "satscan_location"
 CONST_FILENAME_RESULT  = "satscan_results"
 CONST_FILENAME_INPUT   = "satscan_input"
@@ -147,7 +147,7 @@ dict_ast = {"organism_staphylococcus_aureus":  [[AC.CONST_NEWVARNAME_ASTMRSA_RIS
 dict_ris = {"resistant":"R","intermediate":"I","susceptible":"S"}
 #For calling, naming, and reporting pathogens
 dict_org = {"mrsa"     :["organism_staphylococcus_aureus",  "Methicillin-resistant <i>S. aureus</i>",   "MRSA"],
-            "vrefs"    :["organism_enterococcus_faecalis",  "Vancomycin-resistant <i>E. faecalis</i>",  "VREfs"],
+            "vrefs"    :["organism_enterococcus_faecalis",  "Vancomycin-resistant <i>E. faecalis</i>",  "VREfs"], 
             "vrefm"    :["organism_enterococcus_faecium",   "Vancomycin-resistant <i>E. faecium</i>",   "VREfm"],
             "crec"     :["organism_escherichia_coli",       "Carbapenem-resistant <i>E. coli</i>",      "CREC"],
             "crkp"     :["organism_klebsiella_pneumoniae",  "Carbapenem-resistant <i>K. pneumoniae</i>","CRKP"],

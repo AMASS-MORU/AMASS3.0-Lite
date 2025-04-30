@@ -7,6 +7,7 @@
 # Code is rewrite from R code developed by Cherry Lim in AMASS version 2.0.15
 # @author: PRAPASS WANNAPINIJ
 # Created on: 20 Oct 2022
+# Last update on: 30 APR 2025
 
 import os
 #import sys
@@ -760,7 +761,7 @@ def mainloop() :
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb]  = ""
                 try:
                     for s_toreplace in dict_ris:
-                        df_micro.loc[df_micro[satb].astype("string").str.contains(s_toreplace), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
+                        df_micro.loc[df_micro[satb].astype("string").str.contains(s_toreplace,regex=False), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
                     df_micro[satb] = df_micro[satb].astype("category")
                 except Exception as e:
                     AL.printlog("Waring: Unable to set " + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + " columns base on " + satb + "column, this may because original columns is duplicate during map with dictionary. " + str(e),False,logger)  
@@ -771,7 +772,7 @@ def mainloop() :
                                 for s_toreplace in dict_ris:
                                     for iii in range(len(df_micro[satb].columns)):
                                         temp_col = df_micro[satb].iloc[:,iii]
-                                        df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
+                                        df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace,regex=False) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
 
                     except Exception as e:
                         AL.printlog("Warning : Still unable to set data for "   + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + "column. " + str(e),False,logger)
@@ -790,7 +791,9 @@ def mainloop() :
             AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "logfile_ris_count.xlsx",False,logger)  
         del temp_ris_mapped
         # Gen AST columns
+        AL.printlog(dict_ast,False,logger) #v3.1 3032
         for satb in list_antibiotic:
+            AL.printlog(AC.CONST_NEWVARNAME_PREFIX_RIS + satb,False,logger) #v3.1 3032
             df_micro[AC.CONST_NEWVARNAME_PREFIX_AST + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].map(dict_ast).fillna("NA") 
             df_micro[AC.CONST_NEWVARNAME_PREFIX_AST + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_AST + satb].astype("category")
         # Antibiotic group

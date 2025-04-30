@@ -22,6 +22,7 @@ import AMASS_amr_const as AC
 import AMASS_amr_commonlib as AL
 import AMASS_amr_commonlib_report as REP_AL
 import AMASS_annex_c_const as ACC
+import AMASS_annex_c_analysis as ALC
 
 #General const
 ANNEXC_RPT_CONST_TITLE = 'Annex C: Cluster signals'
@@ -195,7 +196,7 @@ def annexc_table_withtotalrow_rotate(df,rh):
                            ('FONT',(0,-1),(-1,-1),'Helvetica-Bold'),
                            ('BACKGROUND',(0,-1),(-1,-1),colors.lightgrey)])
                            #('ROWHEIGHT', (0, 0), (-1, -1), 1.5*inch)])
-def annexc_table_nototalrow_rotate_ast(df,lst_style_bg,rh):
+def annexc_table_nototalrow_rotate_ast(df,lst_style_bg,rh): #v3.1 3032
     #BACGROUD, (FIRSTCOL,FIRSTROW), (LASTCOL,LASTROW), color - This can set to overlap, last one will be on top of previous one
     lst_style   =[('FONT',(0,0),(-1,-1),'Helvetica-Bold'),
                   ('FONT',(0,1),(-1,-1),'Helvetica'),
@@ -210,7 +211,7 @@ def annexc_table_nototalrow_rotate_ast(df,lst_style_bg,rh):
     if len(lst_style_bg)>0:
         lst_style = lst_style + lst_style_bg
     return Table(df,rowHeights=rh,style=lst_style)
-def annexc_continue_bgstyle(df=pd.DataFrame(), str_passast=ACC.CONST_VALUE_PASSEDATB):
+def annexc_continue_bgstyle(df=pd.DataFrame(), str_passast=ACC.CONST_VALUE_PASSEDATB): #v3.1 3032
     lst_style_bg = []
     if len(df)>0:
         for icol in range(len(df.columns)):
@@ -334,18 +335,26 @@ def template_page2_footer():
             "annexc_footer_ast" + "</font>"]
 def footnote_annexC(sp):
     dict_note = {"blo":
-                 ['* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. ' +
+                    ['The cluster signals by AMASS-SaTScan (Annex C) considered patients if their first isolate tested positive for each AMR pathogen and was collected more than two calendar days after admission per specimen type per the evaluation period. ' +
                          'Bar graphs show patients with blood culture positive with organism profiles which were identified in at least one cluster signal. ' +
                          'Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. ' + 
-                         'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"']
+                         'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"'] #v3.1 3032
+                #  ['* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. ' +
+                #          'Bar graphs show patients with blood culture positive with organism profiles which were identified in at least one cluster signal. ' +
+                #          'Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. ' + 
+                #          'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"']
                 }
     if sp in dict_note:
         return dict_note[sp]
     else:
-        return ['* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. ' +
+        return ['The cluster signals by AMASS-SaTScan (Annex C) considered patients if their first isolate tested positive for each AMR pathogen and was collected more than two calendar days after admission per specimen type per the evaluation period. ' +
                         'Bar graphs show patients with a clinical specimen  culture positive with organism profiles which were identified in at least one cluster signal. ' +
                         'Gray bars (Other profiles) represents patients with a clinical specimen positive for organisms with profiles that were not included in any cluster signals. ' + 
-                        'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"']
+                        'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"'] #v3.1 3032
+        # return ['* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. ' +
+        #                 'Bar graphs show patients with a clinical specimen  culture positive with organism profiles which were identified in at least one cluster signal. ' +
+        #                 'Gray bars (Other profiles) represents patients with a clinical specimen positive for organisms with profiles that were not included in any cluster signals. ' + 
+        #                 'Details of AMR profiles are available in "Supplementary_data_Annex_C.pdf" and files in the folder "Report_with_patient_identifiers"']
 def footnote_baseline(sp):
     return footnote_annexC(sp)
 
@@ -538,7 +547,8 @@ def cover(c,logger,strgendate):
     cover_1_3 = "<b>Data from:</b>"
     cover_1_4 = bold_blue_op + str(spc_date_start) + " to " + str(spc_date_end) + bold_blue_ed
     cover_1 = [cover_1_1,cover_1_2,add_blankline+cover_1_3, cover_1_4]
-    cover_2_1 = "This is a detailed report for records with cluster signals identified by the AMASS-SaTScan. This report, together with the full list in Excel format, is for users to check and validate the cluster and the patients in each cluster identified by the SaTScan. The information available in this PDF file include ward names used in the dictionary files. The identifiers in the Excel files for the Annex C include hospital number and specimen collection date. Users should not share or transfer this report and the excel files for the Annex C to any party outside of the hospital without data security management and confidential agreement."
+    cover_2_1 = "This is a detailed report for records with cluster signals identified by the AMASS-SaTScan. This report, together with the full list in Excel format, is for users to check and validate the cluster and the patients in each cluster identified by the SaTScan. The information available in this PDF file include ward names used in the dictionary files." #v3.1 3032
+    # cover_2_1 = "This is a detailed report for records with cluster signals identified by the AMASS-SaTScan. This report, together with the full list in Excel format, is for users to check and validate the cluster and the patients in each cluster identified by the SaTScan. The information available in this PDF file include ward names used in the dictionary files. The identifiers in the Excel files for the Annex C include hospital number and specimen collection date. Users should not share or transfer this report and the excel files for the Annex C to any party outside of the hospital without data security management and confidential agreement."
     cover_2_2 = "<br/><b>Generated on:</b>  " + bold_blue_op + strgendate + bold_blue_ed
     cover_2 = [cover_2_1,cover_2_2]
     ##reportlab
@@ -551,9 +561,13 @@ def cover(c,logger,strgendate):
     REP_AL.report_context(c,cover_1, 0.7*inch, 2.2*inch, 460, 240, font_size=18,line_space=26)
     REP_AL.report_context(c,cover_2, 0.7*inch, 0.5*inch, 460, 120, font_size=10,line_space=13)
     c.showPage()
-def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ast=pd.DataFrame(),df_ward=pd.DataFrame(),list_profile_atb_column=[]):
+def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpage,totalpage,strgendate,sh_org="",spec="",df=pd.DataFrame(),df_baseline=pd.DataFrame(),df_profile=pd.DataFrame(),df_ast=pd.DataFrame(),df_ward=pd.DataFrame(),df_config=pd.DataFrame(),list_profile_atb_column=[]): #v3.1 3032
     #noclustertext = "There is no cluster with p-value < " +str(pvaluelimit) + "."
     #shaveclustertext = "Table of clusters with p-value < " +str(pvaluelimit) + "."
+    df_config_profile = df_config.loc[df_config[ACC.CONST_COL_AMASS_PRMNAME].str.contains("profiling_")] #v3.1 3032
+    dict_configuration_profile_final = ALC.prepare_configuration_to_constant(df=df_config_profile,dict_const=ACC.dict_configuration_profile,
+                                                                        col_amassprm=ACC.CONST_COL_AMASS_PRMNAME,col_userprm=ACC.CONST_COL_USER_PRMNAME,prefix="profiling_") #v3.1 3032
+    str_perctested = str(int(ALC.select_configvalue(configuration_user=dict_configuration_profile_final,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_TESTATBRATE))) #v3.1 3032
     style_summary = ParagraphStyle('normal',fontName='Helvetica',fontSize=9,alignment=TA_CENTER)
     sspecname = ACC.dict_spc[spec]
     sorgname = ACC.dict_org[sh_org][2]
@@ -561,17 +575,24 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                         "all":"a clinical specimen"}
     sdis_spec = dict_dis_specname[spec]
     sheader_wardgrap = f'Display of patients with {sdis_spec} culture positive for {sorgname} in each ward over time'
-    sfootnote = "* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
+    sfootnote = "*<b>Please note that the patients included in the analysis for cluster signals (Annex C) were not exactly similar to those included in the analysis for the AMR proportion report (Section 2-3).</b> The AMASS-SaTScan (Annex C) included patients who had a specimen culture positive for the AMR pathogen of interest, with the first culture-positive specimen collected after the first two calendar days of hospitalization. " #v3.1 3032
+    # sfootnote = "*<b>Please note that patients for the cluster signals (Annex C) were not the same as those for the AMR proportion report (Section 2-3).</b> The cluster signals by AMASS-SaTScan (Annex C) considered patients if their first isolate tested positive for each AMR pathogen and was collected more than two calendar days after admission per specimen type per the evaluation period. "
+    # sfootnote = "* The AMASS-SaTScan (Annex C) de-duplicated by including only the first resistant isolate per patient per specimen type per evaluation period. "
     sfootnote_topward = sfootnote + f"Bar graphs show patients with {sdis_spec} culture positive with the organism with a profile identified in at least one cluster signal. "
     sfootnote_topward = sfootnote_topward + "Gray bars (Other profiles) represents patients with blood culture positive for organisms with profiles that were not included in any cluster signals. "
     sfootnote_topward = sfootnote_topward + "Only wards with a cluster signal identified or having the top three highest number of patients are displayed. "
-    sfootnote_ast = sfootnote + "R was number of patients who had resistant to an antibiotic, I was number of patients who had intermediate to an antibiotic, S was number of patients who had susceptible to an antibiotic, ND was number of patients who had no AST result available for an antibiotic, and - was antibiotic that had no AST result available and not included for the cluster signals. "
-    sfootnote_ast = sfootnote_ast + "Criteria 1 (C1): the proportion of patients who had known AST results against the antibiotic among identified pathogen isolates exceeded a threshold. "
-    sfootnote_ast = sfootnote_ast + "Criteria 2 (C2): the proportion of patients who had R or S ranged between 0.1% and 99.9%. "
-    sfootnote_ast = sfootnote_ast + "Summary: summary results of antibiotic which passed both criteria and included to cluster signals. "
+    sfootnote_profile = sfootnote + "<b><u>The first AMR isolate</u></b> per patient per evaluation period is included in the AMASS-SaTScan analysis. R, I and S represent the number of isolates that are resistant, intermediate and susceptible to the antibiotic, respectively. NA (Not Available) represents the number of isolates for which AST data is not available against the antibiotic. - is used when no AST data is available for any of the isolates against the antibiotic. " #v3.1 3032
+    # sfootnote_profile = sfootnote + "R was number of patients who had resistant to an antibiotic, I was number of patients who had intermediate to an antibiotic, S was number of patients who had susceptible to an antibiotic, ND was number of patients who had no AST result available for an antibiotic, and - was antibiotic that had no AST result available and not included for the cluster signals. "
+    sfootnote_profile_ast = sfootnote_profile + "Criteria 1 (C1) is defined as the proportion of isolates with AST data available against the antibiotic being higher than "+str(str_perctested)+"%. " #v3.1 3032
+    # sfootnote_profile_ast = sfootnote_profile + "Criteria 1 (C1): the proportion of patients who had known AST results against the antibiotic among identified pathogen isolates exceeded a threshold. "
+    sfootnote_profile_ast = sfootnote_profile_ast + "Criteria 2 (C2) is defined as the presence of variation in AST results (e.g., not 100% R and not 100% S). " #v3.1 3032
+    # sfootnote_profile_ast = sfootnote_profile_ast + "Criteria 2 (C2): the proportion of patients who had R or S ranged between 0.1% and 99.9%. "
+    sfootnote_profile_ast = sfootnote_profile_ast + "The summary is marked as P (Pass) when both C1 and C2 are met. Otherwise, it is marked as F (Fail). " #v3.1 3032
+    # sfootnote_profile_ast = sfootnote_profile_ast + "Summary: summary results of antibiotic which passed both criteria and included to cluster signals. "
     lst_footnote = [sfootnote]
     lst_footnote_topward = [sfootnote_topward]
-    lst_footnote_ast     = [sfootnote_ast]
+    lst_footnote_profile = [sfootnote_profile] #v3.1 3032
+    lst_footnote_ast     = [sfootnote_profile_ast] #v3.1 3032
     lst_footnote_wardlist = ["* In case that there are ward names in your hospital_admission_data file, this list and the analysis will prioritize the ward names in the microbiology_data file over the ones in hospital_admission_data file. "]
     
     stotal_patient = "0"
@@ -601,12 +622,12 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
     REP_AL.report_context(canvas_sup_rpt, ["<i>"+ f'No. of AMR profiles = {stotal_profile}' + "</i>"],
                    1.5*inch, 8.7*inch, 460, 50, font_size=11, font_align=TA_LEFT)
         #--------------------------------------------------------------------------------------------------------------
-    #AST
+    #AST #v3.1 3032
     try:
         if len(df_ast) > 0:
             #rename column
             try:
-                df_ast = df_ast.iloc[:,:-1]
+                df_ast = df_ast.iloc[:,:-1].fillna("NA") #v3.1 3032
                 df_ast.rename(columns={ACC.CONST_COL_PROFILEID:"AST\nresults"}, inplace=True)
             except Exception as e:
                 pass
@@ -636,26 +657,27 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
             table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (8.2-ioffset)*inch)
             # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote_ast, 1.0*inch, 0.3*inch, 460, 130, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_ast, 1.0*inch, 0.45*inch, 460, 150, font_size=9,line_space=12) #v3.1 3032
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             df_ast = df_ast[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
             page = page + 1
         else:
             REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of AST results" + "</b>"], 
-                   1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.0*inch, 8.2*inch, 460, 50, font_size=13, font_align=TA_LEFT) #v3.1 3032
             REP_AL.report_context(canvas_sup_rpt, ["None"],
                            1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_ast, 1.0*inch, 0.45*inch, 460, 150, font_size=9,line_space=12) #v3.1 3032
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             page = page + 1
     except:
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote_ast, 1.0*inch, 0.45*inch, 460, 150, font_size=9,line_space=12) #v3.1 3032
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     #--------------------------------------------------------------------------------------------------------------
     #Profile
     try:
         if len(df_profile) > 0:
+            df_profile = df_profile.fillna("NA") #v3.1 3032
             df_profile.sort_values(by = [ANXC_CONST_COL_PROFILESUMCASE], ascending = [False], na_position = "last")
             try:
                 dict_total= {}
@@ -701,9 +723,9 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             #print table
             iheader_h = 0.068*atbname_c
             #Print report
-            REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16)
+            REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16) #v3.1 3032
             REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "List of profiles" + "</b>"],                                       
-                           1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
+                           1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT) #v3.1 3032
             df1 = df_profile[:ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE]
             ioffset = 0.25*(len(df1)) + iheader_h
             lst_df = [lst_column_head] + df1.values.tolist()
@@ -712,8 +734,9 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                 rh = rh + [0.25*inch]
             table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
             table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-            table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+            table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch) #v3.1 3032
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_profile, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12) #v3.1 3032
+            # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12) #v3.1 3032
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_FIRSTPAGE:]
             page = page + 1
@@ -732,21 +755,25 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                     table_draw = annexc_table_nototalrow_rotate(lst_df,rh)
                     #table_draw._awgH[0] = iheader_h*inch
                     table_draw.wrapOn(canvas_sup_rpt, 480+ioffset, 300)
-                    table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch)
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+                    table_draw.drawOn(canvas_sup_rpt, 1.0*inch, (9.5-ioffset)*inch) #v3.1 3032
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote_profile, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12) #v3.1 3032
+                    # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12) #v3.1 3032
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     df_profile = df_profile[ANXC_CONST_PROFILE_MAXROW_NEXTPAGE:]
                     page = page + 1
         else:
+            REP_AL.report_title(canvas_sup_rpt,sspecname +": " + sorgname,1.07*inch, 10.6*inch,'#3e4444',font_size=16) #v3.1 3032
             REP_AL.report_context(canvas_sup_rpt, ["<b>"+ "list of profiles" + "</b>"], 
-                   1.0*inch, 8.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
+                   1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT) #v3.1 3032
             REP_AL.report_context(canvas_sup_rpt, ["None"],
-                           1.5*inch, 7.9*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+                           1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT) #v3.1 3032
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote_profile, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12) #v3.1 3032
+            # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12) #v3.1 3032
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             page = page + 1
     except:
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote_profile, 1.0*inch, 0.30*inch, 460, 130, font_size=9,line_space=12) #v3.1 3032
+        # REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12) #v3.1 3032
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     #--------------------------------------------------------------------------------------------------------------
@@ -793,7 +820,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             df = df[ANXC_CONST_MAX_BASELINETBLROW_PERPAGE:]
             if icurcol >= ANXC_CONST_MAX_BASELINECOLTBL_PERPAGE-1:
                 if balreadyprintpage == False:
-                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+                    REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 80, font_size=9,line_space=12)
                     REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
                     bisfirstpage = False
                     page = page + 1
@@ -802,7 +829,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
             else:
                 icurcol = icurcol + 1
         if balreadyprintpage == False:
-            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+            REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 80, font_size=9,line_space=12) #v3.1 3032
             REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
             bisfirstpage = False
             page = page + 1
@@ -814,7 +841,7 @@ def prapare_supplementAnnexC_per_org(canvas_sup_rpt,logger,page,startpage,lastpa
                        1.0*inch, 9.5*inch, 460, 50, font_size=13, font_align=TA_LEFT)
         REP_AL.report_context(canvas_sup_rpt, ["None"],
                        1.5*inch, 9.2*inch, 460, 50, font_size=11, font_align=TA_LEFT)
-        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 70, font_size=9,line_space=12)
+        REP_AL.report_context(canvas_sup_rpt,lst_footnote, 1.0*inch, 0.30*inch, 460, 80, font_size=9,line_space=12) #v3.1 3032
         REP_AL.canvas_printpage_nototalpage(canvas_sup_rpt,page,strgendate,True,AC.CONST_REPORTPAGENUM_MODE,ANXC_CONST_FOOT_REPNAME)
         page = page + 1
     #--------------------------------------------------------------------------------------------------------------
@@ -1090,6 +1117,8 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     else:
         AL.printlog("Note : No dictionary for ward file",False,logger)  
     
+    #load configuration #v3.1 3032
+    df_config = AL.readxlsxorcsv(AC.CONST_PATH_ROOT + "Configuration/", "Configuration",logger) #v3.1 3032
     #------------------------------------------------------------------------------------------------
     list_color = get_colorlist()
     #Load data and assign profile color
@@ -1101,7 +1130,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
     dict_org_profilecolor = {} # key is org value is dict of profile and it color assigned -> for cluster plus x profile with most cases
     dict_org_profilecolor_onlycluster = {} # key is org value is dict of profile and it color assigned
     dict_list_org_profile_sortbycase = {}
-    dict_df_ast_pdf_org_sp = {}
+    dict_df_ast_pdf_org_sp = {} #v3.1 3032
     for sh_org in ACC.dict_org.keys():
         df_pc= pd.DataFrame()
         try:
@@ -1111,9 +1140,9 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             logger.exception(e)
         dict_df_org_profile_config[sh_org] = df_pc
         #AST
-        df_ast= pd.DataFrame()
+        df_ast= pd.DataFrame() #v3.1 3032
         try:
-            df_ast= pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+ str.upper(sh_org) +".xlsx")
+            df_ast= pd.read_excel(AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+ str.upper(sh_org) +".xlsx") #v3.1 3032
         except Exception as e:
             AL.printlog("Warning : Unable to profile information at: "+ AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+ str.upper(sh_org) +".xlsx" + " for " + str(sh_org),True,logger)
             logger.exception(e)
@@ -1126,7 +1155,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
         dict_profilecolor = {}
         dict_profilecolor_onlycluster = {}
         dict_list_sp_profile_sortbycase = {}
-        dict_df_ast_temp_sp = {}
+        dict_df_ast_temp_sp = {} #v3.1 3032
         #Local use
         list_cluster_profile = []
         list_top_num_case_profile = []
@@ -1224,7 +1253,7 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
             
             #AST
             try:
-                dict_df_ast_temp_sp[sp] = df_ast.loc[df_ast[AC.CONST_NEWVARNAME_AMASSSPECTYPE]==sp,:]
+                dict_df_ast_temp_sp[sp] = df_ast.loc[df_ast[AC.CONST_NEWVARNAME_AMASSSPECTYPE]==sp,:] #v3.1 3032
             except Exception as e:
                 AL.printlog("Warning : Unable to load ast_information.xlsx" + " for " + str(sh_org) + ":" + str(sp),True,logger)
                 logger.exception(e)
@@ -1439,9 +1468,9 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                             AL.printlog("Warning : Unable to generate graph: "+ str(sh_org) + ":" + str(sp),True,logger)
                             logger.exception(e)   
                 #AL.printlog("Finish generating base line graph per organism : " + str(sp) + " of " + str(sh_org) ,False,logger)
-                df_ast = pd.DataFrame()
+                df_ast = pd.DataFrame() #v3.1 3032
                 try:
-                    df_ast = dict_df_ast_pdf_org_sp[sh_org][sp]
+                    df_ast = dict_df_ast_pdf_org_sp[sh_org][sp] #v3.1 3032
                 except Exception as e:
                     AL.printlog("Warning : Unable to generate Table for AST results: "+ str(sh_org) + ":" + str(sp),True,logger)
                     logger.exception(e)
@@ -1451,8 +1480,9 @@ def main_generatepdf(canvas_rpt,logger,df_micro_ward,startpage,lastpage,totalpag
                                                         df=df_cluster,
                                                         df_baseline=df_baseline,
                                                         df_profile=df_profile_sum_det,
-                                                        df_ast=df_ast,
+                                                        df_ast=df_ast, #v3.1 3032
                                                         df_ward=df_ward_sum,
+                                                        df_config=df_config, #v3.1 3032
                                                         list_profile_atb_column=list_profile_atb_column)
             except Exception as e:
                 AL.printlog("Warning : Unable to generate report: " + str(sh_org) + ":" + str(sp),True,logger)
