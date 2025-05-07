@@ -835,6 +835,9 @@ def mainloop() :
         df_micro[AC.CONST_NEWVARNAME_AST3GCCBPN] = np.select(temp_cond,list_ast_asvalue,default="0")
         
         list_amr_atb = AC.getlist_amr_atb(dict_orgcatwithatb)
+        print(list_amr_atb)
+        list_ast_atb = AC.getlist_ast_atb(dict_orgcatwithatb)
+        print(list_ast_atb)
         if len(list_amr_atb) <=0:
             AL.printlog("Waring: list of antibiotic of interest for amr (get from dict_orgcatwithatb defined in AMASS_amr_const.py) is empty, application may pickup wrong record during deduplication by organism",False,logger)  
             df_micro[AC.CONST_NEWVARNAME_AMR] = 0
@@ -848,9 +851,9 @@ def mainloop() :
             df_micro[AC.CONST_NEWVARNAME_AMR] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').sum(axis=1, skipna=True)   
             df_micro[AC.CONST_NEWVARNAME_AMR_TESTED] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').count(axis=1,numeric_only=True)   
             #Add in 3.1 to calculate number of R, I, and S as well as AST tested for each specimen
-            df_micro[AC.CONST_NEWVARNAME_AST_R] = df_micro[list_amr_atb].apply(lambda row: (row == 'R').sum(), axis=1)
-            df_micro[AC.CONST_NEWVARNAME_AST_I] = df_micro[list_amr_atb].apply(lambda row: (row == 'I').sum(), axis=1)
-            df_micro[AC.CONST_NEWVARNAME_AST_S] = df_micro[list_amr_atb].apply(lambda row: (row == 'S').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_R] = df_micro[list_ast_atb].apply(lambda row: (row == 'R').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_I] = df_micro[list_ast_atb].apply(lambda row: (row == 'I').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_S] = df_micro[list_ast_atb].apply(lambda row: (row == 'S').sum(), axis=1)
             df_micro[AC.CONST_NEWVARNAME_AST_TESTED] = df_micro[AC.CONST_NEWVARNAME_AST_R] + df_micro[AC.CONST_NEWVARNAME_AST_I] + df_micro[AC.CONST_NEWVARNAME_AST_S]
         
         #Micro remove and alter column data type to save memory usage --------------------------------------------------------------------------------------

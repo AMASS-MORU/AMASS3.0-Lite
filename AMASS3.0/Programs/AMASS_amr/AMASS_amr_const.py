@@ -212,6 +212,18 @@ def dict_ast() :
         "I":"1",
         "S":"0"
     }
+def getlist_ast_atb(dict_orgatb):
+    try:
+        list_atb = []
+        for sorgkey in dict_orgatb:
+            ocurorg = dict_orgatb[sorgkey]
+            if ocurorg[1] == 1 :
+                list_atb = list_atb + ocurorg[4]
+        #Dedup
+        list_atb = list(dict.fromkeys(list_atb))
+        return list_atb
+    except Exception:
+        return []
 def getlist_amr_atb(dict_orgatb):
     try:
         list_atb = []
