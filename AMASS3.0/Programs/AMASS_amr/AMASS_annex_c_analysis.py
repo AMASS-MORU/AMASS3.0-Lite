@@ -227,7 +227,12 @@ def fn_deduplicatedata(df,list_sort,list_order,na_posmode,list_dupcolchk,keepmod
     return df.sort_values(by = list_sort, ascending = list_order, na_position = na_posmode).drop_duplicates(subset=list_dupcolchk, keep=keepmode)
 # Filter orgcat before dedup (For merge data) with admission date
 def fn_deduplicateannexc_hospmico(df,colname,orgcat) :
-    return fn_deduplicatedata(df,[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #return fn_deduplicatedata(df,[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #Change in 3.1
+    return fn_deduplicatedata(df.loc[df[colname]==orgcat],
+                              [AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AST_R,AC.CONST_NEWVARNAME_AST_I,AC.CONST_NEWVARNAME_AST_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],
+                              [True,True,False,False,False,True],
+                              "last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
 def summation_numpatient(logger,df=pd.DataFrame(),lst_col=[],col_forgrouping=""):
     df_ = df
     try:

@@ -381,10 +381,20 @@ def debug_savecsv(df,fname,bdebug,iquotemode,logger)  :
         #return True
 # Filter orgcat before dedup (For merge data)
 def fn_deduplicatebyorgcat_hospmico(df,colname,orgcat) :
-    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #Change in 3.1
+    return fn_deduplicatedata(df.loc[df[colname]==orgcat],
+                              [AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AST_R,AC.CONST_NEWVARNAME_AST_I,AC.CONST_NEWVARNAME_AST_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],
+                              [True,True,False,False,False,True],
+                              "last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
 # Filter orgcat before dedup
 def fn_deduplicatebyorgcat(df,colname,orgcat) :
-    return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED],[True,True,False,False],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #return fn_deduplicatedata(df.loc[df[colname]==orgcat],[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED],[True,True,False,False],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+    #Change in 3.1
+    return fn_deduplicatedata(df.loc[df[colname]==orgcat],
+                              [AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AST_R,AC.CONST_NEWVARNAME_AST_I,AC.CONST_NEWVARNAME_AST_TESTED],
+                              [True,True,False,False,False],
+                              "last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
 # deduplicate data by sort the data by multiple column (First order then second then..) and then select either first or last of each group of the first order and/or second and/or..
 def fn_deduplicatedata(df,list_sort,list_order,na_posmode,list_dupcolchk,keepmode) :
     return df.sort_values(by = list_sort, ascending = list_order, na_position = na_posmode).drop_duplicates(subset=list_dupcolchk, keep=keepmode)
@@ -754,14 +764,23 @@ def mainloop() :
         df_micro[AC.CONST_NEWVARNAME_ORGCAT] = df_micro["Temp" + AC.CONST_NEWVARNAME_ORG3].map({k : vs[0] for k, vs in dict_orgcatwithatb.items()}).fillna(0)
         df_micro.drop("Temp" + AC.CONST_NEWVARNAME_ORG3, axis=1, inplace=True)              
         #Build 3027 add log for count mapped S\I\R to compare with logfile_ast for unmap values count
-        temp_ris_mapped = pd.DataFrame(columns =["Antibiotics","frequency_raw"])         
+        temp_ris_mapped = pd.DataFrame(columns =["Antibiotics","frequency_raw"])      
+        print(dict_ris)
         # Gen RIS columns
         for satb in list_antibiotic:
             if satb in df_micro.columns:
                 df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb]  = ""
                 try:
                     for s_toreplace in dict_ris:
-                        df_micro.loc[df_micro[satb].astype("string").str.contains(s_toreplace,regex=False), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
+                        #df_micro.loc[df_micro[satb].astype("string").str.contains(s_toreplace,regex=False), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
+                        try:
+                            df_micro.loc[df_micro[satb].astype("string").str.strip().str.lower() == s_toreplace.lower(),
+                                                 AC.CONST_NEWVARNAME_PREFIX_RIS + satb
+                                                 ] = dict_ris[s_toreplace] #Change in 3.1 3101
+                        except Exception as e:
+                            AL.printlog("Waring: Unable to set " + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + " columns base on " + satb + "column, this may because column cannot converted to string for comparing. " + str(e),False,logger)
+                        #if still got those that not translated.
+                        df_micro.loc[(df_micro[satb].astype("string").str.contains(s_toreplace,regex=False)) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == ""), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] 
                     df_micro[satb] = df_micro[satb].astype("category")
                 except Exception as e:
                     AL.printlog("Waring: Unable to set " + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + " columns base on " + satb + "column, this may because original columns is duplicate during map with dictionary. " + str(e),False,logger)  
@@ -772,8 +791,13 @@ def mainloop() :
                                 for s_toreplace in dict_ris:
                                     for iii in range(len(df_micro[satb].columns)):
                                         temp_col = df_micro[satb].iloc[:,iii]
-                                        df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace,regex=False) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
-
+                                        #df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace,regex=False) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace] #v3.1 3032
+                                        df_micro.loc[
+                                                        (temp_col.astype("string").str.strip().str.lower() == s_toreplace.lower()) &
+                                                        (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == ""),
+                                                        AC.CONST_NEWVARNAME_PREFIX_RIS + satb
+                                                    ] = dict_ris[s_toreplace] #Change in 3.1 3101
+                                        df_micro.loc[(temp_col.astype("string").str.contains(s_toreplace,regex=False) & (df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb] == "")), AC.CONST_NEWVARNAME_PREFIX_RIS + satb] = dict_ris[s_toreplace]
                     except Exception as e:
                         AL.printlog("Warning : Still unable to set data for "   + AC.CONST_NEWVARNAME_PREFIX_RIS + satb + "column. " + str(e),False,logger)
                         logger.exception(e)
@@ -791,7 +815,7 @@ def mainloop() :
             AL.printlog("Warning : Cannot save xlsx file : " + AC.CONST_PATH_RESULT + "logfile_ris_count.xlsx",False,logger)  
         del temp_ris_mapped
         # Gen AST columns
-        AL.printlog(dict_ast,False,logger) #v3.1 3032
+        #AL.printlog(dict_ast,False,logger) #v3.1 3032
         for satb in list_antibiotic:
             AL.printlog(AC.CONST_NEWVARNAME_PREFIX_RIS + satb,False,logger) #v3.1 3032
             df_micro[AC.CONST_NEWVARNAME_PREFIX_AST + satb] = df_micro[AC.CONST_NEWVARNAME_PREFIX_RIS + satb].map(dict_ast).fillna("NA") 
@@ -815,9 +839,20 @@ def mainloop() :
             AL.printlog("Waring: list of antibiotic of interest for amr (get from dict_orgcatwithatb defined in AMASS_amr_const.py) is empty, application may pickup wrong record during deduplication by organism",False,logger)  
             df_micro[AC.CONST_NEWVARNAME_AMR] = 0
             df_micro[AC.CONST_NEWVARNAME_AMR_TESTED] = 0
+            #Add in 3.1 to calculate number of R, I, and S as well as AST tested for each specimen
+            df_micro[AC.CONST_NEWVARNAME_AST_R] = 0
+            df_micro[AC.CONST_NEWVARNAME_AST_I] = 0
+            df_micro[AC.CONST_NEWVARNAME_AST_S] = 0
+            df_micro[AC.CONST_NEWVARNAME_AST_TESTED] = 0
         else:
             df_micro[AC.CONST_NEWVARNAME_AMR] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').sum(axis=1, skipna=True)   
             df_micro[AC.CONST_NEWVARNAME_AMR_TESTED] = df_micro[list_amr_atb].apply(pd.to_numeric,errors='coerce').count(axis=1,numeric_only=True)   
+            #Add in 3.1 to calculate number of R, I, and S as well as AST tested for each specimen
+            df_micro[AC.CONST_NEWVARNAME_AST_R] = df_micro[list_amr_atb].apply(lambda row: (row == 'R').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_I] = df_micro[list_amr_atb].apply(lambda row: (row == 'I').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_S] = df_micro[list_amr_atb].apply(lambda row: (row == 'S').sum(), axis=1)
+            df_micro[AC.CONST_NEWVARNAME_AST_TESTED] = df_micro[AC.CONST_NEWVARNAME_AST_R] + df_micro[AC.CONST_NEWVARNAME_AST_I] + df_micro[AC.CONST_NEWVARNAME_AST_S]
+        
         #Micro remove and alter column data type to save memory usage --------------------------------------------------------------------------------------
         #Change text/object field type to category type to save memory usage
         df_micro = AL.fn_df_tocategory_datatype(df_micro,
