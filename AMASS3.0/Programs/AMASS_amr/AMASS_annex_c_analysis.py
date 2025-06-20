@@ -5,10 +5,10 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: CHALIDA RAMGSIWUTISAK
 # Created on: 01 SEP 2023
-# Last update on: 30 APR 2025
+# Last update on: 20 JUNE 2025 #v3.1 3102
 import pandas as pd
 import psutil,gc
-import numpy as np #v3.1 3032
+import numpy as np #v3.1 3102
 import datetime #for setting date-time format
 import logging #for creating logfile
 from reportlab.lib.pagesizes import A4 #for setting PDF size
@@ -45,7 +45,8 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
     # for lo_org in ["organism_staphylococcus_aureus"]:
         lst_usedcolumns = []
         if lo_org in ACC.dict_configuration_astforprofile.keys():
-            lst_usedcolumns = [AC.CONST_NEWVARNAME_ORG3]+AC.get_dict_orgcatwithatb(bisabom=True,bisentspp=True)[lo_org][4]+ACC.dict_configuration_astforprofile[lo_org]
+            # lst_usedcolumns = [AC.CONST_NEWVARNAME_ORG3]+AC.get_dict_orgcatwithatb(bisabom=True,bisentspp=True)[lo_org][4]+ACC.dict_configuration_astforprofile[lo_org]
+            lst_usedcolumns = [AC.CONST_NEWVARNAME_ORG3]+AC.get_dict_orgcatwithatb(bisabom=True,bisentspp=True)[lo_org][4]+ACC.dict_configuration_astforprofile[lo_org][0] #v3.1 3102
         else:
             lst_usedcolumns = [AC.CONST_NEWVARNAME_ORG3]+AC.get_dict_orgcatwithatb(bisabom=True,bisentspp=True)[lo_org][4]
 
@@ -98,37 +99,37 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
             AL.printlog("No. patients with positive isolates for "+lst_value[-1]+" and admitted for >2 calendar days : "+str(len(set(df_all_sp_amr_dedup_ho[AC.CONST_VARNAME_HOSPITALNUMBER]))),False,logger)
             #selecting profiles from configuration
             #do antibiotics selection for profiling
-            lst_ris_profiletemp_blo= select_atbforprofiling(logger, df=df_blo_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final) #v3.1 3032
-            lst_ris_profile_blo    = lst_ris_profiletemp_blo[0] #v3.1 3032
-            lst_ris_profile_blo_c1 = lst_ris_profiletemp_blo[1] #v3.1 3032
-            lst_ris_profile_blo_c2 = lst_ris_profiletemp_blo[2] #v3.1 3032
+            lst_ris_profiletemp_blo= select_atbforprofiling(logger, df=df_blo_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final) #v3.1 3102
+            lst_ris_profile_blo    = lst_ris_profiletemp_blo[0] #v3.1 3102
+            lst_ris_profile_blo_c1 = lst_ris_profiletemp_blo[1] #v3.1 3102
+            lst_ris_profile_blo_c2 = lst_ris_profiletemp_blo[2] #v3.1 3102
             # print (lst_ris_profile_blo,lst_ris_profile_blo_c1,lst_ris_profile_blo_c2)
-            profiletemp = ",".join(lst_ris_profile_blo).replace("RIS","") #v3.1 3032
-            AL.printlog("Antibiotics for profiling from blood :" + profiletemp,False,logger) #v3.1 3032
+            profiletemp = ",".join(lst_ris_profile_blo).replace("RIS","") #v3.1 3102
+            AL.printlog("Antibiotics for profiling from blood :" + profiletemp,False,logger) #v3.1 3102
             #do antibiotics selection for profiling by using isolates positive to that pathogen in clinical specimen
-            lst_ris_profiletemp_all= select_atbforprofiling(logger, df=df_all_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final) #v3.1 3032
-            lst_ris_profile_all    = lst_ris_profiletemp_all[0] #v3.1 3032
-            lst_ris_profile_all_c1 = lst_ris_profiletemp_all[1] #v3.1 3032
-            lst_ris_profile_all_c2 = lst_ris_profiletemp_all[2] #v3.1 3032
+            lst_ris_profiletemp_all= select_atbforprofiling(logger, df=df_all_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, configuration_profile=dict_configuration_profile_final) #v3.1 3102
+            lst_ris_profile_all    = lst_ris_profiletemp_all[0] #v3.1 3102
+            lst_ris_profile_all_c1 = lst_ris_profiletemp_all[1] #v3.1 3102
+            lst_ris_profile_all_c2 = lst_ris_profiletemp_all[2] #v3.1 3102
             # print (lst_ris_profile_all,lst_ris_profile_all_c1,lst_ris_profile_all_c2)
-            profiletemp = ",".join(lst_ris_profile_all).replace("RIS","") #v3.1 3032
-            AL.printlog("Antibiotics for profiling from clinical specimens :" + profiletemp,False,logger) #v3.1 3032
+            profiletemp = ",".join(lst_ris_profile_all).replace("RIS","") #v3.1 3102
+            AL.printlog("Antibiotics for profiling from clinical specimens :" + profiletemp,False,logger) #v3.1 3102
             #profiling
             df_blo_sp_amr_dedup_ho_profile = pd.DataFrame()
             df_all_sp_amr_dedup_ho_profile = pd.DataFrame()
             try:
-                df_blo_sp_amr_dedup_ho_profile  = create_risprofile(logger,df=df_blo_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, lst_col_ristemp=lst_ris_profile_blo, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP) #v3.1 3032
-                df_all_sp_amr_dedup_ho_profile  = create_risprofile(logger,df=df_all_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, lst_col_ristemp=lst_ris_profile_all, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP) #v3.1 3032
+                df_blo_sp_amr_dedup_ho_profile  = create_risprofile(logger,df=df_blo_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, lst_col_ristemp=lst_ris_profile_blo, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP) #v3.1 3102
+                df_all_sp_amr_dedup_ho_profile  = create_risprofile(logger,df=df_all_sp_amr_dedup_ho, lst_col_ris=lst_ris_rpt2, lst_col_ristemp=lst_ris_profile_all, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP) #v3.1 3102
             except Exception as e:
                 AL.printlog("Error, ANNEX C profiling: " +  str(e),True,logger)
             #creating dictionary for profile
             d_profile    = create_dictforMapProfileID_byorg(logger, df_all=df_all_sp_amr_dedup_ho, df_blo=df_blo_sp_amr_dedup_ho, sh_org=lst_value[-1])
             #exporting d_profile to profile_information.xlsx
-            export_dprofile(logger, df_groupprofile=d_profile[0], lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, filename_profile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PROFILE+"_"+lst_value[-1].upper()) #v3.1 3032
+            export_dprofile(logger, df_groupprofile=d_profile[0], lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, filename_profile=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_PROFILE+"_"+lst_value[-1].upper()) #v3.1 3102
             #exporting sumamtion of AST results to ast_information.xlsx
-            df_blo_sp_amr_dedup_ho_ris = summation_astresult(logger, df=df_blo_sp_amr_dedup_ho, dict_configuration=dict_configuration_profile_final, lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, lst_atb_c1=lst_ris_profile_blo_c1, lst_atb_c2=lst_ris_profile_blo_c2, lst_atb_c1_c2=lst_ris_profile_blo, col_spctype=AC.CONST_NEWVARNAME_AMASSSPECTYPE, sh_spc="blo") #v3.1 3032
-            df_all_sp_amr_dedup_ho_ris = summation_astresult(logger, df=df_all_sp_amr_dedup_ho, dict_configuration=dict_configuration_profile_final, lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, lst_atb_c1=lst_ris_profile_all_c1, lst_atb_c2=lst_ris_profile_all_c2, lst_atb_c1_c2=lst_ris_profile_all, col_spctype=AC.CONST_NEWVARNAME_AMASSSPECTYPE, sh_spc="all") #v3.1 3032
-            export_astresult(logger, lst_df=[df_blo_sp_amr_dedup_ho_ris,df_all_sp_amr_dedup_ho_ris], filename_ast=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+lst_value[-1].upper()) #v3.1 3032
+            df_blo_sp_amr_dedup_ho_ris = summation_astresult(logger, df=df_blo_sp_amr_dedup_ho, dict_configuration=dict_configuration_profile_final, lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, lst_atb_c1=lst_ris_profile_blo_c1, lst_atb_c2=lst_ris_profile_blo_c2, lst_atb_c1_c2=lst_ris_profile_blo, col_spctype=AC.CONST_NEWVARNAME_AMASSSPECTYPE, sh_spc="blo") #v3.1 3102
+            df_all_sp_amr_dedup_ho_ris = summation_astresult(logger, df=df_all_sp_amr_dedup_ho, dict_configuration=dict_configuration_profile_final, lst_col_ris=lst_ris_rpt2, lst_col_rpt2_export=lst_ris_rpt2_export, lst_atb_c1=lst_ris_profile_all_c1, lst_atb_c2=lst_ris_profile_all_c2, lst_atb_c1_c2=lst_ris_profile_all, col_spctype=AC.CONST_NEWVARNAME_AMASSSPECTYPE, sh_spc="all") #v3.1 3102
+            export_astresult(logger, lst_df=[df_blo_sp_amr_dedup_ho_ris,df_all_sp_amr_dedup_ho_ris], filename_ast=AC.CONST_PATH_TEMPWITH_PID+ACC.CONST_FILENAME_AST+"_"+lst_value[-1].upper()) #v3.1 3102
             #mapping profile to dataframe -- blood
             if len(df_blo_sp_amr_dedup_ho_profile)>0:
                 df_blo_sp_amr_dedup_ho_profile = map_profileIDtoDataframe(logger, df=df_blo_sp_amr_dedup_ho_profile, d_profile=d_profile[1], sh_org=lst_value[-1], sh_spc="blo", col_profile=ACC.CONST_COL_PROFILE, col_profileid=ACC.CONST_COL_PROFILEID)
@@ -138,7 +139,7 @@ def prepare_fromHospMicro_toSaTScan(logger,df_all=pd.DataFrame(),df_blo=pd.DataF
                     AL.printlog("Error, ANNEX C exporting "+ACC.CONST_FILENAME_HO_DEDUP+"_"+lst_value[-1].upper()+"_"+ACC.dict_spc["blo"]+".xlsx"+": " +  str(e),True,logger)
             #mapping profile to dataframe -- all specimens
             if len(df_all_sp_amr_dedup_ho_profile)>0:
-                df_all_sp_amr_dedup_ho_profile = map_profileIDtoDataframe(logger, df=df_all_sp_amr_dedup_ho_profile, d_profile=d_profile[2], sh_org=lst_value[-1], sh_spc="all", col_profile=ACC.CONST_COL_PROFILE, col_profileid=ACC.CONST_COL_PROFILEID) #v3.1 3032
+                df_all_sp_amr_dedup_ho_profile = map_profileIDtoDataframe(logger, df=df_all_sp_amr_dedup_ho_profile, d_profile=d_profile[2], sh_org=lst_value[-1], sh_spc="all", col_profile=ACC.CONST_COL_PROFILE, col_profileid=ACC.CONST_COL_PROFILEID) #v3.1 3102
                 try:
                     df_all_sp_amr_dedup_ho_profile.drop(columns=[ACC.CONST_COL_PROFILE,ACC.CONST_COL_PROFILETEMP]).to_excel(AC.CONST_PATH_REPORTWITH_PID+ACC.CONST_FILENAME_HO_DEDUP+"_"+lst_value[-1].upper()+"_"+ACC.dict_spc["all"]+".xlsx", index=False)
                 except Exception as e:
@@ -228,7 +229,7 @@ def fn_deduplicatedata(df,list_sort,list_order,na_posmode,list_dupcolchk,keepmod
 # Filter orgcat before dedup (For merge data) with admission date
 def fn_deduplicateannexc_hospmico(df,colname,orgcat) :
     #return fn_deduplicatedata(df,[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AMR,AC.CONST_NEWVARNAME_AMR_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],[True,True,False,False,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
-    #Change in 3.1
+    #Change in 3.1 3031
     return fn_deduplicatedata(df.loc[df[colname]==orgcat],
                               [AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE,AC.CONST_NEWVARNAME_AST_R,AC.CONST_NEWVARNAME_AST_I,AC.CONST_NEWVARNAME_AST_TESTED,AC.CONST_NEWVARNAME_CLEANADMDATE],
                               [True,True,False,False,False,True],
@@ -245,18 +246,18 @@ def summation_numpatient(logger,df=pd.DataFrame(),lst_col=[],col_forgrouping="")
 #Summarising AST results of each antibiotic for Supplementary report AnnexC
 #input : df before SaTScan input
 #output: df with index are ["R","I","S","Total"] and columns are lst of antibiotics + [col_numprofile]
-#v3.1 3032
+#v3.1 3102
 def summation_astresult(logger, df=pd.DataFrame(), dict_configuration={}, lst_col_ris=[], lst_col_rpt2_export=[], lst_atb_c1=[], lst_atb_c2=[], lst_atb_c1_c2=[], col_spctype="", sh_spc=""):
     df_temp = df.copy()
     #criteria for %tested isolates
     str_perctested = int(select_configvalue(configuration_user=dict_configuration,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MIN_TESTATBRATE))
-    lst_ris = ["R","I","S"]
-    lst_row = lst_ris+["NA","C1:≥"+str(str_perctested)+"%","C2:variation","Summary"] #v3.1 3032
+    lst_ris = ACC.lst_ris #v3.1 3102
+    lst_row = lst_ris+[ACC.CONST_VALUE_NA,ACC.CONST_VALUE_C1_1+str(str_perctested)+ACC.CONST_VALUE_C1_2,ACC.CONST_VALUE_C2,ACC.CONST_VALUE_SUMMARY] #v3.1 3102
     # df_ris    = pd.DataFrame(index=lst_ris)
     df_ris_sum= pd.DataFrame(index=lst_row)
     df_merge  = pd.DataFrame()
     if len(df_temp)>0:
-        df_temp  = df_temp[lst_col_ris].fillna("NA").replace("nan","NA").replace("-","NA").apply(lambda col: col.value_counts()).fillna(0).astype(int) # R-AMK: 6, I-AMK: 7, S-AMK: 5, NA: 2 #v3.1 3032
+        df_temp  = df_temp[lst_col_ris].fillna("NA").replace("nan","NA").replace("-","NA").apply(lambda col: col.value_counts()).fillna(0).astype(int) # R-AMK: 6, I-AMK: 7, S-AMK: 5, NA: 2 #v3.1 3102
         df_merge = pd.concat([df_ris_sum,df_temp],axis=1,ignore_index=False,sort=False).fillna(0)
         #assigning "-" to any columns that have not test AST results
         lst_atb_passc   = list(set(lst_atb_c1_c2 + lst_atb_c1 + lst_atb_c2))
@@ -278,7 +279,7 @@ def summation_astresult(logger, df=pd.DataFrame(), dict_configuration={}, lst_co
     return df_merge
 
 #Concatinating dataframes of AST results for Supplementary report AnnexC
-#v3.1 3032
+#v3.1 3102
 def export_astresult(logger, lst_df=[], filename_ast="", col_profileid=ACC.CONST_COL_PROFILEID):
     try:
         df_concat = pd.concat(lst_df,axis=0,ignore_index=False,sort=False).fillna(0).reset_index().rename(columns={"index":col_profileid})
@@ -292,9 +293,9 @@ def export_astresult(logger, lst_df=[], filename_ast="", col_profileid=ACC.CONST
 #Creating dictionary for mappingID
 #ID ordering by all specimen and then blood of each organism
 #d_profile["profile_sequence"]="profile_ID"
-#v3.1 3032
+#v3.1 3102
 def create_dictforMapProfileID_byorg(logger, df_all=pd.DataFrame(), df_blo=pd.DataFrame(), sh_org="", col_profileid=ACC.CONST_COL_PROFILEID, col_profile=ACC.CONST_COL_PROFILE, col_profiletemp=ACC.CONST_COL_PROFILETEMP, col_numprofile_all=ACC.CONST_COL_NUMPROFILE_ALL, col_numprofile_blo=ACC.CONST_COL_NUMPROFILE_BLO):
-    prefixID_blo=sh_org.upper()+"_BL_" #v3.1 3032
+    prefixID_blo=sh_org.upper()+"_BL_" #v3.1 3102
     prefixID_all=sh_org.upper()+"_ALL_"
     count_blo = 0
     count_all = 0
@@ -344,7 +345,7 @@ def map_profileIDtoDataframe(logger, df=pd.DataFrame(), d_profile={}, filename_d
 #column RISdrug1 : -, -, R, S
 #column RISdrug2 : R, -, -, -
 #column RISdrugN : -, -, R, S
-#v3.1 3032
+#v3.1 3102
 def export_dprofile(logger, df_groupprofile=pd.DataFrame(), lst_col_ris=[], lst_col_rpt2_export=[], filename_profile="", 
                     col_profileid=ACC.CONST_COL_PROFILEID, col_profile=ACC.CONST_COL_PROFILE, col_numprofile_all=ACC.CONST_COL_NUMPROFILE_ALL, col_numprofile_blo=ACC.CONST_COL_NUMPROFILE_BLO):
     if len(df_groupprofile) > 0:
@@ -358,7 +359,7 @@ def export_dprofile(logger, df_groupprofile=pd.DataFrame(), lst_col_ris=[], lst_
     else:
         pass
 #selecting organisms
-#v3.1 3032
+#v3.1 3102
 def select_dfbyOrganism(logger, df=pd.DataFrame(), col_org="", str_selectorg=""):
     df_new = pd.DataFrame()
     try:
@@ -402,7 +403,8 @@ def get_lstastforpathogen(lo_org="",check_writereport=False):
         lst_atb = [d_[lo_org][4][idx] for idx in v ]
     #getting list of additional antibiotics from configuration
     if (ACC.dict_configuration_astforprofile != {}) and (lo_org in ACC.dict_configuration_astforprofile.keys()):
-        lst_atb = lst_atb + ACC.dict_configuration_astforprofile[lo_org]
+        # lst_atb = lst_atb + ACC.dict_configuration_astforprofile[lo_org]
+        lst_atb = lst_atb + ACC.dict_configuration_astforprofile[lo_org][0] #v3.1 3102
         lst_atb_unique = []
         for atb in lst_atb:
             if atb not in lst_atb_unique:
@@ -464,9 +466,9 @@ def select_atb_byminMaxTestedATB(str_atb="",numerator=0,denominator=0,min_tested
 #Selecting list of ATBs which pass the criteria for profiling
 def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configuration_profile={},
                           resistant=ACC.dict_ris["resistant"],intermediate=ACC.dict_ris["intermediate"],susceptible=ACC.dict_ris["susceptible"]):
-    lst_col_ris_include = [] #v3.1 3032
-    lst_col_ris_passC1  = [] #v3.1 3032
-    lst_col_ris_passC2  = [] #v3.1 3032
+    lst_col_ris_include = [] #v3.1 3102
+    lst_col_ris_passC1  = [] #v3.1 3102
+    lst_col_ris_passC2  = [] #v3.1 3102
     for atb in lst_col_ris:
         try:
             if atb in df.columns:
@@ -478,14 +480,14 @@ def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configurati
                 max_testedatb = select_configvalue(configuration_user=configuration_profile,configuration_default=ACC.dict_configuration_profile_default,b_satscan=False,param=ACC.CONST_VALUE_MAX_TESTATBRATE)
                 if (total_testedatb*100/len(df)>=min_testedatb) and (total_testedatb*100/len(df)<=max_testedatb):
                     #list of antibiotics passing tested isolates
-                    lst_col_ris_passC1.append(atb) #v3.1 3032
+                    lst_col_ris_passC1.append(atb) #v3.1 3102
                     #calculating RIS rate
                     min_tested_r,max_tested_r = retrieve_minMaxTestedATB(dict_config_user=configuration_profile, dict_config_default=ACC.dict_configuration_profile_default,
-                                                                        param_min=ACC.CONST_VALUE_MIN_RRATE, param_max=ACC.CONST_VALUE_MAX_RRATE) #v3.1 3032
+                                                                        param_min=ACC.CONST_VALUE_MIN_RRATE, param_max=ACC.CONST_VALUE_MAX_RRATE) #v3.1 3102
                     min_tested_s,max_tested_s = retrieve_minMaxTestedATB(dict_config_user=configuration_profile, dict_config_default=ACC.dict_configuration_profile_default,
-                                                                        param_min=ACC.CONST_VALUE_MIN_SRATE, param_max=ACC.CONST_VALUE_MAX_SRATE) #v3.1 3032
-                    lst_col_ris_include.append(select_atb_byminMaxTestedATB(str_atb=atb,numerator=num_r,denominator=total_testedatb,min_tested=min_tested_r,max_tested=max_tested_r)) #v3.1 3032
-                    lst_col_ris_include.append(select_atb_byminMaxTestedATB(str_atb=atb,numerator=num_s,denominator=total_testedatb,min_tested=min_tested_s,max_tested=max_tested_s)) #v3.1 3032
+                                                                        param_min=ACC.CONST_VALUE_MIN_SRATE, param_max=ACC.CONST_VALUE_MAX_SRATE) #v3.1 3102
+                    lst_col_ris_include.append(select_atb_byminMaxTestedATB(str_atb=atb,numerator=num_r,denominator=total_testedatb,min_tested=min_tested_r,max_tested=max_tested_r)) #v3.1 3102
+                    lst_col_ris_include.append(select_atb_byminMaxTestedATB(str_atb=atb,numerator=num_s,denominator=total_testedatb,min_tested=min_tested_s,max_tested=max_tested_s)) #v3.1 3102
                     print (atb, "%tested AST:"+str(round(total_testedatb*100/len(df),ndigits=2)), "%R:"+str(round(num_r*100/total_testedatb,ndigits=2)), "%S:"+str(round(num_s*100/total_testedatb,ndigits=2)))
                 #list of antibiotics passing RIS variation
                 min_tested_r,max_tested_r = retrieve_minMaxTestedATB(dict_config_user=configuration_profile, dict_config_default=ACC.dict_configuration_profile_default,
@@ -497,9 +499,9 @@ def select_atbforprofiling(logger,df=pd.DataFrame(), lst_col_ris=[], configurati
         except Exception as e:
             AL.printlog("Error, ANNEX C selecting Antibiotics for profiling: " +  str(e),True,logger)
     lst_col_ris_include_unique = [atb for atb in set(lst_col_ris_include) if atb != ""]
-    lst_col_ris_passC1_unique  = [atb for atb in set(lst_col_ris_passC1) if atb != ""] #v3.1 3032
-    lst_col_ris_passC2_unique  = [atb for atb in set(lst_col_ris_passC2) if atb != ""] #v3.1 3032
-    return lst_col_ris_include_unique, lst_col_ris_passC1_unique, lst_col_ris_passC2_unique #v3.1 3032
+    lst_col_ris_passC1_unique  = [atb for atb in set(lst_col_ris_passC1) if atb != ""] #v3.1 3102
+    lst_col_ris_passC2_unique  = [atb for atb in set(lst_col_ris_passC2) if atb != ""] #v3.1 3102
+    return lst_col_ris_include_unique, lst_col_ris_passC1_unique, lst_col_ris_passC2_unique #v3.1 3102
 
 #Creating "R---I-S---R..."
 #lst_col_ris is list of full antibiotics recommended use from CLSI for that pathogen
@@ -519,8 +521,8 @@ def create_risprofile(logger,df=pd.DataFrame(), lst_col_ris=[], lst_col_ristemp=
             df[col_profile] = df[col_profile] + ";" + "NC"
     # - >>> DO NOT AVAILABLE (NA) or not tested but included for profiling
     #DO NOT INCLUDED (NC) to profiling >>> -
-    df[col_profile] = df[col_profile].str.replace("-","NA").str.replace("NC","-").str[1:] #v3.1 3032
-    df[col_profiletemp] = df[col_profiletemp].str.replace("-","NA").str[1:] #v3.1 3032
+    df[col_profile] = df[col_profile].str.replace("-","NA").str.replace("NC","-").str[1:] #v3.1 3102
+    df[col_profiletemp] = df[col_profiletemp].str.replace("-","NA").str[1:] #v3.1 3102
     return df
 #Droping RIS duplicated sequences
 def drop_dupProfile(df=pd.DataFrame(), col_profile=""):

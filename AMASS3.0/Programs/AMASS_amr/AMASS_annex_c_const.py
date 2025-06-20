@@ -5,7 +5,7 @@
 #***-------------------------------------------------------------------------------------------------***#
 # @author: CHALIDA RAMGSIWUTISAK
 # Created on: 30 AUG 2023
-# Last update on: 30 APR 2025
+# Last update on: 20 JUNE 2025 #v3.1 3102
 import AMASS_amr_const as AC
 import pandas as pd #for creating and manipulating dataframe
 CONST_RUN_ANNEXC_WITH_NOHOSP = False
@@ -54,10 +54,20 @@ CONST_COL_NUMWARD = "Number_of_wards"
 #values for AMASS microbiology_data.xlsx
 CONST_PRENAME_PROFILEID = "profile_"
 CONST_VALUE_WARD = "ward"
-#columns for ast_information.xlsx
-CONST_VALUE_PASSEDATB   ="P" #v3.1 3032
-CONST_VALUE_NOTPASSEDATB="F" #v3.1 3032
-CONST_VALUE_NOTTESTEDATB="-" #v3.1 3032
+#values for ast_information.xlsx
+CONST_VALUE_PASSEDATB   ="P" #v3.1 3102
+CONST_VALUE_NOTPASSEDATB="F" #v3.1 3102
+CONST_VALUE_NOTTESTEDATB="-" #v3.1 3102
+CONST_VALUE_RESISTANT   ="R" #v3.1 3102
+CONST_VALUE_INTERMEDIATE="I" #v3.1 3102
+CONST_VALUE_SUSCEPTIBLE ="S" #v3.1 3102
+CONST_VALUE_NA        ="NA" #v3.1 3102
+CONST_VALUE_C1_1      ="C1:≥" #v3.1 3102
+CONST_VALUE_C1_2      ="%" #v3.1 3102
+CONST_VALUE_C2        ="C2:variation" #v3.1 3102
+CONST_VALUE_SUMMARY   ="Summary" #v3.1 3102
+lst_ris   = [CONST_VALUE_RESISTANT,CONST_VALUE_INTERMEDIATE,CONST_VALUE_SUSCEPTIBLE] #v3.1 3102
+lst_ris_na= [CONST_VALUE_RESISTANT,CONST_VALUE_INTERMEDIATE,CONST_VALUE_SUSCEPTIBLE,CONST_VALUE_NA] #v3.1 3102
 #columns for profile_information.xlsx
 CONST_COL_NUMPROFILE_ALL="No. of patients with a clinical specimen culture positive"
 CONST_COL_NUMPROFILE_BLO="No. of patients with blood culture positive"
@@ -100,7 +110,7 @@ CONST_FILENAME_HO_DEDUP= "AnnexC_dedup_profile"
 CONST_FILENAME_ORIPARAM= ".\Programs\AMASS_amr\satscan_param.prm"
 CONST_FILENAME_NEWPARAM= "satscan_param"
 CONST_FILENAME_PROFILE = "profile_information"
-CONST_FILENAME_AST = "ast_information" #v3.1 3032
+CONST_FILENAME_AST = "ast_information" #v3.1 3102
 CONST_FILENAME_LOCATION= "satscan_location"
 CONST_FILENAME_RESULT  = "satscan_results"
 CONST_FILENAME_INPUT   = "satscan_input"
@@ -190,7 +200,27 @@ dict_configuration_prm_default = {"CaseFile="                               :"sa
 #Able to add more antibiotics for organisms
 #1 antibiotic  >>> "organism_staphylococcus_aureus":[CONST_NEWVARNAME_PREFIX_RIS+"Cefoperazone_and_sulbactam"]
 #2 antibiotics >>> "organism_staphylococcus_aureus":[CONST_NEWVARNAME_PREFIX_RIS+"Cefoperazone_and_sulbactam",CONST_NEWVARNAME_PREFIX_RIS+"Trimethoprim"]
-dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin", 
+# dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin", 
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ofloxacin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Gentamicin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Amikacin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Sulfamethoxazole_and_trimethoprim",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Rifampicin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Teicoplanin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Daptomycin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Linezolid",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ceftaroline",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
+#                                     "organism_enterococcus_faecalis":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
+#                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
+#                                     "organism_enterococcus_faecium":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
+#                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
+#                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
+#                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"]}
+##will be added in the future
+dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[[AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin", 
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ofloxacin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Gentamicin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Amikacin",
@@ -201,14 +231,34 @@ dict_configuration_astforprofile = {"organism_staphylococcus_aureus":[AC.CONST_N
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Linezolid",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Ceftaroline",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
-                                    "organism_enterococcus_faecalis":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
+                                                                      ["Erythromycin",
+                                                                       "Ofloxacin",
+                                                                       "Gentamicin",
+                                                                       "Amikacin",
+                                                                       "Co-trimoxazole",
+                                                                       "Rifampicin",
+                                                                       "Teicoplanin",
+                                                                       "Daptomycin",
+                                                                       "Linezolid",
+                                                                       "Ceftaroline",
+                                                                       "Piperacillin/tazobactam"]],
+                                    "organism_enterococcus_faecalis":[[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
                                                                       AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
-                                    "organism_enterococcus_faecium":[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
+                                                                      ["Ciprofloxacin",
+                                                                       "Levofloxacin",
+                                                                       "Erythromycin",
+                                                                       "Piperacillin/tazobactam"]],
+                                    "organism_enterococcus_faecium":[[AC.CONST_NEWVARNAME_PREFIX_RIS+"Ciprofloxacin",
                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Levofloxacin",
                                                                      AC.CONST_NEWVARNAME_PREFIX_RIS+"Erythromycin",
-                                                                     AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"]}
+                                                                     AC.CONST_NEWVARNAME_PREFIX_RIS+"Piperacillin_and_tazobactam"],
+                                                                     ["Ciprofloxacin",
+                                                                      "Levofloxacin",
+                                                                      "Erythromycin",
+                                                                      "Piperacillin/tazobactam"]]}
+
 #For setting criteria for selecting antibioitcs in profiling step
 #i.e. select an antibiotic when 0.1<resistant_rate<99.9 >>>>> {"minimum_tested_antibiotic_rate":"0.1","maximum_tested_antibiotic_rate":"99.9"}
 dict_configuration_profile = {CONST_VALUE_MIN_TESTATBRATE:"profiling_minimum_tested_isolate_for_antibiotic"}
@@ -245,3 +295,8 @@ dict_intermediate_configtosatscan={"satscan_analysis_type":{"Purely Spatial"    
                                                                      "Month"  :"2",
                                                                      "Day"    :"3", 
                                                                      "Generic":"4"}}
+#Color palette for AST #v3.1 3102
+dict_ast_color = {CONST_VALUE_NA          :"#000000",
+                  CONST_VALUE_RESISTANT   :"#E69F00",
+                  CONST_VALUE_INTERMEDIATE:"#FDF150",
+                  CONST_VALUE_SUSCEPTIBLE :"#009E73"}
