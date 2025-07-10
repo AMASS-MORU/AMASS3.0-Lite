@@ -1324,7 +1324,7 @@ def mainloop() :
                 except:
                     pass
         sub_printprocmem("finish analyse annex A1 data",logger)
-        # Start Annex A2 summary table ----------------------------------------------------------------------------------------------------------
+        # Start Annex A1b,A2 summary table ----------------------------------------------------------------------------------------------------------
         df_hospmicro_annex_a = df_hospmicro
         df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA] =  df_hospmicro_annex_a[AC.CONST_VARNAME_SPECTYPE].astype("string").str.strip().map(dict_datavaltoamass_annex_a).fillna("specimen_others")
         df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA] = df_hospmicro_annex_a[AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA].str.strip().map(dict_annex_a_spectype).fillna("Others")
@@ -1334,6 +1334,60 @@ def mainloop() :
         df_hospmicro_annex_a = df_hospmicro_annex_a.loc[df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA]!=""]
         df_hospmicro_annex_a = df_hospmicro_annex_a.loc[df_hospmicro_annex_a[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA]!=AC.CONST_ANNEXA_NON_ORG]
         temp_df = fn_deduplicatedata(df_hospmicro_annex_a,[AC.CONST_VARNAME_HOSPITALNUMBER, AC.CONST_NEWVARNAME_CLEANSPECDATE],[True,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER],"first")
+        #A1b ---------------------------------------------------------------------------
+        #the total number per specimen
+        #AL.fn_savecsv(df_hospmicro_annex_a, AC.CONST_PATH_ROOT + "df_hospmicro_annex_a.csv", 2, logger)
+        #Need to deduplicate in case wrong admission data, 1 patient stay on multiple ward at the same time.
+        temp_df_A11_sum = fn_deduplicatedata(df_hospmicro_annex_a,[AC.CONST_NEWVARNAME_MICROREC_ID],[True],"last",[AC.CONST_NEWVARNAME_MICROREC_ID],"first")
+        temp_list = [['microbiology_data','Minimum_date', dict_progvar["micro_date_min"]], 
+                     ['microbiology_data','Maximum_date', dict_progvar["micro_date_max"]],
+                     ['hospital_admission_data','Minimum_admdate', dict_progvar["hosp_date_min"] if bishosp_ava else "NA"], 
+                     ['hospital_admission_data','Maximum_admdate', dict_progvar["hosp_date_max"] if bishosp_ava else "NA"], 
+                     ['microbiology_data','Number_of_all_culture_positive', len(temp_df_A11_sum)]
+                     ]
+        
+        for sspeckey in dict_annex_a_spectype:
+            sspecname = dict_annex_a_spectype[sspeckey]
+            sparameter = "Number_of_" + sspecname.replace("\n"," ").replace(" ","_").lower().strip() + "_culture_positive"
+            n_annexa_speccount = len(temp_df_A11_sum[temp_df_A11_sum[AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA]==sspecname])
+            temp_list.append(['microbiology_data',sparameter,str(n_annexa_speccount)])
+        df_annexA_A11_Sum = pd.DataFrame(temp_list, columns =["Type_of_data_file","Parameters","Values"])
+        #the table
+        temp_df_A11 = fn_deduplicatedata(df_hospmicro_annex_a,[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA,AC.CONST_NEWVARNAME_ORGCAT_ANNEXA, AC.CONST_NEWVARNAME_CLEANSPECDATE],[True,True,True,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_SPECTYPE_ANNEXA,AC.CONST_NEWVARNAME_ORGCAT_ANNEXA],"first")
+        temp_df_A11_2 = fn_deduplicatedata(df_hospmicro_annex_a,[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_ORGCAT_ANNEXA, AC.CONST_NEWVARNAME_CLEANSPECDATE],[True,True,True],"last",[AC.CONST_VARNAME_HOSPITALNUMBER,AC.CONST_NEWVARNAME_ORGCAT_ANNEXA],"first")
+        df_annexA11_pivot = temp_df_A11.pivot_table(index=AC.CONST_NEWVARNAME_ORGNAME_ANNEXA, columns=AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA, aggfunc={AC.CONST_NEWVARNAME_SPECTYPENAME_ANNEXA:len}, fill_value=0)
+        df_annexA11_pivot.columns = df_annexA11_pivot.columns.droplevel(0)
+        # add missing column and row to pivot table
+        df_annexA11 = pd.DataFrame(columns=["Organism","Total number\nof patients*"])
+        for oorg in dict_annex_a_listorg.values():
+            if oorg[1] == 1 :
+                sorg = oorg[2]
+                list_rowvalue = [sorg]
+                for sspec in dict_annex_a_spectype.values():
+                    # add new column on the fly
+                    if sspec not in df_annexA11.columns:
+                        df_annexA11[sspec] = 0
+                    # if have value for this org and specimen type then use it value
+                    iCur = 0
+                    if sorg in df_annexA11_pivot.index:
+                        if sspec in df_annexA11_pivot.columns:
+                            iCur = df_annexA11_pivot.loc[sorg][sspec]
+                    list_rowvalue.append(iCur)
+                # append row  
+                itotal = len(temp_df_A11_2[temp_df_A11_2[AC.CONST_NEWVARNAME_ORGNAME_ANNEXA]==sorg])
+                list_rowvalue.insert(1,itotal)
+                df_annexA11.loc[sorg] = list_rowvalue 
+        df_annexA11.loc['Total'] = df_annexA11.sum()
+        df_annexA11.loc['Total','Organism'] = "Total"
+        #put NA back in
+        for sspec in dict_annex_a_spectype.values():
+            if sspec not in df_annexA11_pivot.columns:
+                try:
+                    df_annexA11[sspec] = "NA"
+                    AL.printlog("Note : " + sspec + " set to NA for annex A1b",False,logger)
+                except:
+                    pass
+        sub_printprocmem("finish analyse annex A1b data",logger)
         df_annexA2 = pd.DataFrame(columns=["Organism","Number_of_deaths","Total_number_of_patients","Mortality(%)","Mortality_lower_95ci","Mortality_upper_95ci"])
         for sorgkey in dict_annex_a_listorg:
             ocurorg = dict_annex_a_listorg[sorgkey]
@@ -1731,6 +1785,12 @@ def mainloop() :
         # A1
         if not AL.fn_savecsv(df_annexA1, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i, 2, logger):
             print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i)
+        # A1b
+        if bishosp_ava:
+            if not AL.fn_savecsv(df_annexA_A11_Sum, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_res_i_A11 , 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_res_i_A11)
+            if not AL.fn_savecsv(df_annexA11, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i_A11, 2, logger):
+                print("Error : Cannot save csv file : " + AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_pat_i_A11)
         # A2
         if bishosp_ava:
             if not AL.fn_savecsv(df_annexA2, AC.CONST_PATH_RESULT + AC.CONST_FILENAME_secA_mor_i, 2, logger):

@@ -7,7 +7,7 @@
 # Updated on: 30 APR 2025 #Update software version
 import pandas as pd #for creating and manipulating dataframe
 CONST_SOFTWARE_RELEASE = "20 June 2025"
-CONST_SOFTWARE_BUILD = "3102"
+CONST_SOFTWARE_BUILD = "3103"
 CONST_SOFTWARE_MAJOR_VERSION = "3.1"
 CONST_SOFTWARE_VERSION =CONST_SOFTWARE_MAJOR_VERSION + " released on " + CONST_SOFTWARE_RELEASE
 CONST_SOFTWARE_VERSION_SHORT = CONST_SOFTWARE_MAJOR_VERSION +"B" + CONST_SOFTWARE_BUILD
@@ -511,6 +511,8 @@ CONST_FILENAME_sec6_mor_i = "ver3_Report6_mortality_table.csv"
 CONST_FILENAME_secA_res_i = "ver3_AnnexA_page39_results.csv"
 CONST_FILENAME_secA_pat_i = "ver3_AnnexA_patients_with_positive_specimens.csv"
 CONST_FILENAME_secA_mor_i = "ver3_AnnexA_mortlity_table.csv"
+CONST_FILENAME_secA_res_i_A11 = "ver3_1_AnnexA1b_ipd_results.csv"
+CONST_FILENAME_secA_pat_i_A11 = "ver3_1_AnnexA1b_ipd_patients_with_positive_specimens.csv"
 CONST_FILENAME_secB_blo_i = "ver3_AnnexB_proportion_table_blood.csv"
 CONST_FILENAME_secB_blo_mon_i = "ver3_AnnexB_proportion_table_blood_bymonth.csv"
 #ResultData file listed for V2.0 compatibility
