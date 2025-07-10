@@ -1151,10 +1151,10 @@ def section6(c,logger,result_table, sec6_mor, result_mor_table,list_sec6_mor_tbl
     ######### SECTION6: PAGE1 #########
     ARC.report_title(c,'Section [6] Mortality involving AMR and',1.07*inch, 10.5*inch,'#3e4444',font_size=16)
     ARC.report_title(c,'antimicrobial−susceptible infections',1.07*inch, 10.2*inch,'#3e4444',font_size=16)
-    ARC.report_title(c,'Introduction',1.07*inch, 9.5*inch,'#3e4444',font_size=12)
-    ARC.report_context(c,section6_page1_1, 1.0*inch, 6.0*inch, 460, 250,font_size=11)
-    ARC.report_title(c,'Results',1.07*inch, 5.9*inch,'#3e4444',font_size=12)
-    ARC.report_context(c,section6_page1_2, 1.0*inch, 0.7*inch, 460, 370,font_size=11)
+    ARC.report_title(c,'Introduction',1.07*inch, 9.6*inch,'#3e4444',font_size=12)
+    ARC.report_context(c,section6_page1_1, 1.0*inch, 6.1*inch, 460, 250,font_size=11)
+    ARC.report_title(c,'Results',1.07*inch, 6.0*inch,'#3e4444',font_size=12)
+    ARC.report_context(c,section6_page1_2, 1.0*inch, 0.67*inch, 460, 380,font_size=11)
     canvas_printpage(c, startpage, lastpage,today,False,ipagemode,ssectionanme,isecmaxpage,startpage) 
     ######### SECTION6: PAGE2 #########
     ARC.report_context(c,section6_page2_1, 1.0*inch, 8.5*inch, 460, 120,font_size=11)
